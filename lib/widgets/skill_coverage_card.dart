@@ -59,18 +59,12 @@ class _SkillBar extends StatelessWidget {
 
   Color get color {
     switch (category) {
-      case SkillCategory.grossMotor:
-        return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor:
-        return AppTheme.fineMotorColor;
-      case SkillCategory.language:
-        return AppTheme.languageColor;
-      case SkillCategory.cognitive:
-        return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional:
-        return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory:
-        return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
+      case SkillCategory.language: return AppTheme.languageColor;
+      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory: return AppTheme.sensoryColor;
     }
   }
 
@@ -82,17 +76,14 @@ class _SkillBar extends StatelessWidget {
         children: [
           SizedBox(
             width: 90,
-            child: Text(
-              category.label,
-              style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
-            ),
+            child: Text(category.label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
           ),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: ratio),
-                duration: const Duration(milliseconds: 700),
+                duration: const Duration(milliseconds: 600),
                 curve: Curves.easeOut,
                 builder: (_, value, __) => LinearProgressIndicator(
                   value: value,
@@ -106,10 +97,7 @@ class _SkillBar extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             width: 20,
-            child: Text(
-              '$count',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textDark),
-            ),
+            child: Text('$count', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
           ),
         ],
       ),
