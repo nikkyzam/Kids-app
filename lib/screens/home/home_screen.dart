@@ -13,6 +13,8 @@ import '../../widgets/skill_coverage_card.dart';
 import '../milestones/milestones_screen.dart';
 import '../settings/settings_screen.dart';
 import '../history/activity_history_screen.dart';
+import '../library/activity_library_screen.dart';
+import '../../widgets/weekly_recap_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -114,6 +116,7 @@ class _ActivityTab extends StatelessWidget {
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         const SliverToBoxAdapter(child: StreakBanner()),
+        SliverToBoxAdapter(child: _buildLibraryButton(context)),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -124,9 +127,31 @@ class _ActivityTab extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverToBoxAdapter(child: _buildMilestoneTeaser(context, profile.id!)),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: WeeklyRecapCard()),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(child: SkillCoverageCard()),
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
+    );
+  }
+
+  Widget _buildLibraryButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: TextButton.icon(
+          icon: const Icon(Icons.grid_view_rounded, size: 14),
+          label: const Text('Browse All Activities', style: TextStyle(fontSize: 12)),
+          style: TextButton.styleFrom(
+            foregroundColor: AppTheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          ),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ActivityLibraryScreen()),
+          ),
+        ),
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import '../models/activity.dart';
 import '../providers/activity_provider.dart';
 import '../theme/app_theme.dart';
 import 'confetti_overlay.dart';
+import 'streak_milestone_dialog.dart';
 import '../screens/paywall/paywall_screen.dart';
 
 class ActivityCard extends StatefulWidget {
@@ -185,6 +186,9 @@ class _ActivityCardState extends State<ActivityCard> {
                 onPressed: () async {
                   await ap.toggleCompletion(widget.profileId);
                   _confettiKey.currentState?.play();
+                  if (context.mounted) {
+                    StreakMilestoneDialog.showIfMilestone(context, ap.currentStreak);
+                  }
                 },
                 icon: const Icon(Icons.check_rounded, size: 18),
                 label: const Text('Complete Challenge'),

@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/milestone_item.dart';
 import '../../widgets/parental_gate_dialog.dart';
 import '../../data/milestones_data.dart';
+import '../../services/pdf_export_service.dart';
 
 class MilestonesScreen extends StatelessWidget {
   const MilestonesScreen({super.key});
@@ -161,40 +162,33 @@ class MilestonesScreen extends StatelessWidget {
   }
 
   Future<void> _exportPdf(BuildContext context) async {
-    // Parental gate before export
     final passed = await showDialog<bool>(
       context: context,
       builder: (_) => const ParentalGateDialog(),
     );
     if (passed != true || !context.mounted) return;
 
-    // Check premium
     final mp = context.read<MilestoneProvider>();
-    await _generateAndSharePdf(context, mp);
+    final profile = context.read<ProfileProvider>().activeProfile;
+    if (profile == null) return;
+
+    await _generateAndSharePdf(context, mp, profile);
   }
 
-  Future<void> _generateAndSharePdf(BuildContext context, MilestoneProvider mp) async {
+  Future<void> _generateAndSharePdf(
+      BuildContext context, MilestoneProvider mp, dynamic profile) async {
     try {
-      // Import pdf and printing packages in actual implementation
-      // This shows the export action to the user
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Preparing your milestone report…'),
+          content: Text('Building your milestone report…'),
           backgroundColor: AppTheme.primary,
+          duration: Duration(seconds: 2),
         ),
       );
-
-      // In production: generate PDF using the `pdf` package and share via `printing`
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${mp.achievedCount} milestones exported successfully!'),
-            backgroundColor: AppTheme.success,
-          ),
-        );
-      }
+      await PdfExportService.exportMilestones(
+        profile: profile,
+        achievements: mp.achievements,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
