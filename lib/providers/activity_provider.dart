@@ -12,6 +12,7 @@ class ActivityProvider extends ChangeNotifier {
 
   PlayActivity? _todayActivity;
   ActivityCompletion? _todayCompletion;
+  List<ActivityCompletion> _allCompletions = [];
   bool _isPremium = false;
   bool _isLoading = false;
 
@@ -21,18 +22,78 @@ class ActivityProvider extends ChangeNotifier {
 
   PlayActivity? get todayActivity => _todayActivity;
   ActivityCompletion? get todayCompletion => _todayCompletion;
+  List<ActivityCompletion> get allCompletions => List.unmodifiable(_allCompletions);
   bool get isCompleted => _todayCompletion != null;
   bool get isPremium => _isPremium;
   bool get isLoading => _isLoading;
+  int get totalCompletions => _allCompletions.length;
 
   String get todayKey => DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+  String _keyFor(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
+
+  bool completedOnDay(DateTime day) => _allCompletions.any((c) => c.dateKey == _keyFor(day));
+
+  int get currentStreak {
+    if (_allCompletions.isEmpty) return 0;
+    final days = _allCompletions.map((c) => c.dateKey).toSet();
+    int streak = 0;
+    var day = DateTime.now();
+    // Allow today to not yet be done without breaking the streak
+    if (!days.contains(_keyFor(day))) {
+      day = day.subtract(const Duration(days: 1));
+    }
+    while (days.contains(_keyFor(day))) {
+      streak++;
+      day = day.subtract(const Duration(days: 1));
+    }
+    return streak;
+  }
+
+  int get longestStreak {
+    if (_allCompletions.isEmpty) return 0;
+    final days = _allCompletions.map((c) => c.dateKey).toSet().toList()..sort();
+    int longest = 1;
+    int current = 1;
+    for (int i = 1; i < days.length; i++) {
+      final prev = DateTime.parse(days[i - 1]);
+      final curr = DateTime.parse(days[i]);
+      if (curr.difference(prev).inDays == 1) {
+        current++;
+        if (current > longest) longest = current;
+      } else {
+        current = 1;
+      }
+    }
+    return longest;
+  }
+
+  Map<SkillCategory, int> get skillCoverage {
+    final counts = <SkillCategory, int>{};
+    for (final completion in _allCompletions) {
+      final activity = ActivitiesData.all.where((a) => a.id == completion.activityId).firstOrNull;
+      if (activity != null) {
+        counts[activity.skillCategory] = (counts[activity.skillCategory] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
+
+  List<ActivityCompletion> get recentCompletions {
+    final sorted = [..._allCompletions]..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+    return sorted;
+  }
+
+  PlayActivity? activityForCompletion(ActivityCompletion completion) =>
+      ActivitiesData.all.where((a) => a.id == completion.activityId).firstOrNull;
 
   Future<void> loadForProfile(int profileId, int ageInWeeks) async {
     _isLoading = true;
     notifyListeners();
 
     _todayActivity = ActivitiesData.todayActivity(ageInWeeks);
-    _todayCompletion = await DatabaseHelper.instance.getCompletion(profileId, todayKey);
+    _allCompletions = await DatabaseHelper.instance.getCompletions(profileId);
+    _todayCompletion = _allCompletions.where((c) => c.dateKey == todayKey).firstOrNull;
 
     _isLoading = false;
     notifyListeners();
@@ -43,6 +104,7 @@ class ActivityProvider extends ChangeNotifier {
 
     if (isCompleted) {
       await DatabaseHelper.instance.deleteCompletion(profileId, todayKey);
+      _allCompletions.removeWhere((c) => c.dateKey == todayKey);
       _todayCompletion = null;
     } else {
       final completion = ActivityCompletion(
@@ -52,14 +114,14 @@ class ActivityProvider extends ChangeNotifier {
         completedAt: DateTime.now(),
       );
       await DatabaseHelper.instance.saveCompletion(completion);
+      _allCompletions.add(completion);
       _todayCompletion = completion;
     }
     notifyListeners();
   }
 
-  bool activityRequiresPremium(PlayActivity activity) {
-    return !activity.isInFreeTier && !_isPremium;
-  }
+  bool activityRequiresPremium(PlayActivity activity) =>
+      !activity.isInFreeTier && !_isPremium;
 
   bool get todayRequiresPremium {
     if (_todayActivity == null) return false;
@@ -73,8 +135,6 @@ class ActivityProvider extends ChangeNotifier {
   }
 
   Future<void> restorePurchases() async {
-    // In production: call StoreKit / Google Play restore API
-    // For now this is a placeholder
     _isPremium = _prefs.getBool('is_premium') ?? false;
     notifyListeners();
   }

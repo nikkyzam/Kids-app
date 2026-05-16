@@ -7,8 +7,12 @@ import '../../providers/milestone_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/child_profile_dropdown.dart';
 import '../../widgets/activity_card.dart';
+import '../../widgets/streak_banner.dart';
+import '../../widgets/daily_tip_card.dart';
+import '../../widgets/skill_coverage_card.dart';
 import '../milestones/milestones_screen.dart';
 import '../settings/settings_screen.dart';
+import '../history/activity_history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,8 +57,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.history_rounded),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ActivityHistoryScreen()),
+                ),
+              ),
+              IconButton(
                 icon: const Icon(Icons.settings_outlined),
-                onPressed: () => _openSettings(),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                ),
               ),
             ],
           ),
@@ -72,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
               NavigationDestination(
                 icon: Icon(Icons.play_circle_outline_rounded),
                 selectedIcon: Icon(Icons.play_circle_rounded),
-                label: 'Today\'s Play',
+                label: "Today's Play",
               ),
               NavigationDestination(
                 icon: Icon(Icons.checklist_outlined),
@@ -85,10 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
-  void _openSettings() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
-  }
 }
 
 class _ActivityTab extends StatelessWidget {
@@ -97,41 +105,61 @@ class _ActivityTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().activeProfile!;
+    final ap = context.watch<ActivityProvider>();
 
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(child: _buildGreeting(context, profile.name, profile.displayAge)),
+        SliverToBoxAdapter(
+          child: _buildGreeting(context, profile.name, profile.displayAge, ap.currentStreak),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        const SliverToBoxAdapter(child: StreakBanner()),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverToBoxAdapter(child: ActivityCard(profileId: profile.id!)),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: DailyTipCard()),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverToBoxAdapter(child: _buildMilestoneTeaser(context, profile.id!)),
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: SkillCoverageCard()),
+        const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
   }
 
-  Widget _buildGreeting(BuildContext context, String name, String age) {
+  Widget _buildGreeting(BuildContext context, String name, String age, int streak) {
     final hour = DateTime.now().hour;
     final greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(greeting, style: Theme.of(context).textTheme.bodyMedium),
-          Text(name, style: Theme.of(context).textTheme.displayLarge),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryLight,
-              borderRadius: BorderRadius.circular(20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(greeting, style: Theme.of(context).textTheme.bodyMedium),
+                Text(name, style: Theme.of(context).textTheme.displayLarge),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryLight,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(age,
+                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                ),
+              ],
             ),
-            child: Text(age, style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600)),
           ),
+          if (streak >= 3)
+            _StreakBadge(streak: streak),
         ],
       ),
     );
@@ -163,7 +191,21 @@ class _ActivityTab extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text('Milestones', style: Theme.of(context).textTheme.titleMedium),
                         const Spacer(),
-                        Text('$achieved/$total', style: Theme.of(context).textTheme.bodyMedium),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: achieved == 0 ? AppTheme.primaryLight : AppTheme.successLight,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$achieved/$total',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: achieved == 0 ? AppTheme.primary : AppTheme.success,
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 4),
                         const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted, size: 18),
                       ],
@@ -171,13 +213,25 @@ class _ActivityTab extends StatelessWidget {
                     const SizedBox(height: 10),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 6,
-                        backgroundColor: AppTheme.primaryLight,
-                        valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: progress),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeOut,
+                        builder: (_, value, __) => LinearProgressIndicator(
+                          value: value,
+                          minHeight: 6,
+                          backgroundColor: AppTheme.primaryLight,
+                          valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+                        ),
                       ),
                     ),
+                    if (achieved > 0) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _motivationText(achieved, total),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -185,6 +239,46 @@ class _ActivityTab extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  String _motivationText(int achieved, int total) {
+    final pct = (achieved / total * 100).round();
+    if (pct < 10) return 'Great start! Keep tracking each milestone.';
+    if (pct < 30) return 'Building momentum — $pct% complete!';
+    if (pct < 60) return 'Halfway there — you\'re doing amazing!';
+    if (pct < 85) return '$pct% tracked — incredible progress!';
+    return 'Almost done — nearly all milestones logged!';
+  }
+}
+
+class _StreakBadge extends StatelessWidget {
+  final int streak;
+  const _StreakBadge({required this.streak});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF7043), Color(0xFFFF5722)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: const Color(0xFFFF7043).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))],
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
+          Text(
+            '$streak',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+          ),
+          const Text('days', style: TextStyle(fontSize: 8, color: Colors.white70)),
+        ],
+      ),
     );
   }
 }
