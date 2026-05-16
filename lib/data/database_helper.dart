@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -163,5 +164,11 @@ class DatabaseHelper {
       whereArgs: [profileId, milestoneId],
     );
     return rows.isEmpty ? null : MilestoneAchievement.fromMap(rows.first);
+  }
+
+  @visibleForTesting
+  Future<void> resetForTesting() async {
+    await _db?.close();
+    _db = null;
   }
 }
