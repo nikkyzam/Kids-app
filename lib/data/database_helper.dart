@@ -21,8 +21,9 @@ class DatabaseHelper {
     final path = join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -59,6 +60,32 @@ class DatabaseHelper {
         UNIQUE(profile_id, milestone_id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE unlocked_badges (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_id INTEGER NOT NULL,
+        badge_id TEXT NOT NULL,
+        unlocked_at TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
+        UNIQUE(profile_id, badge_id)
+      )
+    ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS unlocked_badges (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profile_id INTEGER NOT NULL,
+          badge_id TEXT NOT NULL,
+          unlocked_at TEXT NOT NULL,
+          FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
+          UNIQUE(profile_id, badge_id)
+        )
+      ''');
+    }
   }
 
   // ─── Child Profiles ───────────────────────────────────────────────────────
@@ -164,6 +191,32 @@ class DatabaseHelper {
       whereArgs: [profileId, milestoneId],
     );
     return rows.isEmpty ? null : MilestoneAchievement.fromMap(rows.first);
+  }
+
+  // ─── Unlocked Badges ──────────────────────────────────────────────────────
+
+  Future<List<String>> getUnlockedBadgeIds(int profileId) async {
+    final db = await database;
+    final rows = await db.query(
+      'unlocked_badges',
+      columns: ['badge_id'],
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+    );
+    return rows.map((r) => r['badge_id'] as String).toList();
+  }
+
+  Future<void> saveBadge(int profileId, String badgeId) async {
+    final db = await database;
+    await db.insert(
+      'unlocked_badges',
+      {
+        'profile_id': profileId,
+        'badge_id': badgeId,
+        'unlocked_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
   }
 
   @visibleForTesting

@@ -4,10 +4,13 @@ import 'package:intl/intl.dart';
 
 import '../../providers/profile_provider.dart';
 import '../../providers/activity_provider.dart';
+import '../../services/notification_service.dart';
+import '../../services/backup_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/parental_gate_dialog.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../paywall/paywall_screen.dart';
+import '../badges/badges_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,6 +21,20 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _gateUnlocked = false;
+  bool _notifEnabled = false;
+  TimeOfDay _notifTime = const TimeOfDay(hour: 9, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifState();
+  }
+
+  Future<void> _loadNotifState() async {
+    final enabled = await NotificationService.instance.isEnabled();
+    final time = await NotificationService.instance.scheduledTime();
+    if (mounted) setState(() { _notifEnabled = enabled; _notifTime = time; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +139,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             const Divider(height: 1),
+            _SectionHeader(title: 'Notifications'),
+            SwitchListTile(
+              secondary: const Icon(Icons.notifications_outlined, color: AppTheme.primary),
+              title: const Text('Daily Reminder'),
+              subtitle: Text(_notifEnabled
+                  ? 'Remind me at ${_notifTime.format(context)}'
+                  : 'Tap to enable daily play reminders'),
+              value: _notifEnabled,
+              onChanged: _toggleNotification,
+              activeColor: AppTheme.primary,
+            ),
+            if (_notifEnabled)
+              ListTile(
+                leading: const Icon(Icons.schedule_rounded, color: AppTheme.textMuted),
+                title: const Text('Reminder Time'),
+                trailing: Text(
+                  _notifTime.format(context),
+                  style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600),
+                ),
+                onTap: _pickNotifTime,
+              ),
+            const Divider(height: 1),
+            _SectionHeader(title: 'Data'),
+            ListTile(
+              leading: const Icon(Icons.emoji_events_outlined, color: AppTheme.secondary),
+              title: const Text('Achievements'),
+              subtitle: const Text('View your earned badges'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const BadgesScreen()),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.upload_rounded, color: AppTheme.primary),
+              title: const Text('Export Backup'),
+              subtitle: const Text('Save all data as a JSON file'),
+              onTap: () => BackupService.exportBackup(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.download_rounded, color: AppTheme.primary),
+              title: const Text('Restore Backup'),
+              subtitle: const Text('Import data from a backup file'),
+              onTap: () async {
+                final ok = await BackupService.importBackup(context);
+                if (ok && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Backup restored! Restart the app to see changes.'),
+                      backgroundColor: AppTheme.success,
+                    ),
+                  );
+                }
+              },
+            ),
+            const Divider(height: 1),
             _SectionHeader(title: 'About'),
             const ListTile(
               leading: Icon(Icons.privacy_tip_outlined, color: AppTheme.textMuted),
@@ -137,6 +209,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  Future<void> _toggleNotification(bool value) async {
+    final profile = context.read<ProfileProvider>().activeProfile;
+    if (value) {
+      final granted = await NotificationService.instance.requestPermissions();
+      if (!granted && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permission denied — enable notifications in device settings.')),
+        );
+        return;
+      }
+      await NotificationService.instance.scheduleDailyAt(_notifTime, profile?.name ?? 'your child');
+    } else {
+      await NotificationService.instance.cancel();
+    }
+    if (mounted) setState(() => _notifEnabled = value);
+  }
+
+  Future<void> _pickNotifTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _notifTime);
+    if (picked == null || !mounted) return;
+    setState(() => _notifTime = picked);
+    final profile = context.read<ProfileProvider>().activeProfile;
+    await NotificationService.instance.scheduleDailyAt(picked, profile?.name ?? 'your child');
   }
 
   Future<void> _addProfile() async {

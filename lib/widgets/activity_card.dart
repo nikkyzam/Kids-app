@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../models/activity.dart';
 import '../providers/activity_provider.dart';
+import '../providers/badge_provider.dart';
+import '../providers/milestone_provider.dart';
 import '../theme/app_theme.dart';
+import 'badge_unlocked_dialog.dart';
 import 'confetti_overlay.dart';
 import 'streak_milestone_dialog.dart';
 import '../screens/paywall/paywall_screen.dart';
@@ -186,8 +189,19 @@ class _ActivityCardState extends State<ActivityCard> {
                 onPressed: () async {
                   await ap.toggleCompletion(widget.profileId);
                   _confettiKey.currentState?.play();
-                  if (context.mounted) {
-                    StreakMilestoneDialog.showIfMilestone(context, ap.currentStreak);
+                  if (!context.mounted) return;
+                  StreakMilestoneDialog.showIfMilestone(context, ap.currentStreak);
+                  final mp = context.read<MilestoneProvider>();
+                  final bp = context.read<BadgeProvider>();
+                  final newBadges = await bp.checkAndUnlock(
+                    profileId: widget.profileId,
+                    ap: ap,
+                    mp: mp,
+                  );
+                  for (final badge in newBadges) {
+                    if (context.mounted) {
+                      await BadgeUnlockedDialog.show(context, badge);
+                    }
                   }
                 },
                 icon: const Icon(Icons.check_rounded, size: 18),

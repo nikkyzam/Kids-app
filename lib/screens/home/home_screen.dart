@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/milestone_provider.dart';
+import '../../providers/badge_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/child_profile_dropdown.dart';
 import '../../widgets/activity_card.dart';
@@ -14,6 +15,7 @@ import '../milestones/milestones_screen.dart';
 import '../settings/settings_screen.dart';
 import '../history/activity_history_screen.dart';
 import '../library/activity_library_screen.dart';
+import '../badges/badges_screen.dart';
 import '../../widgets/weekly_recap_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (profile == null) return;
     context.read<ActivityProvider>().loadForProfile(profile.id!, profile.ageBandWeeks);
     context.read<MilestoneProvider>().loadForProfile(profile.id!);
+    context.read<BadgeProvider>().loadBadges(profile.id!);
   }
 
   @override
@@ -62,6 +65,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.history_rounded),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ActivityHistoryScreen()),
+                ),
+              ),
+              Consumer<BadgeProvider>(
+                builder: (context, bp, _) => Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.emoji_events_outlined),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const BadgesScreen()),
+                      ),
+                    ),
+                    if (bp.unlockedCount > 0)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${bp.unlockedCount}',
+                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               IconButton(
