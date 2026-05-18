@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import '../models/child_profile.dart';
 import '../models/activity_completion.dart';
 import '../models/milestone_achievement.dart';
+import '../models/photo_memory.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();
@@ -21,7 +22,7 @@ class DatabaseHelper {
     final path = join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -71,6 +72,19 @@ class DatabaseHelper {
         UNIQUE(profile_id, badge_id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE photo_memories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_id INTEGER NOT NULL,
+        reference_type TEXT NOT NULL,
+        reference_id TEXT NOT NULL,
+        image_path TEXT NOT NULL,
+        caption TEXT,
+        captured_at TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -83,6 +97,20 @@ class DatabaseHelper {
           unlocked_at TEXT NOT NULL,
           FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
           UNIQUE(profile_id, badge_id)
+        )
+      ''');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS photo_memories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profile_id INTEGER NOT NULL,
+          reference_type TEXT NOT NULL,
+          reference_id TEXT NOT NULL,
+          image_path TEXT NOT NULL,
+          caption TEXT,
+          captured_at TEXT NOT NULL,
+          FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
         )
       ''');
     }
@@ -191,6 +219,49 @@ class DatabaseHelper {
       whereArgs: [profileId, milestoneId],
     );
     return rows.isEmpty ? null : MilestoneAchievement.fromMap(rows.first);
+  }
+
+  // ─── Photo Memories ───────────────────────────────────────────────────────
+
+  Future<List<PhotoMemory>> getPhotos(int profileId) async {
+    final db = await database;
+    final rows = await db.query(
+      'photo_memories',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      orderBy: 'captured_at DESC',
+    );
+    return rows.map(PhotoMemory.fromMap).toList();
+  }
+
+  Future<List<PhotoMemory>> getPhotosForReference(
+      int profileId, String refType, String refId) async {
+    final db = await database;
+    final rows = await db.query(
+      'photo_memories',
+      where: 'profile_id = ? AND reference_type = ? AND reference_id = ?',
+      whereArgs: [profileId, refType, refId],
+    );
+    return rows.map(PhotoMemory.fromMap).toList();
+  }
+
+  Future<PhotoMemory> savePhoto(PhotoMemory photo) async {
+    final db = await database;
+    final id = await db.insert('photo_memories', photo.toMap()..remove('id'));
+    return PhotoMemory(
+      id: id,
+      profileId: photo.profileId,
+      referenceType: photo.referenceType,
+      referenceId: photo.referenceId,
+      imagePath: photo.imagePath,
+      caption: photo.caption,
+      capturedAt: photo.capturedAt,
+    );
+  }
+
+  Future<void> deletePhoto(int photoId) async {
+    final db = await database;
+    await db.delete('photo_memories', where: 'id = ?', whereArgs: [photoId]);
   }
 
   // ─── Unlocked Badges ──────────────────────────────────────────────────────

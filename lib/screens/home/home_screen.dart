@@ -16,7 +16,11 @@ import '../settings/settings_screen.dart';
 import '../history/activity_history_screen.dart';
 import '../library/activity_library_screen.dart';
 import '../badges/badges_screen.dart';
+import '../memories/memories_timeline_screen.dart';
+import '../insights/development_snapshot_screen.dart';
+import '../insights/pediatrician_prep_screen.dart';
 import '../../widgets/weekly_recap_card.dart';
+import '../../widgets/red_flag_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -162,8 +166,54 @@ class _ActivityTab extends StatelessWidget {
         const SliverToBoxAdapter(child: WeeklyRecapCard()),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(child: SkillCoverageCard()),
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverToBoxAdapter(child: _buildInsightsRow(context, profile.id!)),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: RedFlagBanner()),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
       ],
+    );
+  }
+
+  Widget _buildInsightsRow(BuildContext context, int profileId) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: _InsightButton(
+              icon: Icons.camera_alt_outlined,
+              label: 'Memories',
+              color: AppTheme.fineMotorColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => MemoriesTimelineScreen(profileId: profileId)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _InsightButton(
+              icon: Icons.track_changes_rounded,
+              label: 'On Track?',
+              color: AppTheme.cognitiveColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DevelopmentSnapshotScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _InsightButton(
+              icon: Icons.medical_services_outlined,
+              label: 'Doctor Prep',
+              color: AppTheme.languageColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PediatricianPrepScreen()),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -306,6 +356,52 @@ class _ActivityTab extends StatelessWidget {
     if (pct < 60) return 'Halfway there — you\'re doing amazing!';
     if (pct < 85) return '$pct% tracked — incredible progress!';
     return 'Almost done — nearly all milestones logged!';
+  }
+}
+
+class _InsightButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _InsightButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

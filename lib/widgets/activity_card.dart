@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:image_picker/image_picker.dart';
+
+import '../data/database_helper.dart';
 import '../models/activity.dart';
+import '../models/photo_memory.dart';
 import '../providers/activity_provider.dart';
 import '../providers/badge_provider.dart';
 import '../providers/milestone_provider.dart';
@@ -203,6 +207,9 @@ class _ActivityCardState extends State<ActivityCard> {
                       await BadgeUnlockedDialog.show(context, badge);
                     }
                   }
+                  if (context.mounted) {
+                    _offerPhotoMemory(context, ap, widget.profileId);
+                  }
                 },
                 icon: const Icon(Icons.check_rounded, size: 18),
                 label: const Text('Complete Challenge'),
@@ -266,6 +273,49 @@ class _ActivityCardState extends State<ActivityCard> {
         ),
       ),
     );
+  }
+
+  Future<void> _offerPhotoMemory(BuildContext context, ActivityProvider ap, int profileId) async {
+    if (ap.todayActivity == null || !ap.isCompleted) return;
+    final dateKey = DateTime.now().toIso8601String().split('T').first;
+
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+
+    final add = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Capture the moment?'),
+        content: const Text("Add a photo of today's activity to your memories timeline."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Maybe later')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Add Photo')),
+        ],
+      ),
+    );
+    if (add != true || !mounted) return;
+
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    if (picked == null || !mounted) return;
+
+    await DatabaseHelper.instance.savePhoto(PhotoMemory(
+      profileId: profileId,
+      referenceType: 'activity',
+      referenceId: dateKey,
+      imagePath: picked.path,
+      capturedAt: DateTime.now().toIso8601String(),
+    ));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Photo memory saved!'),
+          backgroundColor: AppTheme.success,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Color _skillColor(SkillCategory category) {

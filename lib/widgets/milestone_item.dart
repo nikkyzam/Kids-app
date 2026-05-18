@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'dart:io';
 import 'dart:math';
-import 'package:confetti/confetti.dart';
 
+import 'package:confetti/confetti.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../data/database_helper.dart';
 import '../models/milestone.dart';
+import '../models/photo_memory.dart';
 import '../providers/milestone_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -56,6 +61,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
                   await mp.toggleMilestone(widget.profileId, widget.milestone.id);
                   if (!wasAchieved && mounted) {
                     _confetti.play();
+                    _promptAddPhoto(context);
                   }
                 },
                 onLongPress: isAchieved ? () => _editNotes(context, mp, achievement) : null,
@@ -155,6 +161,45 @@ class _MilestoneItemState extends State<MilestoneItem> {
         borderRadius: BorderRadius.circular(2),
       ),
     );
+  }
+
+  Future<void> _promptAddPhoto(BuildContext context) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    final add = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Add a Photo Memory?'),
+        content: const Text('Capture this milestone with a photo — it will be saved in your memories timeline.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Skip')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Add Photo')),
+        ],
+      ),
+    );
+    if (add != true || !mounted) return;
+
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    if (picked == null || !mounted) return;
+
+    await DatabaseHelper.instance.savePhoto(PhotoMemory(
+      profileId: widget.profileId,
+      referenceType: 'milestone',
+      referenceId: widget.milestone.id,
+      imagePath: picked.path,
+      capturedAt: DateTime.now().toIso8601String(),
+    ));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Photo memory saved!'),
+          backgroundColor: AppTheme.success,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _editNotes(BuildContext context, MilestoneProvider mp, achievement) async {
