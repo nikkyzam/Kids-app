@@ -1,11 +1,13 @@
 class ChildProfile {
   final int? id;
+  final String? uuid;
   final String name;
   final DateTime dateOfBirth;
   final DateTime createdAt;
 
   const ChildProfile({
     this.id,
+    this.uuid,
     required this.name,
     required this.dateOfBirth,
     required this.createdAt,
@@ -37,8 +39,9 @@ class ChildProfile {
   // Age in whole weeks capped at 156 weeks (3 years)
   int get ageBandWeeks => ageInWeeks.clamp(0, 156);
 
-  ChildProfile copyWith({int? id, String? name, DateTime? dateOfBirth}) => ChildProfile(
+  ChildProfile copyWith({int? id, String? uuid, String? name, DateTime? dateOfBirth}) => ChildProfile(
         id: id ?? this.id,
+        uuid: uuid ?? this.uuid,
         name: name ?? this.name,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
         createdAt: createdAt,
@@ -46,6 +49,7 @@ class ChildProfile {
 
   Map<String, dynamic> toMap() => {
         'id': id,
+        'uuid': uuid,
         'name': name,
         'date_of_birth': dateOfBirth.toIso8601String(),
         'created_at': createdAt.toIso8601String(),
@@ -53,6 +57,7 @@ class ChildProfile {
 
   factory ChildProfile.fromMap(Map<String, dynamic> map) => ChildProfile(
         id: map['id'] as int?,
+        uuid: map['uuid'] as String?,
         name: map['name'] as String,
         dateOfBirth: DateTime.parse(map['date_of_birth'] as String),
         createdAt: DateTime.parse(map['created_at'] as String),

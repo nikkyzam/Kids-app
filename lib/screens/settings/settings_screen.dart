@@ -4,14 +4,19 @@ import 'package:intl/intl.dart';
 
 import '../../providers/profile_provider.dart';
 import '../../providers/activity_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/backup_service.dart';
+import '../../services/auth_service.dart';
+import '../../services/sync_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/parental_gate_dialog.dart';
+import '../auth/sign_in_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../paywall/paywall_screen.dart';
 import '../badges/badges_screen.dart';
 import '../paywall/premium_plus_screen.dart';
+import 'family_sharing_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -176,6 +181,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: _pickNotifTime,
               ),
             const Divider(height: 1),
+            _SectionHeader(title: 'Account & Sync'),
+            _buildAccountSection(context),
+            const Divider(height: 1),
             _SectionHeader(title: 'Data'),
             ListTile(
               leading: const Icon(Icons.emoji_events_outlined, color: AppTheme.secondary),
@@ -225,6 +233,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
     );
   }
+
+  Widget _buildAccountSection(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        if (!auth.isSignedIn) {
+          return ListTile(
+            leading: const Icon(Icons.cloud_outlined, color: AppTheme.primary),
+            title: const Text('Sign in to sync'),
+            subtitle: const Text('Back up data and share with a co-caregiver'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SignInScreen()),
+            ),
+          );
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.cloud_done_outlined, color: AppTheme.primary),
+              title: Text(auth.currentUser?.email ?? 'Signed in'),
+              subtitle: Text(_syncLabel(auth.syncStatus)),
+              trailing: auth.syncStatus == SyncStatus.syncing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FamilySharingScreen()),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.sync_rounded, color: AppTheme.primary),
+              title: const Text('Sync Now'),
+              onTap: () async {
+                auth.setSyncStatus(SyncStatus.syncing);
+                try {
+                  await SyncService.instance.syncAll();
+                  if (context.mounted) {
+                    auth.setSyncStatus(SyncStatus.done);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Sync complete.')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) auth.setSyncStatus(SyncStatus.error, error: e.toString());
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded, color: AppTheme.textMuted),
+              title: const Text('Sign Out'),
+              onTap: () async {
+                await AuthService.instance.signOut();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Signed out. Data stays on this device.')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _syncLabel(SyncStatus status) => switch (status) {
+        SyncStatus.idle => 'Tap to manage family sharing',
+        SyncStatus.syncing => 'Syncing…',
+        SyncStatus.done => 'Up to date',
+        SyncStatus.error => 'Sync error — tap to retry',
+      };
 
   Future<void> _toggleNotification(bool value) async {
     final profile = context.read<ProfileProvider>().activeProfile;

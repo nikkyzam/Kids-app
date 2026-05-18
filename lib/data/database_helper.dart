@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/child_profile.dart';
 import '../models/activity_completion.dart';
@@ -23,7 +24,7 @@ class DatabaseHelper {
     final path = join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -33,9 +34,11 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE child_profiles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT,
         name TEXT NOT NULL,
         date_of_birth TEXT NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        updated_at TEXT
       )
     ''');
 
@@ -46,6 +49,7 @@ class DatabaseHelper {
         activity_id TEXT NOT NULL,
         date_key TEXT NOT NULL,
         completed_at TEXT NOT NULL,
+        updated_at TEXT,
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
         UNIQUE(profile_id, date_key)
       )
@@ -58,6 +62,7 @@ class DatabaseHelper {
         milestone_id TEXT NOT NULL,
         achieved_date TEXT NOT NULL,
         notes TEXT,
+        updated_at TEXT,
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
         UNIQUE(profile_id, milestone_id)
       )
@@ -69,6 +74,7 @@ class DatabaseHelper {
         profile_id INTEGER NOT NULL,
         badge_id TEXT NOT NULL,
         unlocked_at TEXT NOT NULL,
+        updated_at TEXT,
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
         UNIQUE(profile_id, badge_id)
       )
@@ -82,6 +88,7 @@ class DatabaseHelper {
         value REAL NOT NULL,
         measured_on TEXT NOT NULL,
         notes TEXT,
+        updated_at TEXT,
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
       )
     ''');
@@ -95,6 +102,7 @@ class DatabaseHelper {
         image_path TEXT NOT NULL,
         caption TEXT,
         captured_at TEXT NOT NULL,
+        updated_at TEXT,
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
       )
     ''');
@@ -113,19 +121,6 @@ class DatabaseHelper {
         )
       ''');
     }
-    if (oldVersion < 4) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS growth_measurements (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          profile_id INTEGER NOT NULL,
-          metric TEXT NOT NULL,
-          value REAL NOT NULL,
-          measured_on TEXT NOT NULL,
-          notes TEXT,
-          FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
-        )
-      ''');
-    }
     if (oldVersion < 3) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS photo_memories (
@@ -140,6 +135,47 @@ class DatabaseHelper {
         )
       ''');
     }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS growth_measurements (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profile_id INTEGER NOT NULL,
+          metric TEXT NOT NULL,
+          value REAL NOT NULL,
+          measured_on TEXT NOT NULL,
+          notes TEXT,
+          FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
+        )
+      ''');
+    }
+    if (oldVersion < 5) {
+      // Add uuid + updated_at to child_profiles
+      await db.execute('ALTER TABLE child_profiles ADD COLUMN uuid TEXT');
+      await db.execute('ALTER TABLE child_profiles ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE child_profiles SET updated_at = created_at');
+      // Assign UUIDs to existing profiles
+      const uuidGen = Uuid();
+      final profiles = await db.query('child_profiles', columns: ['id']);
+      for (final p in profiles) {
+        await db.update(
+          'child_profiles',
+          {'uuid': uuidGen.v4()},
+          where: 'id = ?',
+          whereArgs: [p['id']],
+        );
+      }
+      // Add updated_at to remaining tables
+      await db.execute('ALTER TABLE activity_completions ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE activity_completions SET updated_at = completed_at');
+      await db.execute('ALTER TABLE milestone_achievements ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE milestone_achievements SET updated_at = achieved_date');
+      await db.execute('ALTER TABLE unlocked_badges ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE unlocked_badges SET updated_at = unlocked_at');
+      await db.execute('ALTER TABLE growth_measurements ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE growth_measurements SET updated_at = measured_on');
+      await db.execute('ALTER TABLE photo_memories ADD COLUMN updated_at TEXT');
+      await db.execute('UPDATE photo_memories SET updated_at = captured_at');
+    }
   }
 
   // ─── Child Profiles ───────────────────────────────────────────────────────
@@ -152,13 +188,24 @@ class DatabaseHelper {
 
   Future<ChildProfile> insertProfile(ChildProfile profile) async {
     final db = await database;
-    final id = await db.insert('child_profiles', profile.toMap()..remove('id'));
+    const uuidGen = Uuid();
+    final now = DateTime.now().toIso8601String();
+    final map = profile.toMap()
+      ..remove('id')
+      ..['uuid'] = uuidGen.v4()
+      ..['updated_at'] = now;
+    final id = await db.insert('child_profiles', map);
     return profile.copyWith(id: id);
   }
 
   Future<void> updateProfile(ChildProfile profile) async {
     final db = await database;
-    await db.update('child_profiles', profile.toMap(), where: 'id = ?', whereArgs: [profile.id]);
+    await db.update(
+      'child_profiles',
+      {...profile.toMap(), 'updated_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [profile.id],
+    );
   }
 
   Future<void> deleteProfile(int id) async {
@@ -193,7 +240,7 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'activity_completions',
-      completion.toMap()..remove('id'),
+      {...completion.toMap()..remove('id'), 'updated_at': DateTime.now().toIso8601String()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -223,7 +270,7 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'milestone_achievements',
-      achievement.toMap()..remove('id'),
+      {...achievement.toMap()..remove('id'), 'updated_at': DateTime.now().toIso8601String()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -263,7 +310,10 @@ class DatabaseHelper {
 
   Future<GrowthMeasurement> saveGrowthMeasurement(GrowthMeasurement m) async {
     final db = await database;
-    final id = await db.insert('growth_measurements', m.toMap()..remove('id'));
+    final id = await db.insert('growth_measurements', {
+      ...m.toMap()..remove('id'),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
     return GrowthMeasurement(
       id: id,
       profileId: m.profileId,
@@ -305,7 +355,10 @@ class DatabaseHelper {
 
   Future<PhotoMemory> savePhoto(PhotoMemory photo) async {
     final db = await database;
-    final id = await db.insert('photo_memories', photo.toMap()..remove('id'));
+    final id = await db.insert('photo_memories', {
+      ...photo.toMap()..remove('id'),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
     return PhotoMemory(
       id: id,
       profileId: photo.profileId,
@@ -337,12 +390,14 @@ class DatabaseHelper {
 
   Future<void> saveBadge(int profileId, String badgeId) async {
     final db = await database;
+    final now = DateTime.now().toIso8601String();
     await db.insert(
       'unlocked_badges',
       {
         'profile_id': profileId,
         'badge_id': badgeId,
-        'unlocked_at': DateTime.now().toIso8601String(),
+        'unlocked_at': now,
+        'updated_at': now,
       },
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
