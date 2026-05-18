@@ -14,10 +14,12 @@ class ActivityProvider extends ChangeNotifier {
   ActivityCompletion? _todayCompletion;
   List<ActivityCompletion> _allCompletions = [];
   bool _isPremium = false;
+  bool _isPremiumPlus = false;
   bool _isLoading = false;
 
   ActivityProvider(this._prefs) {
     _isPremium = _prefs.getBool('is_premium') ?? false;
+    _isPremiumPlus = _prefs.getBool('is_premium_plus') ?? false;
   }
 
   PlayActivity? get todayActivity => _todayActivity;
@@ -25,6 +27,7 @@ class ActivityProvider extends ChangeNotifier {
   List<ActivityCompletion> get allCompletions => List.unmodifiable(_allCompletions);
   bool get isCompleted => _todayCompletion != null;
   bool get isPremium => _isPremium;
+  bool get isPremiumPlus => _isPremiumPlus;
   bool get isLoading => _isLoading;
   int get totalCompletions => _allCompletions.length;
 
@@ -134,8 +137,15 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> unlockPremiumPlus() async {
+    _isPremiumPlus = true;
+    await _prefs.setBool('is_premium_plus', true);
+    notifyListeners();
+  }
+
   Future<void> restorePurchases() async {
     _isPremium = _prefs.getBool('is_premium') ?? false;
+    _isPremiumPlus = _prefs.getBool('is_premium_plus') ?? false;
     notifyListeners();
   }
 }

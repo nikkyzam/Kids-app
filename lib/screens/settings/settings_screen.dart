@@ -11,6 +11,7 @@ import '../../widgets/parental_gate_dialog.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../paywall/paywall_screen.dart';
 import '../badges/badges_screen.dart';
+import '../paywall/premium_plus_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -114,15 +115,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: AppTheme.secondary),
                 title: Text('PlaySteps Premium'),
-                subtitle: Text('All features unlocked'),
+                subtitle: Text('Full activity library unlocked'),
               )
             else
               ListTile(
                 leading: const Icon(Icons.star_outline_rounded, color: AppTheme.secondary),
-                title: const Text('Upgrade to Premium'),
-                subtitle: const Text('Unlock all daily activities & export'),
+                title: const Text('Unlock Premium — \$4.99'),
+                subtitle: const Text('Full activity library, ages 4 weeks – 36 months'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+              ),
+            if (activityProvider.isPremiumPlus)
+              const ListTile(
+                leading: Icon(Icons.star_rounded, color: Color(0xFFF5A623)),
+                title: Text('Premium Plus — Active'),
+                subtitle: Text('Growth tracker, leap calendar, smart plan & weekly report'),
+              )
+            else
+              ListTile(
+                leading: const Icon(Icons.star_outline_rounded, color: Color(0xFFF5A623)),
+                title: const Text('Premium Plus — \$7.99/year'),
+                subtitle: const Text('Growth charts, leap calendar, smart plan, weekly report'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
               ),
             ListTile(
               leading: const Icon(Icons.restore_rounded, color: AppTheme.textMuted),

@@ -19,6 +19,11 @@ import '../badges/badges_screen.dart';
 import '../memories/memories_timeline_screen.dart';
 import '../insights/development_snapshot_screen.dart';
 import '../insights/pediatrician_prep_screen.dart';
+import '../growth/growth_tracker_screen.dart';
+import '../leaps/developmental_leaps_screen.dart';
+import '../plan/activity_plan_screen.dart';
+import '../digest/weekly_digest_screen.dart';
+import '../paywall/premium_plus_screen.dart';
 import '../../widgets/weekly_recap_card.dart';
 import '../../widgets/red_flag_banner.dart';
 
@@ -171,6 +176,8 @@ class _ActivityTab extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(child: RedFlagBanner()),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverToBoxAdapter(child: _buildPremiumPlusRow(context, profile.id!)),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
   }
@@ -356,6 +363,154 @@ class _ActivityTab extends StatelessWidget {
     if (pct < 60) return 'Halfway there — you\'re doing amazing!';
     if (pct < 85) return '$pct% tracked — incredible progress!';
     return 'Almost done — nearly all milestones logged!';
+  }
+}
+
+  Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
+    final isPremiumPlus = context.watch<ActivityProvider>().isPremiumPlus;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('⭐', style: TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                'Premium Plus',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFFF5A623),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              if (!isPremiumPlus) ...[
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),
+                  ),
+                  child: Text(
+                    'Upgrade →',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: const Color(0xFFF5A623),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 2.2,
+            children: [
+              _PremiumPlusTile(
+                emoji: '📈',
+                label: 'Growth Tracker',
+                isLocked: !isPremiumPlus,
+                onTap: isPremiumPlus
+                    ? () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => GrowthTrackerScreen(profileId: profileId)))
+                    : () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
+              ),
+              _PremiumPlusTile(
+                emoji: '🧠',
+                label: 'Leap Calendar',
+                isLocked: !isPremiumPlus,
+                onTap: isPremiumPlus
+                    ? () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const DevelopmentalLeapsScreen()))
+                    : () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
+              ),
+              _PremiumPlusTile(
+                emoji: '📅',
+                label: '4-Week Plan',
+                isLocked: !isPremiumPlus,
+                onTap: isPremiumPlus
+                    ? () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ActivityPlanScreen()))
+                    : () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
+              ),
+              _PremiumPlusTile(
+                emoji: '📋',
+                label: 'Weekly Report',
+                isLocked: !isPremiumPlus,
+                onTap: isPremiumPlus
+                    ? () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const WeeklyDigestScreen()))
+                    : () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+class _PremiumPlusTile extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final bool isLocked;
+  final VoidCallback onTap;
+
+  const _PremiumPlusTile({
+    required this.emoji,
+    required this.label,
+    required this.isLocked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: isLocked ? null : const Color(0xFFFFFBF0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isLocked
+              ? Colors.transparent
+              : const Color(0xFFF5A623).withOpacity(0.4),
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isLocked ? AppTheme.textMuted : const Color(0xFF8B6914),
+                  ),
+                ),
+              ),
+              if (isLocked)
+                const Icon(Icons.lock_outline_rounded, size: 14, color: AppTheme.textMuted),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

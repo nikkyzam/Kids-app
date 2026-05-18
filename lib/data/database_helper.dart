@@ -6,6 +6,7 @@ import '../models/child_profile.dart';
 import '../models/activity_completion.dart';
 import '../models/milestone_achievement.dart';
 import '../models/photo_memory.dart';
+import '../models/growth_measurement.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();
@@ -22,7 +23,7 @@ class DatabaseHelper {
     final path = join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -74,6 +75,18 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
+      CREATE TABLE growth_measurements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_id INTEGER NOT NULL,
+        metric TEXT NOT NULL,
+        value REAL NOT NULL,
+        measured_on TEXT NOT NULL,
+        notes TEXT,
+        FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE photo_memories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         profile_id INTEGER NOT NULL,
@@ -97,6 +110,19 @@ class DatabaseHelper {
           unlocked_at TEXT NOT NULL,
           FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
           UNIQUE(profile_id, badge_id)
+        )
+      ''');
+    }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS growth_measurements (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          profile_id INTEGER NOT NULL,
+          metric TEXT NOT NULL,
+          value REAL NOT NULL,
+          measured_on TEXT NOT NULL,
+          notes TEXT,
+          FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
         )
       ''');
     }
@@ -219,6 +245,38 @@ class DatabaseHelper {
       whereArgs: [profileId, milestoneId],
     );
     return rows.isEmpty ? null : MilestoneAchievement.fromMap(rows.first);
+  }
+
+  // ─── Growth Measurements ──────────────────────────────────────────────────
+
+  Future<List<GrowthMeasurement>> getGrowthMeasurements(
+      int profileId, GrowthMetric metric) async {
+    final db = await database;
+    final rows = await db.query(
+      'growth_measurements',
+      where: 'profile_id = ? AND metric = ?',
+      whereArgs: [profileId, metric.name],
+      orderBy: 'measured_on ASC',
+    );
+    return rows.map(GrowthMeasurement.fromMap).toList();
+  }
+
+  Future<GrowthMeasurement> saveGrowthMeasurement(GrowthMeasurement m) async {
+    final db = await database;
+    final id = await db.insert('growth_measurements', m.toMap()..remove('id'));
+    return GrowthMeasurement(
+      id: id,
+      profileId: m.profileId,
+      metric: m.metric,
+      value: m.value,
+      measuredOn: m.measuredOn,
+      notes: m.notes,
+    );
+  }
+
+  Future<void> deleteGrowthMeasurement(int id) async {
+    final db = await database;
+    await db.delete('growth_measurements', where: 'id = ?', whereArgs: [id]);
   }
 
   // ─── Photo Memories ───────────────────────────────────────────────────────
