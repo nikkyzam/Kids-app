@@ -63,6 +63,9 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
   }
 
   Widget _buildBody(BuildContext context, AuthProvider authProvider) {
+    if (!authProvider.isSyncAvailable) {
+      return _buildSyncUnavailable(context);
+    }
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -76,6 +79,49 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
         const SizedBox(height: 24),
         _buildSyncSection(context, authProvider),
       ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sync unavailable (no Supabase credentials configured)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSyncUnavailable(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: _AppCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryLight,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(Icons.cloud_off_rounded,
+                    color: AppTheme.primary, size: 32),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Cloud sync unavailable',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'This build has no cloud backend configured, so family sharing '
+                'and cross-device sync are turned off. All of your data stays '
+                'safely on this device.',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

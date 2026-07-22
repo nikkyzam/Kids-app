@@ -7,16 +7,21 @@ enum SyncStatus { idle, syncing, done, error }
 
 class AuthProvider extends ChangeNotifier {
   AuthProvider() {
-    _subscription = AuthService.instance.authStateChanges.listen((_) {
-      notifyListeners();
-    });
+    if (AuthService.instance.isAvailable) {
+      _subscription = AuthService.instance.authStateChanges.listen((_) {
+        notifyListeners();
+      });
+    }
   }
 
-  late final StreamSubscription<AuthState> _subscription;
+  StreamSubscription<AuthState>? _subscription;
 
   // ---------------------------------------------------------------------------
   // Auth state pass-throughs
   // ---------------------------------------------------------------------------
+
+  /// Whether cloud sync is configured for this build.
+  bool get isSyncAvailable => AuthService.instance.isAvailable;
 
   bool get isSignedIn => AuthService.instance.isSignedIn;
 
@@ -48,7 +53,7 @@ class AuthProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }

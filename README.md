@@ -153,6 +153,22 @@ Add `android/key.properties` and `android/app/release.keystore` to `.gitignore`.
 
 ---
 
+### Optional: Cloud Sync (Supabase)
+
+Cloud sync and family sharing are **opt-in**. PlaySteps boots and runs fully offline by default — no Supabase project is required. When credentials are absent, the sync UI shows a "Cloud sync unavailable" notice and all data stays on-device.
+
+To enable sync, supply your Supabase project credentials at build time (preferred — keeps secrets out of source control):
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+The same `--dart-define` flags apply to `flutter build`. Alternatively, replace the placeholder defaults in `lib/config/supabase_config.dart`. Apply the schema in `supabase/schema.sql` to your project first.
+
+---
+
 ## Running Locally
 
 ```bash

@@ -18,10 +18,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  await Supabase.initialize(
-    url: SupabaseConfig.url,
-    anonKey: SupabaseConfig.anonKey,
-  );
+  // Cloud sync is optional. Only spin up Supabase when real credentials have
+  // been provided — the app is offline-first and must boot without a network
+  // or a configured backend.
+  if (SupabaseConfig.isConfigured) {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
+  }
 
   final prefs = await SharedPreferences.getInstance();
   await DatabaseHelper.instance.database;

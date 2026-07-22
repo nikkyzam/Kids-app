@@ -180,9 +180,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 onTap: _pickNotifTime,
               ),
-            const Divider(height: 1),
-            _SectionHeader(title: 'Account & Sync'),
-            _buildAccountSection(context),
+            // Account & Sync is only shown when a cloud backend is configured;
+            // otherwise PlaySteps runs fully offline and there is nothing to sync.
+            if (AuthService.instance.isAvailable) ...[
+              const Divider(height: 1),
+              _SectionHeader(title: 'Account & Sync'),
+              _buildAccountSection(context),
+            ],
             const Divider(height: 1),
             _SectionHeader(title: 'Data'),
             ListTile(
