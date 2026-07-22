@@ -22,12 +22,19 @@ class ProfileProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _profiles = await DatabaseHelper.instance.getProfiles();
-    final savedId = _prefs.getInt('active_profile_id');
-    if (savedId != null) {
-      _activeProfile = _profiles.where((p) => p.id == savedId).firstOrNull;
+    try {
+      _profiles = await DatabaseHelper.instance.getProfiles();
+      final savedId = _prefs.getInt('active_profile_id');
+      if (savedId != null) {
+        _activeProfile = _profiles.where((p) => p.id == savedId).firstOrNull;
+      }
+      _activeProfile ??= _profiles.firstOrNull;
+    } catch (e) {
+      // Degrade to the onboarding state rather than hanging on a spinner if
+      // the local database is unavailable.
+      _profiles = [];
+      _activeProfile = null;
     }
-    _activeProfile ??= _profiles.firstOrNull;
 
     _isLoading = false;
     notifyListeners();

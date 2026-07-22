@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,15 @@ void main() async {
   await configureDatabaseFactory();
 
   final prefs = await SharedPreferences.getInstance();
-  await DatabaseHelper.instance.database;
+  try {
+    await DatabaseHelper.instance.database;
+  } catch (e) {
+    // Don't white-screen if the local database can't initialize (e.g. the
+    // SQLite WASM worker is unavailable in a web demo). The UI still renders;
+    // data access degrades gracefully.
+    if (!kIsWeb) rethrow;
+    debugPrint('Local database unavailable: $e');
+  }
   await NotificationService.instance.init();
 
   runApp(
