@@ -70,7 +70,8 @@ class PediatricianPrepScreen extends StatelessWidget {
 
         // Build milestone-gap questions (cap at 5 to leave room for always-on questions)
         final gapMilestones = MilestonesData.all
-            .where((m) => m.ageGroupMonths <= ageInMonths && !mp.isAchieved(m.id))
+            .where(
+                (m) => m.ageGroupMonths <= ageInMonths && !mp.isAchieved(m.id))
             .toList();
 
         final alwaysQuestions = [
@@ -411,8 +412,8 @@ class _QuestionsCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 TextButton.icon(
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     foregroundColor: AppTheme.primary,
                   ),
                   onPressed: () => _copyAll(context),
@@ -577,8 +578,7 @@ class _RedFlagTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.warning.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border:
-            Border.all(color: AppTheme.warning.withOpacity(0.4), width: 1),
+        border: Border.all(color: AppTheme.warning.withOpacity(0.4), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

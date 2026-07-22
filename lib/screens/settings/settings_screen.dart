@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 import '../../providers/profile_provider.dart';
 import '../../providers/activity_provider.dart';
@@ -39,7 +38,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadNotifState() async {
     final enabled = await NotificationService.instance.isEnabled();
     final time = await NotificationService.instance.scheduledTime();
-    if (mounted) setState(() { _notifEnabled = enabled; _notifTime = time; });
+    if (mounted)
+      setState(() {
+        _notifEnabled = enabled;
+        _notifTime = time;
+      });
   }
 
   @override
@@ -64,7 +67,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppTheme.primaryLight,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.lock_outline_rounded, color: AppTheme.primary, size: 36),
+              child: const Icon(Icons.lock_outline_rounded,
+                  color: AppTheme.primary, size: 36),
             ),
             const SizedBox(height: 20),
             Text('Parent Zone', style: Theme.of(context).textTheme.titleLarge),
@@ -101,17 +105,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _SectionHeader(title: 'Children'),
             ...profileProvider.profiles.map((p) => _ProfileTile(
-              profile: p,
-              isActive: p.id == profileProvider.activeProfile?.id,
-              onDelete: profileProvider.profiles.length > 1
-                  ? () => _confirmDeleteProfile(p)
-                  : null,
-            )),
+                  profile: p,
+                  isActive: p.id == profileProvider.activeProfile?.id,
+                  onDelete: profileProvider.profiles.length > 1
+                      ? () => _confirmDeleteProfile(p)
+                      : null,
+                )),
             if (profileProvider.canAddMore)
               ListTile(
-                leading: const Icon(Icons.add_circle_outline_rounded, color: AppTheme.primary),
+                leading: const Icon(Icons.add_circle_outline_rounded,
+                    color: AppTheme.primary),
                 title: const Text('Add Child Profile'),
-                subtitle: Text('${3 - profileProvider.profiles.length} slot${3 - profileProvider.profiles.length == 1 ? '' : 's'} remaining'),
+                subtitle: Text(
+                    '${3 - profileProvider.profiles.length} slot${3 - profileProvider.profiles.length == 1 ? '' : 's'} remaining'),
                 onTap: _addProfile,
               ),
             const Divider(height: 1),
@@ -124,35 +130,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
               )
             else
               ListTile(
-                leading: const Icon(Icons.star_outline_rounded, color: AppTheme.secondary),
+                leading: const Icon(Icons.star_outline_rounded,
+                    color: AppTheme.secondary),
                 title: const Text('Unlock Premium — \$4.99'),
-                subtitle: const Text('Full activity library, ages 4 weeks – 36 months'),
+                subtitle: const Text(
+                    'Full activity library, ages 4 weeks – 36 months'),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PaywallScreen())),
               ),
             if (activityProvider.isPremiumPlus)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: Color(0xFFF5A623)),
                 title: Text('Premium Plus — Active'),
-                subtitle: Text('Growth tracker, leap calendar, smart plan & weekly report'),
+                subtitle: Text(
+                    'Growth tracker, leap calendar, smart plan & weekly report'),
               )
             else
               ListTile(
-                leading: const Icon(Icons.star_outline_rounded, color: Color(0xFFF5A623)),
+                leading: const Icon(Icons.star_outline_rounded,
+                    color: Color(0xFFF5A623)),
                 title: const Text('Premium Plus — \$7.99/year'),
-                subtitle: const Text('Growth charts, leap calendar, smart plan, weekly report'),
+                subtitle: const Text(
+                    'Growth charts, leap calendar, smart plan, weekly report'),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const PremiumPlusScreen())),
               ),
             ListTile(
-              leading: const Icon(Icons.restore_rounded, color: AppTheme.textMuted),
+              leading:
+                  const Icon(Icons.restore_rounded, color: AppTheme.textMuted),
               title: const Text('Restore Purchases'),
               onTap: () async {
                 await activityProvider.restorePurchases();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(activityProvider.isPremium ? 'Premium restored!' : 'No purchases found.'),
+                      content: Text(activityProvider.isPremium
+                          ? 'Premium restored!'
+                          : 'No purchases found.'),
                     ),
                   );
                 }
@@ -161,7 +177,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Divider(height: 1),
             _SectionHeader(title: 'Notifications'),
             SwitchListTile(
-              secondary: const Icon(Icons.notifications_outlined, color: AppTheme.primary),
+              secondary: const Icon(Icons.notifications_outlined,
+                  color: AppTheme.primary),
               title: const Text('Daily Reminder'),
               subtitle: Text(_notifEnabled
                   ? 'Remind me at ${_notifTime.format(context)}'
@@ -172,11 +189,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             if (_notifEnabled)
               ListTile(
-                leading: const Icon(Icons.schedule_rounded, color: AppTheme.textMuted),
+                leading: const Icon(Icons.schedule_rounded,
+                    color: AppTheme.textMuted),
                 title: const Text('Reminder Time'),
                 trailing: Text(
                   _notifTime.format(context),
-                  style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      color: AppTheme.primary, fontWeight: FontWeight.w600),
                 ),
                 onTap: _pickNotifTime,
               ),
@@ -190,7 +209,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Divider(height: 1),
             _SectionHeader(title: 'Data'),
             ListTile(
-              leading: const Icon(Icons.emoji_events_outlined, color: AppTheme.secondary),
+              leading: const Icon(Icons.emoji_events_outlined,
+                  color: AppTheme.secondary),
               title: const Text('Achievements'),
               subtitle: const Text('View your earned badges'),
               trailing: const Icon(Icons.chevron_right_rounded),
@@ -199,13 +219,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.upload_rounded, color: AppTheme.primary),
+              leading:
+                  const Icon(Icons.upload_rounded, color: AppTheme.primary),
               title: const Text('Export Backup'),
               subtitle: const Text('Save all data as a JSON file'),
               onTap: () => BackupService.exportBackup(context),
             ),
             ListTile(
-              leading: const Icon(Icons.download_rounded, color: AppTheme.primary),
+              leading:
+                  const Icon(Icons.download_rounded, color: AppTheme.primary),
               title: const Text('Restore Backup'),
               subtitle: const Text('Import data from a backup file'),
               onTap: () async {
@@ -213,7 +235,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (ok && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Backup restored! Restart the app to see changes.'),
+                      content: Text(
+                          'Backup restored! Restart the app to see changes.'),
                       backgroundColor: AppTheme.success,
                     ),
                   );
@@ -223,12 +246,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Divider(height: 1),
             _SectionHeader(title: 'About'),
             const ListTile(
-              leading: Icon(Icons.privacy_tip_outlined, color: AppTheme.textMuted),
+              leading:
+                  Icon(Icons.privacy_tip_outlined, color: AppTheme.textMuted),
               title: Text('Privacy'),
               subtitle: Text('All data stored locally. No accounts, no cloud.'),
             ),
             const ListTile(
-              leading: Icon(Icons.info_outline_rounded, color: AppTheme.textMuted),
+              leading:
+                  Icon(Icons.info_outline_rounded, color: AppTheme.textMuted),
               title: Text('Version'),
               subtitle: Text('PlaySteps 1.0.0'),
             ),
@@ -256,7 +281,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.cloud_done_outlined, color: AppTheme.primary),
+              leading: const Icon(Icons.cloud_done_outlined,
+                  color: AppTheme.primary),
               title: Text(auth.currentUser?.email ?? 'Signed in'),
               subtitle: Text(_syncLabel(auth.syncStatus)),
               trailing: auth.syncStatus == SyncStatus.syncing
@@ -284,18 +310,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   }
                 } catch (e) {
-                  if (context.mounted) auth.setSyncStatus(SyncStatus.error, error: e.toString());
+                  if (context.mounted)
+                    auth.setSyncStatus(SyncStatus.error, error: e.toString());
                 }
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout_rounded, color: AppTheme.textMuted),
+              leading:
+                  const Icon(Icons.logout_rounded, color: AppTheme.textMuted),
               title: const Text('Sign Out'),
               onTap: () async {
                 await AuthService.instance.signOut();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Signed out. Data stays on this device.')),
+                    const SnackBar(
+                        content:
+                            Text('Signed out. Data stays on this device.')),
                   );
                 }
               },
@@ -319,11 +349,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final granted = await NotificationService.instance.requestPermissions();
       if (!granted && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permission denied — enable notifications in device settings.')),
+          const SnackBar(
+              content: Text(
+                  'Permission denied — enable notifications in device settings.')),
         );
         return;
       }
-      await NotificationService.instance.scheduleDailyAt(_notifTime, profile?.name ?? 'your child');
+      await NotificationService.instance
+          .scheduleDailyAt(_notifTime, profile?.name ?? 'your child');
     } else {
       await NotificationService.instance.cancel();
     }
@@ -331,11 +364,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _pickNotifTime() async {
-    final picked = await showTimePicker(context: context, initialTime: _notifTime);
+    final picked =
+        await showTimePicker(context: context, initialTime: _notifTime);
     if (picked == null || !mounted) return;
     setState(() => _notifTime = picked);
     final profile = context.read<ProfileProvider>().activeProfile;
-    await NotificationService.instance.scheduleDailyAt(picked, profile?.name ?? 'your child');
+    await NotificationService.instance
+        .scheduleDailyAt(picked, profile?.name ?? 'your child');
   }
 
   Future<void> _addProfile() async {
@@ -352,12 +387,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: Text('Delete ${profile.name}?'),
-        content: const Text('All activities and milestones for this profile will be permanently deleted.'),
+        content: const Text(
+            'All activities and milestones for this profile will be permanently deleted.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: AppTheme.error)),
+            child:
+                const Text('Delete', style: TextStyle(color: AppTheme.error)),
           ),
         ],
       ),
@@ -377,7 +416,11 @@ class _SectionHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
       child: Text(title.toUpperCase(),
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textMuted, letterSpacing: 1.2)),
+          style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textMuted,
+              letterSpacing: 1.2)),
     );
   }
 }
@@ -387,7 +430,8 @@ class _ProfileTile extends StatelessWidget {
   final bool isActive;
   final VoidCallback? onDelete;
 
-  const _ProfileTile({required this.profile, required this.isActive, this.onDelete});
+  const _ProfileTile(
+      {required this.profile, required this.isActive, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -396,14 +440,17 @@ class _ProfileTile extends StatelessWidget {
         backgroundColor: isActive ? AppTheme.primary : AppTheme.primaryLight,
         child: Text(
           profile.name[0].toUpperCase(),
-          style: TextStyle(color: isActive ? Colors.white : AppTheme.primary, fontWeight: FontWeight.w700),
+          style: TextStyle(
+              color: isActive ? Colors.white : AppTheme.primary,
+              fontWeight: FontWeight.w700),
         ),
       ),
       title: Text(profile.name),
       subtitle: Text(profile.displayAge),
       trailing: onDelete != null
           ? IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: AppTheme.error, size: 20),
+              icon: const Icon(Icons.delete_outline_rounded,
+                  color: AppTheme.error, size: 20),
               onPressed: onDelete,
             )
           : null,

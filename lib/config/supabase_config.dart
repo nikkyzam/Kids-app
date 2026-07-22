@@ -20,8 +20,10 @@ class SupabaseConfig {
   /// on-device and every cloud-sync feature is disabled gracefully, rather than
   /// crashing at startup on the placeholder values above.
   static bool get isConfigured {
-    final hasValidUrl = url.startsWith('http') && !url.contains('YOUR_SUPABASE');
-    final hasValidKey = anonKey.isNotEmpty && !anonKey.contains('YOUR_SUPABASE');
+    final hasValidUrl =
+        url.startsWith('http') && !url.contains('YOUR_SUPABASE');
+    final hasValidKey =
+        anonKey.isNotEmpty && !anonKey.contains('YOUR_SUPABASE');
     return hasValidUrl && hasValidKey;
   }
 }

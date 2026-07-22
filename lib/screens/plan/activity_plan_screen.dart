@@ -65,12 +65,10 @@ class _ActivityPlanScreenState extends State<ActivityPlanScreen>
       return;
     }
 
-    final weakActivities = ageActivities
-        .where((a) => weakest.contains(a.skillCategory))
-        .toList();
-    final otherActivities = ageActivities
-        .where((a) => !weakest.contains(a.skillCategory))
-        .toList();
+    final weakActivities =
+        ageActivities.where((a) => weakest.contains(a.skillCategory)).toList();
+    final otherActivities =
+        ageActivities.where((a) => !weakest.contains(a.skillCategory)).toList();
 
     final fallbackWeak =
         weakActivities.isEmpty ? ageActivities : weakActivities;
@@ -151,8 +149,7 @@ class _ActivityPlanScreenState extends State<ActivityPlanScreen>
     final dateRangeLabel =
         '${DateFormat('MMM d').format(today)} – ${DateFormat('MMM d').format(planEnd)}';
 
-    final weakSkillLabels =
-        _weakestSkills.map((s) => s.label).join(', ');
+    final weakSkillLabels = _weakestSkills.map((s) => s.label).join(', ');
 
     return Scaffold(
       backgroundColor: AppTheme.surface,
@@ -309,8 +306,7 @@ class _WeekTab extends StatelessWidget {
           final activity = activities[i];
           final color = skillColor(activity.skillCategory);
 
-          final isCompleted =
-              isToday && activityProvider.isCompleted;
+          final isCompleted = isToday && activityProvider.isCompleted;
 
           return _DayTile(
             dayLetter: dayLetters[i % 7],
@@ -351,9 +347,7 @@ class _DayTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       decoration: BoxDecoration(
-        color: isToday
-            ? AppTheme.primary.withOpacity(0.07)
-            : Colors.white,
+        color: isToday ? AppTheme.primary.withOpacity(0.07) : Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isToday
@@ -362,8 +356,7 @@ class _DayTile extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: _DayCircle(
           letter: dayLetter,
           color: isToday ? AppTheme.primary : skillColor,

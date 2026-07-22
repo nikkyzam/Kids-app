@@ -75,15 +75,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
             borderRadius: BorderRadius.circular(24),
           ),
-          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 40),
+          child: const Icon(Icons.auto_awesome_rounded,
+              color: Colors.white, size: 40),
         ),
         const SizedBox(height: 20),
-        Text('Unlock PlaySteps Premium', style: Theme.of(context).textTheme.displayMedium, textAlign: TextAlign.center),
+        Text('Unlock PlaySteps Premium',
+            style: Theme.of(context).textTheme.displayMedium,
+            textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text(
           'Everything you need to support your child\'s first three years — all offline.',
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textMuted),
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge
+              ?.copyWith(color: AppTheme.textMuted),
         ),
       ],
     );
@@ -91,11 +97,22 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Widget _buildFeatureList() {
     final features = [
-      _Feature(Icons.play_circle_rounded, AppTheme.primary, 'Unlimited Daily Activities', 'New play challenges every day through 36 months'),
-      _Feature(Icons.checklist_rounded, AppTheme.success, 'Full Milestone Ledger', 'Track all domains from birth to 3 years'),
-      _Feature(Icons.picture_as_pdf_rounded, AppTheme.secondary, 'Pediatrician Export', 'One-tap PDF share for doctor visits'),
-      _Feature(Icons.sort_rounded, AppTheme.cognitiveColor, 'Advanced Domain Filter', 'Focus on the skills that matter most right now'),
-      _Feature(Icons.lock_outline_rounded, AppTheme.grossMotorColor, '100% Private', 'Zero cloud. Zero data collection. Always.'),
+      _Feature(
+          Icons.play_circle_rounded,
+          AppTheme.primary,
+          'Unlimited Daily Activities',
+          'New play challenges every day through 36 months'),
+      _Feature(Icons.checklist_rounded, AppTheme.success,
+          'Full Milestone Ledger', 'Track all domains from birth to 3 years'),
+      _Feature(Icons.picture_as_pdf_rounded, AppTheme.secondary,
+          'Pediatrician Export', 'One-tap PDF share for doctor visits'),
+      _Feature(
+          Icons.sort_rounded,
+          AppTheme.cognitiveColor,
+          'Advanced Domain Filter',
+          'Focus on the skills that matter most right now'),
+      _Feature(Icons.lock_outline_rounded, AppTheme.grossMotorColor,
+          '100% Private', 'Zero cloud. Zero data collection. Always.'),
     ];
 
     return Column(
@@ -109,13 +126,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
         FilledButton(
           onPressed: _isPurchasing ? null : _purchase,
           child: _isPurchasing
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 2))
               : const Text('Unlock Premium — \$4.99'),
         ),
         const SizedBox(height: 6),
         Text(
           'One-time purchase. No subscription.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.success, fontWeight: FontWeight.w600),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: AppTheme.success, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -168,7 +192,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
         if (isPremium) Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isPremium ? 'Premium restored!' : 'No previous purchase found.'),
+            content: Text(isPremium
+                ? 'Premium restored!'
+                : 'No previous purchase found.'),
           ),
         );
       }
@@ -210,8 +236,10 @@ class _FeatureTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(feature.title, style: Theme.of(context).textTheme.titleMedium),
-                Text(feature.subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                Text(feature.title,
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(feature.subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
           ),

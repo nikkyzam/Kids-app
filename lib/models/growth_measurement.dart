@@ -3,9 +3,12 @@ enum GrowthMetric { weight, height, headCircumference }
 extension GrowthMetricX on GrowthMetric {
   String get label {
     switch (this) {
-      case GrowthMetric.weight: return 'Weight';
-      case GrowthMetric.height: return 'Height / Length';
-      case GrowthMetric.headCircumference: return 'Head Circumference';
+      case GrowthMetric.weight:
+        return 'Weight';
+      case GrowthMetric.height:
+        return 'Height / Length';
+      case GrowthMetric.headCircumference:
+        return 'Head Circumference';
     }
   }
 
@@ -41,7 +44,8 @@ class GrowthMeasurement {
         'notes': notes,
       };
 
-  static GrowthMeasurement fromMap(Map<String, dynamic> map) => GrowthMeasurement(
+  static GrowthMeasurement fromMap(Map<String, dynamic> map) =>
+      GrowthMeasurement(
         id: map['id'] as int?,
         profileId: map['profile_id'] as int,
         metric: GrowthMetric.values.firstWhere((m) => m.name == map['metric']),

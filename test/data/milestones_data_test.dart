@@ -10,7 +10,8 @@ void main() {
 
     test('all milestones have non-empty descriptions', () {
       for (final m in MilestonesData.all) {
-        expect(m.description, isNotEmpty, reason: 'Milestone ${m.id} has empty description');
+        expect(m.description, isNotEmpty,
+            reason: 'Milestone ${m.id} has empty description');
       }
     });
 
@@ -77,15 +78,19 @@ void main() {
     });
 
     test('filters to gross motor only', () {
-      final filtered = MilestonesData.filterByDomain(MilestonesData.all, MilestoneDomain.grossMotor);
+      final filtered = MilestonesData.filterByDomain(
+          MilestonesData.all, MilestoneDomain.grossMotor);
       expect(filtered, isNotEmpty);
-      expect(filtered.every((m) => m.domain == MilestoneDomain.grossMotor), isTrue);
+      expect(filtered.every((m) => m.domain == MilestoneDomain.grossMotor),
+          isTrue);
     });
 
     test('filters to language only', () {
-      final filtered = MilestonesData.filterByDomain(MilestonesData.all, MilestoneDomain.language);
+      final filtered = MilestonesData.filterByDomain(
+          MilestonesData.all, MilestoneDomain.language);
       expect(filtered, isNotEmpty);
-      expect(filtered.every((m) => m.domain == MilestoneDomain.language), isTrue);
+      expect(
+          filtered.every((m) => m.domain == MilestoneDomain.language), isTrue);
     });
 
     test('filtered results are a subset of the original list', () {
@@ -99,7 +104,8 @@ void main() {
 
   group('MilestonesData.ageGroups', () {
     test('returns the expected list of age groups', () {
-      expect(MilestonesData.ageGroups, equals([2, 4, 6, 9, 12, 15, 18, 24, 30, 36]));
+      expect(MilestonesData.ageGroups,
+          equals([2, 4, 6, 9, 12, 15, 18, 24, 30, 36]));
     });
 
     test('is sorted in ascending order', () {

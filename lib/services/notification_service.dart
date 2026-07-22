@@ -64,6 +64,8 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -89,7 +91,8 @@ class NotificationService {
 
   tz.TZDateTime _nextInstance(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
-    var next = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var next =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     if (next.isBefore(now)) {
       next = next.add(const Duration(days: 1));
     }

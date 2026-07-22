@@ -22,7 +22,8 @@ class MilestoneProvider extends ChangeNotifier {
   List<int> get ageGroups {
     if (_filterDomain == null) return MilestonesData.ageGroups;
     return MilestonesData.ageGroups
-        .where((ag) => MilestonesData.forAgeGroup(ag).any((m) => m.domain == _filterDomain))
+        .where((ag) => MilestonesData.forAgeGroup(ag)
+            .any((m) => m.domain == _filterDomain))
         .toList();
   }
 
@@ -58,7 +59,8 @@ class MilestoneProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateNotes(int profileId, String milestoneId, String notes) async {
+  Future<void> updateNotes(
+      int profileId, String milestoneId, String notes) async {
     final existing = getAchievement(milestoneId);
     if (existing == null) return;
     final updated = existing.copyWith(notes: notes);

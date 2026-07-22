@@ -19,7 +19,8 @@ class ChildProfile {
 
   int get ageInMonths {
     final now = DateTime.now();
-    int months = (now.year - dateOfBirth.year) * 12 + now.month - dateOfBirth.month;
+    int months =
+        (now.year - dateOfBirth.year) * 12 + now.month - dateOfBirth.month;
     if (now.day < dateOfBirth.day) months--;
     return months.clamp(0, 999);
   }
@@ -32,14 +33,16 @@ class ChildProfile {
     if (m < 24) return '$m month${m == 1 ? '' : 's'}';
     final years = m ~/ 12;
     final rem = m % 12;
-    if (rem == 0) return '$years year${years == 1 ? '' : 's'}';
+    if (rem == 0) return '$years yr';
     return '$years yr $rem mo';
   }
 
   // Age in whole weeks capped at 156 weeks (3 years)
   int get ageBandWeeks => ageInWeeks.clamp(0, 156);
 
-  ChildProfile copyWith({int? id, String? uuid, String? name, DateTime? dateOfBirth}) => ChildProfile(
+  ChildProfile copyWith(
+          {int? id, String? uuid, String? name, DateTime? dateOfBirth}) =>
+      ChildProfile(
         id: id ?? this.id,
         uuid: uuid ?? this.uuid,
         name: name ?? this.name,

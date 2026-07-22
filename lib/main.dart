@@ -24,6 +24,7 @@ void main() async {
   if (SupabaseConfig.isConfigured) {
     await Supabase.initialize(
       url: SupabaseConfig.url,
+      // ignore: deprecated_member_use
       anonKey: SupabaseConfig.anonKey,
     );
   }

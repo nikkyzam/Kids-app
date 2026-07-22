@@ -8,12 +8,18 @@ enum SkillCategory {
 
   String get label {
     switch (this) {
-      case SkillCategory.grossMotor: return 'Gross Motor';
-      case SkillCategory.fineMotor: return 'Fine Motor';
-      case SkillCategory.language: return 'Language';
-      case SkillCategory.cognitive: return 'Cognitive';
-      case SkillCategory.socialEmotional: return 'Social & Emotional';
-      case SkillCategory.sensory: return 'Sensory';
+      case SkillCategory.grossMotor:
+        return 'Gross Motor';
+      case SkillCategory.fineMotor:
+        return 'Fine Motor';
+      case SkillCategory.language:
+        return 'Language';
+      case SkillCategory.cognitive:
+        return 'Cognitive';
+      case SkillCategory.socialEmotional:
+        return 'Social & Emotional';
+      case SkillCategory.sensory:
+        return 'Sensory';
     }
   }
 }

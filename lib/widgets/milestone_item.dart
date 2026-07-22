@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
@@ -58,15 +57,19 @@ class _MilestoneItemState extends State<MilestoneItem> {
                 borderRadius: BorderRadius.circular(16),
                 onTap: () async {
                   final wasAchieved = mp.isAchieved(widget.milestone.id);
-                  await mp.toggleMilestone(widget.profileId, widget.milestone.id);
+                  await mp.toggleMilestone(
+                      widget.profileId, widget.milestone.id);
                   if (!wasAchieved && mounted) {
                     _confetti.play();
                     _promptAddPhoto(context);
                   }
                 },
-                onLongPress: isAchieved ? () => _editNotes(context, mp, achievement) : null,
+                onLongPress: isAchieved
+                    ? () => _editNotes(context, mp, achievement)
+                    : null,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Row(
                     children: [
                       _buildDomainIndicator(domainColor, isAchieved),
@@ -77,23 +80,35 @@ class _MilestoneItemState extends State<MilestoneItem> {
                           children: [
                             Text(
                               widget.milestone.description,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontWeight: isAchieved ? FontWeight.w600 : FontWeight.w400,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    fontWeight: isAchieved
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
                             ),
                             if (isAchieved && achievement != null) ...[
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.check_circle_rounded, size: 12, color: AppTheme.success),
+                                  const Icon(Icons.check_circle_rounded,
+                                      size: 12, color: AppTheme.success),
                                   const SizedBox(width: 4),
                                   Text(
-                                    DateFormat('MMM d, yyyy').format(achievement.achievedDate),
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.success, fontWeight: FontWeight.w600),
+                                    DateFormat('MMM d, yyyy')
+                                        .format(achievement.achievedDate),
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.success,
+                                        fontWeight: FontWeight.w600),
                                   ),
-                                  if (achievement.notes?.isNotEmpty == true) ...[
+                                  if (achievement.notes?.isNotEmpty ==
+                                      true) ...[
                                     const SizedBox(width: 8),
-                                    const Icon(Icons.note_alt_outlined, size: 12, color: AppTheme.textMuted),
+                                    const Icon(Icons.note_alt_outlined,
+                                        size: 12, color: AppTheme.textMuted),
                                   ],
                                 ],
                               ),
@@ -101,8 +116,11 @@ class _MilestoneItemState extends State<MilestoneItem> {
                             if (!isAchieved)
                               const Padding(
                                 padding: EdgeInsets.only(top: 2),
-                                child: Text('Long-press to add a note after checking',
-                                    style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                                child: Text(
+                                    'Long-press to add a note after checking',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        color: AppTheme.textMuted)),
                               ),
                           ],
                         ),
@@ -114,15 +132,20 @@ class _MilestoneItemState extends State<MilestoneItem> {
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: isAchieved ? AppTheme.success : Colors.transparent,
+                          color: isAchieved
+                              ? AppTheme.success
+                              : Colors.transparent,
                           border: Border.all(
-                            color: isAchieved ? AppTheme.success : AppTheme.textMuted.withOpacity(0.4),
+                            color: isAchieved
+                                ? AppTheme.success
+                                : AppTheme.textMuted.withOpacity(0.4),
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: isAchieved
-                            ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+                            ? const Icon(Icons.check_rounded,
+                                size: 14, color: Colors.white)
                             : null,
                       ),
                     ],
@@ -170,17 +193,23 @@ class _MilestoneItemState extends State<MilestoneItem> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Add a Photo Memory?'),
-        content: const Text('Capture this milestone with a photo — it will be saved in your memories timeline.'),
+        content: const Text(
+            'Capture this milestone with a photo — it will be saved in your memories timeline.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Skip')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Add Photo')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Skip')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Add Photo')),
         ],
       ),
     );
     if (add != true || !mounted) return;
 
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final picked =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
     if (picked == null || !mounted) return;
 
     await DatabaseHelper.instance.savePhoto(PhotoMemory(
@@ -202,7 +231,8 @@ class _MilestoneItemState extends State<MilestoneItem> {
     }
   }
 
-  Future<void> _editNotes(BuildContext context, MilestoneProvider mp, achievement) async {
+  Future<void> _editNotes(
+      BuildContext context, MilestoneProvider mp, achievement) async {
     final controller = TextEditingController(text: achievement?.notes ?? '');
     final result = await showDialog<String>(
       context: context,
@@ -218,8 +248,12 @@ class _MilestoneItemState extends State<MilestoneItem> {
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('Save Memory')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: const Text('Save Memory')),
         ],
       ),
     );
@@ -231,11 +265,16 @@ class _MilestoneItemState extends State<MilestoneItem> {
 
   Color _domainColor(MilestoneDomain domain) {
     switch (domain) {
-      case MilestoneDomain.grossMotor: return AppTheme.grossMotorColor;
-      case MilestoneDomain.fineMotor: return AppTheme.fineMotorColor;
-      case MilestoneDomain.language: return AppTheme.languageColor;
-      case MilestoneDomain.cognitive: return AppTheme.cognitiveColor;
-      case MilestoneDomain.socialEmotional: return AppTheme.socialEmotionalColor;
+      case MilestoneDomain.grossMotor:
+        return AppTheme.grossMotorColor;
+      case MilestoneDomain.fineMotor:
+        return AppTheme.fineMotorColor;
+      case MilestoneDomain.language:
+        return AppTheme.languageColor;
+      case MilestoneDomain.cognitive:
+        return AppTheme.cognitiveColor;
+      case MilestoneDomain.socialEmotional:
+        return AppTheme.socialEmotionalColor;
     }
   }
 }

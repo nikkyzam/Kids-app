@@ -18,9 +18,7 @@ class RedFlagBanner extends StatelessWidget {
         final profile = pp.activeProfile;
         if (profile == null || mp.isLoading) return const SizedBox.shrink();
 
-        final achievedIds = mp.achievements
-            .map((a) => a.milestoneId)
-            .toSet();
+        final achievedIds = mp.achievements.map((a) => a.milestoneId).toSet();
 
         final flags = RedFlagsData.activeFor(profile.ageInMonths, achievedIds);
         if (flags.isEmpty) return const SizedBox.shrink();
@@ -38,7 +36,8 @@ class RedFlagBanner extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.info_outline_rounded, color: Color(0xFFE65100), size: 18),
+                  const Icon(Icons.info_outline_rounded,
+                      color: Color(0xFFE65100), size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -60,7 +59,8 @@ class RedFlagBanner extends StatelessWidget {
               if (flags.length > 1)
                 Text(
                   '+ ${flags.length - 1} more — tap to see all',
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                  style:
+                      const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                 ),
             ],
           ),

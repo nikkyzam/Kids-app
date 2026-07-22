@@ -34,8 +34,10 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
   void initState() {
     super.initState();
     _confetti = ConfettiController(duration: const Duration(seconds: 4));
-    _scaleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _scaleAnim = CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut);
+    _scaleController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _scaleAnim =
+        CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut);
     _confetti.play();
     _scaleController.forward();
   }
@@ -57,11 +59,16 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
   }
 
   String get _subtext {
-    if (widget.streak >= 100) return 'You\'ve played with your baby every day for 100 days. That\'s extraordinary.';
-    if (widget.streak >= 60) return 'Two months of daily play. Your dedication is building your baby\'s brain.';
-    if (widget.streak >= 30) return 'A full month! Science shows consistent play at this age has lasting effects.';
-    if (widget.streak >= 21) return 'Three weeks builds a habit. Play is now part of your daily rhythm.';
-    if (widget.streak >= 14) return 'Two weeks of daily challenges. Your baby is noticing the difference.';
+    if (widget.streak >= 100)
+      return 'You\'ve played with your baby every day for 100 days. That\'s extraordinary.';
+    if (widget.streak >= 60)
+      return 'Two months of daily play. Your dedication is building your baby\'s brain.';
+    if (widget.streak >= 30)
+      return 'A full month! Science shows consistent play at this age has lasting effects.';
+    if (widget.streak >= 21)
+      return 'Three weeks builds a habit. Play is now part of your daily rhythm.';
+    if (widget.streak >= 14)
+      return 'Two weeks of daily challenges. Your baby is noticing the difference.';
     return 'Seven days straight! You\'ve built the habit. Keep it going.';
   }
 
@@ -128,7 +135,8 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
                   Text(
                     _subtext,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, color: Colors.white60, height: 1.5),
+                    style: const TextStyle(
+                        fontSize: 13, color: Colors.white60, height: 1.5),
                   ),
                   const SizedBox(height: 24),
                   // Flame row
@@ -153,7 +161,8 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: const Text('Keep It Going!',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
@@ -169,8 +178,12 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
           gravity: 0.25,
           emissionFrequency: 0.04,
           colors: const [
-            AppTheme.primary, AppTheme.secondary, AppTheme.success,
-            Color(0xFFFF7043), Color(0xFF9C6FDE), Colors.white,
+            AppTheme.primary,
+            AppTheme.secondary,
+            AppTheme.success,
+            Color(0xFFFF7043),
+            Color(0xFF9C6FDE),
+            Colors.white,
           ],
         ),
       ],

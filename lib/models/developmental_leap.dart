@@ -2,7 +2,7 @@ class DevelopmentalLeap {
   final int number;
   final String name;
   final int stormyStartWeek; // fussy period begins
-  final int leapWeek;        // peak cognitive shift
+  final int leapWeek; // peak cognitive shift
   final String whatsDeveloping;
   final String whatToExpect;
   final List<String> tips;

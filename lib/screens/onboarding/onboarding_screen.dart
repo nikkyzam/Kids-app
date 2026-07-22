@@ -40,7 +40,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             mode: CupertinoDatePickerMode.date,
             maximumDate: now,
             minimumDate: now.subtract(const Duration(days: 365 * 4)),
-            initialDateTime: _selectedDob ?? now.subtract(const Duration(days: 90)),
+            initialDateTime:
+                _selectedDob ?? now.subtract(const Duration(days: 90)),
             onDateTimeChanged: (dt) => picked = dt,
           ),
         ),
@@ -81,7 +82,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  bool get _canSave => _nameController.text.trim().isNotEmpty && _selectedDob != null;
+  bool get _canSave =>
+      _nameController.text.trim().isNotEmpty && _selectedDob != null;
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +119,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             color: AppTheme.primaryLight,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.child_care_rounded, color: AppTheme.primary, size: 32),
+          child: const Icon(Icons.child_care_rounded,
+              color: AppTheme.primary, size: 32),
         ),
         const SizedBox(height: 20),
-        Text('Welcome to\nPlaySteps', style: Theme.of(context).textTheme.displayMedium),
+        Text('Welcome to\nPlaySteps',
+            style: Theme.of(context).textTheme.displayMedium),
         const SizedBox(height: 8),
         Text(
           'No accounts. No cloud. Just play.',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textMuted),
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge
+              ?.copyWith(color: AppTheme.textMuted),
         ),
       ],
     );
@@ -134,7 +141,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Baby's Name or Nickname", style: Theme.of(context).textTheme.labelLarge),
+        Text("Baby's Name or Nickname",
+            style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         TextField(
           controller: _nameController,
@@ -165,11 +173,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         : DateFormat('MMMM d, yyyy').format(_selectedDob!),
                     style: TextStyle(
                       fontSize: 15,
-                      color: _selectedDob == null ? AppTheme.textMuted : AppTheme.textDark,
+                      color: _selectedDob == null
+                          ? AppTheme.textMuted
+                          : AppTheme.textDark,
                     ),
                   ),
                 ),
-                const Icon(Icons.calendar_today_rounded, color: AppTheme.textMuted, size: 18),
+                const Icon(Icons.calendar_today_rounded,
+                    color: AppTheme.textMuted, size: 18),
               ],
             ),
           ),
@@ -192,7 +203,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else if (weeks < 26) {
       ageText = '$weeks weeks old';
     } else {
-      final months = ((now.year - _selectedDob!.year) * 12 + now.month - _selectedDob!.month);
+      final months = ((now.year - _selectedDob!.year) * 12 +
+          now.month -
+          _selectedDob!.month);
       ageText = '$months month${months == 1 ? '' : 's'} old';
     }
 
@@ -207,7 +220,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           const Icon(Icons.cake_rounded, size: 14, color: AppTheme.primary),
           const SizedBox(width: 6),
-          Text(ageText, style: const TextStyle(fontSize: 13, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+          Text(ageText,
+              style: const TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -220,7 +237,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: FilledButton(
         onPressed: (_canSave && !_isSaving) ? _saveProfile : null,
         child: _isSaving
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2))
             : const Text('Get Started'),
       ),
     );

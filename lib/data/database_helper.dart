@@ -20,8 +20,14 @@ class DatabaseHelper {
     return _db!;
   }
 
+  /// Overrides the database location in tests. Set to [inMemoryDatabasePath]
+  /// so each test isolate gets its own throwaway database with no shared file.
+  @visibleForTesting
+  static String? testDatabasePath;
+
   Future<Database> _initDb() async {
-    final path = join(await getDatabasesPath(), 'playsteps.db');
+    final path =
+        testDatabasePath ?? join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
       version: 5,
@@ -165,14 +171,21 @@ class DatabaseHelper {
         );
       }
       // Add updated_at to remaining tables
-      await db.execute('ALTER TABLE activity_completions ADD COLUMN updated_at TEXT');
-      await db.execute('UPDATE activity_completions SET updated_at = completed_at');
-      await db.execute('ALTER TABLE milestone_achievements ADD COLUMN updated_at TEXT');
-      await db.execute('UPDATE milestone_achievements SET updated_at = achieved_date');
-      await db.execute('ALTER TABLE unlocked_badges ADD COLUMN updated_at TEXT');
+      await db.execute(
+          'ALTER TABLE activity_completions ADD COLUMN updated_at TEXT');
+      await db
+          .execute('UPDATE activity_completions SET updated_at = completed_at');
+      await db.execute(
+          'ALTER TABLE milestone_achievements ADD COLUMN updated_at TEXT');
+      await db.execute(
+          'UPDATE milestone_achievements SET updated_at = achieved_date');
+      await db
+          .execute('ALTER TABLE unlocked_badges ADD COLUMN updated_at TEXT');
       await db.execute('UPDATE unlocked_badges SET updated_at = unlocked_at');
-      await db.execute('ALTER TABLE growth_measurements ADD COLUMN updated_at TEXT');
-      await db.execute('UPDATE growth_measurements SET updated_at = measured_on');
+      await db.execute(
+          'ALTER TABLE growth_measurements ADD COLUMN updated_at TEXT');
+      await db
+          .execute('UPDATE growth_measurements SET updated_at = measured_on');
       await db.execute('ALTER TABLE photo_memories ADD COLUMN updated_at TEXT');
       await db.execute('UPDATE photo_memories SET updated_at = captured_at');
     }
@@ -215,7 +228,8 @@ class DatabaseHelper {
 
   // ─── Activity Completions ─────────────────────────────────────────────────
 
-  Future<ActivityCompletion?> getCompletion(int profileId, String dateKey) async {
+  Future<ActivityCompletion?> getCompletion(
+      int profileId, String dateKey) async {
     final db = await database;
     final rows = await db.query(
       'activity_completions',
@@ -240,7 +254,10 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'activity_completions',
-      {...completion.toMap()..remove('id'), 'updated_at': DateTime.now().toIso8601String()},
+      {
+        ...completion.toMap()..remove('id'),
+        'updated_at': DateTime.now().toIso8601String()
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -270,7 +287,10 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'milestone_achievements',
-      {...achievement.toMap()..remove('id'), 'updated_at': DateTime.now().toIso8601String()},
+      {
+        ...achievement.toMap()..remove('id'),
+        'updated_at': DateTime.now().toIso8601String()
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -284,7 +304,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<MilestoneAchievement?> getAchievement(int profileId, String milestoneId) async {
+  Future<MilestoneAchievement?> getAchievement(
+      int profileId, String milestoneId) async {
     final db = await database;
     final rows = await db.query(
       'milestone_achievements',
@@ -407,5 +428,7 @@ class DatabaseHelper {
   Future<void> resetForTesting() async {
     await _db?.close();
     _db = null;
+    // With an in-memory test database (see [testDatabasePath]), closing the
+    // connection discards all data, so the next access opens a fresh schema.
   }
 }

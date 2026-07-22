@@ -71,7 +71,10 @@ class ActivitiesData {
       ageBandMaxWeeks: 4,
       title: 'High-Contrast Visual Tour',
       durationMins: 5,
-      materials: ['Black-and-white picture (printed or from a book)', 'Tape or book holder'],
+      materials: [
+        'Black-and-white picture (printed or from a book)',
+        'Tape or book holder'
+      ],
       instructions: [
         'Prop a bold black-and-white image (stripes, faces, checkers) 20 cm from baby\'s eyes.',
         'Slowly move the image left and right at a 45-degree arc, taking 3 seconds per sweep.',
@@ -118,7 +121,10 @@ class ActivitiesData {
       ageBandMaxWeeks: 8,
       title: 'Tummy Time with Mirror',
       durationMins: 5,
-      materials: ['Non-breakable baby mirror', '2 rolled towels or a nursing pillow'],
+      materials: [
+        'Non-breakable baby mirror',
+        '2 rolled towels or a nursing pillow'
+      ],
       instructions: [
         'Place a rolled towel under baby\'s chest during tummy time to reduce strain.',
         'Position the mirror at eye level 20 cm away so baby can see their reflection.',
@@ -148,7 +154,9 @@ class ActivitiesData {
       ageBandMaxWeeks: 8,
       title: 'Colour Contrast Parade',
       durationMins: 5,
-      materials: ['3 household objects of different solid colours (cup, cloth, toy)'],
+      materials: [
+        '3 household objects of different solid colours (cup, cloth, toy)'
+      ],
       instructions: [
         'Hold a brightly coloured object 25 cm from baby\'s face until eyes focus.',
         'Slowly move it in a wide arc from left to right over 4 seconds.',
@@ -704,7 +712,10 @@ class ActivitiesData {
       ageBandMaxWeeks: 117,
       title: 'Sharing Practice',
       durationMins: 5,
-      materials: ['5 identical objects (blocks, crackers, or stickers)', '1 other person'],
+      materials: [
+        '5 identical objects (blocks, crackers, or stickers)',
+        '1 other person'
+      ],
       instructions: [
         'Sit with baby and a partner; distribute items one at a time, alternating who receives.',
         'Say "One for me, one for you" with each handoff — model enthusiastic acceptance.',
@@ -721,7 +732,11 @@ class ActivitiesData {
       ageBandMaxWeeks: 156,
       title: 'Obstacle Course',
       durationMins: 5,
-      materials: ['Pillows (crawl over)', 'Hula hoop (step through)', 'Line of tape (balance)'],
+      materials: [
+        'Pillows (crawl over)',
+        'Hula hoop (step through)',
+        'Line of tape (balance)'
+      ],
       instructions: [
         'Set up 3 stations in sequence: crawl over pillows, step through hoop, walk tape line.',
         'Walk through the course yourself first as a demo, then say "Your turn!"',
@@ -778,13 +793,17 @@ class ActivitiesData {
   ];
 
   static List<PlayActivity> forAgeBandWeeks(int ageInWeeks) {
-    return all.where((a) => ageInWeeks >= a.ageBandMinWeeks && ageInWeeks < a.ageBandMaxWeeks).toList();
+    return all
+        .where((a) =>
+            ageInWeeks >= a.ageBandMinWeeks && ageInWeeks < a.ageBandMaxWeeks)
+        .toList();
   }
 
   static PlayActivity? todayActivity(int ageInWeeks) {
     final band = forAgeBandWeeks(ageInWeeks);
     if (band.isEmpty) return null;
-    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
+    final dayOfYear =
+        DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
     return band[dayOfYear % band.length];
   }
 }

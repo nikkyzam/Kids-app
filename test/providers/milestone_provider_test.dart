@@ -10,7 +10,10 @@ import 'package:playsteps/data/milestones_data.dart';
 
 Future<ChildProfile> _insertTestProfile() async {
   return DatabaseHelper.instance.insertProfile(
-    ChildProfile(name: 'Test', dateOfBirth: DateTime(2024, 1, 1), createdAt: DateTime.now()),
+    ChildProfile(
+        name: 'Test',
+        dateOfBirth: DateTime(2024, 1, 1),
+        createdAt: DateTime.now()),
   );
 }
 
@@ -18,6 +21,7 @@ void main() {
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    DatabaseHelper.testDatabasePath = inMemoryDatabasePath;
   });
 
   setUp(() async {
@@ -50,7 +54,8 @@ void main() {
       provider.setFilter(MilestoneDomain.grossMotor);
       expect(provider.filterDomain, MilestoneDomain.grossMotor);
       expect(
-        provider.allMilestones.every((m) => m.domain == MilestoneDomain.grossMotor),
+        provider.allMilestones
+            .every((m) => m.domain == MilestoneDomain.grossMotor),
         isTrue,
       );
     });
@@ -72,7 +77,8 @@ void main() {
       }
     });
 
-    test('ageGroups with filter only includes groups that have matching domain', () {
+    test('ageGroups with filter only includes groups that have matching domain',
+        () {
       final provider = MilestoneProvider();
       provider.setFilter(MilestoneDomain.cognitive);
       final groups = provider.ageGroups;
@@ -80,7 +86,8 @@ void main() {
       for (final ag in groups) {
         final hasMatch = MilestonesData.forAgeGroup(ag)
             .any((m) => m.domain == MilestoneDomain.cognitive);
-        expect(hasMatch, isTrue, reason: 'Age group $ag should have cognitive milestones');
+        expect(hasMatch, isTrue,
+            reason: 'Age group $ag should have cognitive milestones');
       }
     });
   });
@@ -167,7 +174,8 @@ void main() {
       await provider.loadForProfile(profile.id!);
 
       await provider.toggleMilestone(profile.id!, 'm_2_se_1');
-      await provider.updateNotes(profile.id!, 'm_2_se_1', 'First smile at grandma!');
+      await provider.updateNotes(
+          profile.id!, 'm_2_se_1', 'First smile at grandma!');
 
       final achievement = provider.getAchievement('m_2_se_1');
       expect(achievement!.notes, 'First smile at grandma!');

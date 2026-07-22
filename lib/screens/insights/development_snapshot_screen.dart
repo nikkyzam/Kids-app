@@ -25,8 +25,7 @@ class DevelopmentSnapshotScreen extends StatefulWidget {
       _DevelopmentSnapshotScreenState();
 }
 
-class _DevelopmentSnapshotScreenState
-    extends State<DevelopmentSnapshotScreen> {
+class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
   // Tracks which red flags the user has acknowledged locally.
   final Set<String> _notedRedFlags = {};
 
@@ -53,9 +52,8 @@ class _DevelopmentSnapshotScreenState
         final childName = profile.name;
 
         // ── Compute overall status ─────────────────────────────────────────
-        final relevantGroups = MilestonesData.ageGroups
-            .where((g) => g <= ageInMonths)
-            .toList();
+        final relevantGroups =
+            MilestonesData.ageGroups.where((g) => g <= ageInMonths).toList();
 
         int totalExpected = 0;
         int totalAchieved = 0;
@@ -65,8 +63,7 @@ class _DevelopmentSnapshotScreenState
           totalAchieved += ms.where((m) => mp.isAchieved(m.id)).length;
         }
 
-        final ratio =
-            totalExpected == 0 ? 1.0 : totalAchieved / totalExpected;
+        final ratio = totalExpected == 0 ? 1.0 : totalAchieved / totalExpected;
 
         // Build achieved ids for red-flag lookup
         final achievedIds = mp.achievements.map((a) => a.milestoneId).toSet();
@@ -150,8 +147,8 @@ class _DevelopmentSnapshotScreenState
               if (relevantGroups.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Text(
                       'No age groups to show yet — check back soon!',
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -226,8 +223,7 @@ class _StatusHeroCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(config.emoji,
-                    style: const TextStyle(fontSize: 42)),
+                Text(config.emoji, style: const TextStyle(fontSize: 42)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -276,8 +272,7 @@ class _StatusHeroCard extends StatelessWidget {
                   value: achievedCount / expectedCount,
                   minHeight: 8,
                   backgroundColor: config.textColor.withOpacity(0.15),
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(config.textColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(config.textColor),
                 ),
               ),
               const SizedBox(height: 6),
@@ -483,11 +478,8 @@ class _RedFlagItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isNoted
-                        ? AppTheme.textMuted
-                        : AppTheme.textDark,
-                    decoration:
-                        isNoted ? TextDecoration.lineThrough : null,
+                    color: isNoted ? AppTheme.textMuted : AppTheme.textDark,
+                    decoration: isNoted ? TextDecoration.lineThrough : null,
                     decorationColor: AppTheme.textMuted,
                     fontFamily: 'Nunito',
                   ),
@@ -510,8 +502,7 @@ class _RedFlagItem extends StatelessWidget {
             onTap: onToggle,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isNoted
                     ? AppTheme.success.withOpacity(0.12)
@@ -551,7 +542,8 @@ class _AgeGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final milestones = MilestonesData.forAgeGroup(ageGroup);
-    final achieved = milestones.where((m) => milestoneProvider.isAchieved(m.id)).length;
+    final achieved =
+        milestones.where((m) => milestoneProvider.isAchieved(m.id)).length;
     final total = milestones.length;
     final ratio = total == 0 ? 1.0 : achieved / total;
 
@@ -593,8 +585,8 @@ class _AgeGroupCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
                       color: trafficColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
@@ -691,8 +683,7 @@ class _MilestoneRow extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: isAchieved ? AppTheme.textMuted : AppTheme.textDark,
-                decoration:
-                    isAchieved ? TextDecoration.lineThrough : null,
+                decoration: isAchieved ? TextDecoration.lineThrough : null,
                 decorationColor: AppTheme.textMuted,
                 height: 1.4,
                 fontFamily: 'Nunito',

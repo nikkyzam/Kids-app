@@ -25,36 +25,60 @@ void main() {
   group('PlayActivity.isInFreeTier', () {
     test('true when ageBandMinWeeks is 0', () {
       const act = PlayActivity(
-        id: 'a', ageBandMinWeeks: 0, ageBandMaxWeeks: 4,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.sensory,
+        id: 'a',
+        ageBandMinWeeks: 0,
+        ageBandMaxWeeks: 4,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.sensory,
       );
       expect(act.isInFreeTier, isTrue);
     });
 
     test('true when ageBandMinWeeks is 1', () {
       const act = PlayActivity(
-        id: 'a', ageBandMinWeeks: 1, ageBandMaxWeeks: 4,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.sensory,
+        id: 'a',
+        ageBandMinWeeks: 1,
+        ageBandMaxWeeks: 4,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.sensory,
       );
       expect(act.isInFreeTier, isTrue);
     });
 
     test('false when ageBandMinWeeks is 4', () {
       const act = PlayActivity(
-        id: 'b', ageBandMinWeeks: 4, ageBandMaxWeeks: 8,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.grossMotor,
+        id: 'b',
+        ageBandMinWeeks: 4,
+        ageBandMaxWeeks: 8,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.grossMotor,
       );
       expect(act.isInFreeTier, isFalse);
     });
 
     test('false for premium age bands', () {
       const act = PlayActivity(
-        id: 'c', ageBandMinWeeks: 48, ageBandMaxWeeks: 65,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.cognitive,
+        id: 'c',
+        ageBandMinWeeks: 48,
+        ageBandMaxWeeks: 65,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.cognitive,
       );
       expect(act.isInFreeTier, isFalse);
     });
@@ -64,8 +88,11 @@ void main() {
     test('toMap/fromMap roundtrip', () {
       final now = DateTime(2024, 5, 10, 12, 0);
       final original = ActivityCompletion(
-        id: 7, profileId: 1, activityId: 'act_0_1',
-        dateKey: '2024-05-10', completedAt: now,
+        id: 7,
+        profileId: 1,
+        activityId: 'act_0_1',
+        dateKey: '2024-05-10',
+        completedAt: now,
       );
       final restored = ActivityCompletion.fromMap(original.toMap());
       expect(restored.id, 7);
@@ -96,8 +123,11 @@ void main() {
     test('toMap/fromMap roundtrip with notes', () {
       final date = DateTime(2024, 4, 20);
       final original = MilestoneAchievement(
-        id: 3, profileId: 1, milestoneId: 'm_2_gm_1',
-        achievedDate: date, notes: 'First smile today!',
+        id: 3,
+        profileId: 1,
+        milestoneId: 'm_2_gm_1',
+        achievedDate: date,
+        notes: 'First smile today!',
       );
       final restored = MilestoneAchievement.fromMap(original.toMap());
       expect(restored.id, 3);
@@ -108,7 +138,8 @@ void main() {
 
     test('toMap/fromMap roundtrip without notes', () {
       final original = MilestoneAchievement(
-        profileId: 1, milestoneId: 'm_4_la_1',
+        profileId: 1,
+        milestoneId: 'm_4_la_1',
         achievedDate: DateTime(2024, 5, 1),
       );
       final restored = MilestoneAchievement.fromMap(original.toMap());
@@ -117,8 +148,10 @@ void main() {
 
     test('copyWith updates notes', () {
       final original = MilestoneAchievement(
-        profileId: 1, milestoneId: 'm_6_gm_1',
-        achievedDate: DateTime.now(), notes: 'Old note',
+        profileId: 1,
+        milestoneId: 'm_6_gm_1',
+        achievedDate: DateTime.now(),
+        notes: 'Old note',
       );
       final updated = original.copyWith(notes: 'New note');
       expect(updated.notes, 'New note');

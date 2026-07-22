@@ -37,16 +37,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _tab = 0;
 
+  /// Switches the active bottom-navigation tab. Exposed so descendant widgets
+  /// can navigate without reaching into the protected [setState].
+  void selectTab(int index) => setState(() => _tab = index);
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadForActiveProfile());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _loadForActiveProfile());
   }
 
   void _loadForActiveProfile() {
     final profile = context.read<ProfileProvider>().activeProfile;
     if (profile == null) return;
-    context.read<ActivityProvider>().loadForProfile(profile.id!, profile.ageBandWeeks);
+    context
+        .read<ActivityProvider>()
+        .loadForProfile(profile.id!, profile.ageBandWeeks);
     context.read<MilestoneProvider>().loadForProfile(profile.id!);
     context.read<BadgeProvider>().loadBadges(profile.id!);
   }
@@ -73,7 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.history_rounded),
                 onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ActivityHistoryScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const ActivityHistoryScreen()),
                 ),
               ),
               Consumer<BadgeProvider>(
@@ -98,7 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Text(
                             '${bp.unlockedCount}',
-                            style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w800),
+                            style: const TextStyle(
+                                fontSize: 9,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),
@@ -153,7 +164,8 @@ class _ActivityTab extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: _buildGreeting(context, profile.name, profile.displayAge, ap.currentStreak),
+          child: _buildGreeting(
+              context, profile.name, profile.displayAge, ap.currentStreak),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         const SliverToBoxAdapter(child: StreakBanner()),
@@ -161,7 +173,8 @@ class _ActivityTab extends StatelessWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(child: ActivityCard(profileId: profile.id!)),
+          sliver:
+              SliverToBoxAdapter(child: ActivityCard(profileId: profile.id!)),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const SliverToBoxAdapter(child: DailyTipCard()),
@@ -193,7 +206,9 @@ class _ActivityTab extends StatelessWidget {
               label: 'Memories',
               color: AppTheme.fineMotorColor,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => MemoriesTimelineScreen(profileId: profileId)),
+                MaterialPageRoute(
+                    builder: (_) =>
+                        MemoriesTimelineScreen(profileId: profileId)),
               ),
             ),
           ),
@@ -204,7 +219,8 @@ class _ActivityTab extends StatelessWidget {
               label: 'On Track?',
               color: AppTheme.cognitiveColor,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const DevelopmentSnapshotScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const DevelopmentSnapshotScreen()),
               ),
             ),
           ),
@@ -215,7 +231,8 @@ class _ActivityTab extends StatelessWidget {
               label: 'Doctor Prep',
               color: AppTheme.languageColor,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PediatricianPrepScreen()),
+                MaterialPageRoute(
+                    builder: (_) => const PediatricianPrepScreen()),
               ),
             ),
           ),
@@ -231,7 +248,8 @@ class _ActivityTab extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: TextButton.icon(
           icon: const Icon(Icons.grid_view_rounded, size: 14),
-          label: const Text('Browse All Activities', style: TextStyle(fontSize: 12)),
+          label: const Text('Browse All Activities',
+              style: TextStyle(fontSize: 12)),
           style: TextButton.styleFrom(
             foregroundColor: AppTheme.primary,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -244,9 +262,14 @@ class _ActivityTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting(BuildContext context, String name, String age, int streak) {
+  Widget _buildGreeting(
+      BuildContext context, String name, String age, int streak) {
     final hour = DateTime.now().hour;
-    final greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    final greeting = hour < 12
+        ? 'Good morning'
+        : hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -261,19 +284,22 @@ class _ActivityTab extends StatelessWidget {
                 Text(name, style: Theme.of(context).textTheme.displayLarge),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryLight,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(age,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600)),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
           ),
-          if (streak >= 3)
-            _StreakBadge(streak: streak),
+          if (streak >= 3) _StreakBadge(streak: streak),
         ],
       ),
     );
@@ -288,8 +314,9 @@ class _ActivityTab extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            final homeState = context.findAncestorStateOfType<_HomeScreenState>();
-            homeState?.setState(() => homeState._tab = 1);
+            final homeState =
+                context.findAncestorStateOfType<_HomeScreenState>();
+            homeState?.selectTab(1);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -301,14 +328,19 @@ class _ActivityTab extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.checklist_rounded, color: AppTheme.primary, size: 20),
+                        const Icon(Icons.checklist_rounded,
+                            color: AppTheme.primary, size: 20),
                         const SizedBox(width: 8),
-                        Text('Milestones', style: Theme.of(context).textTheme.titleMedium),
+                        Text('Milestones',
+                            style: Theme.of(context).textTheme.titleMedium),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: achieved == 0 ? AppTheme.primaryLight : AppTheme.successLight,
+                            color: achieved == 0
+                                ? AppTheme.primaryLight
+                                : AppTheme.successLight,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -316,12 +348,15 @@ class _ActivityTab extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: achieved == 0 ? AppTheme.primary : AppTheme.success,
+                              color: achieved == 0
+                                  ? AppTheme.primary
+                                  : AppTheme.success,
                             ),
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted, size: 18),
+                        const Icon(Icons.chevron_right_rounded,
+                            color: AppTheme.textMuted, size: 18),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -335,7 +370,8 @@ class _ActivityTab extends StatelessWidget {
                           value: value,
                           minHeight: 6,
                           backgroundColor: AppTheme.primaryLight,
-                          valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+                          valueColor:
+                              const AlwaysStoppedAnimation(AppTheme.primary),
                         ),
                       ),
                     ),
@@ -343,7 +379,10 @@ class _ActivityTab extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         _motivationText(achieved, total),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 11),
                       ),
                     ],
                   ],
@@ -366,99 +405,100 @@ class _ActivityTab extends StatelessWidget {
   }
 }
 
-  Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
-    final isPremiumPlus = context.watch<ActivityProvider>().isPremiumPlus;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text('⭐', style: TextStyle(fontSize: 14)),
-              const SizedBox(width: 6),
-              Text(
-                'Premium Plus',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFF5A623),
-                  letterSpacing: 1.2,
+Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
+  final isPremiumPlus = context.watch<ActivityProvider>().isPremiumPlus;
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('⭐', style: TextStyle(fontSize: 14)),
+            const SizedBox(width: 6),
+            Text(
+              'Premium Plus',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFFF5A623),
+                letterSpacing: 1.2,
+              ),
+            ),
+            if (!isPremiumPlus) ...[
+              const Spacer(),
+              GestureDetector(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),
+                ),
+                child: Text(
+                  'Upgrade →',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: const Color(0xFFF5A623),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              if (!isPremiumPlus) ...[
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),
-                  ),
-                  child: Text(
-                    'Upgrade →',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: const Color(0xFFF5A623),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
             ],
-          ),
-          const SizedBox(height: 10),
-          GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.2,
-            children: [
-              _PremiumPlusTile(
-                emoji: '📈',
-                label: 'Growth Tracker',
-                isLocked: !isPremiumPlus,
-                onTap: isPremiumPlus
-                    ? () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => GrowthTrackerScreen(profileId: profileId)))
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
-              ),
-              _PremiumPlusTile(
-                emoji: '🧠',
-                label: 'Leap Calendar',
-                isLocked: !isPremiumPlus,
-                onTap: isPremiumPlus
-                    ? () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const DevelopmentalLeapsScreen()))
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
-              ),
-              _PremiumPlusTile(
-                emoji: '📅',
-                label: '4-Week Plan',
-                isLocked: !isPremiumPlus,
-                onTap: isPremiumPlus
-                    ? () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ActivityPlanScreen()))
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
-              ),
-              _PremiumPlusTile(
-                emoji: '📋',
-                label: 'Weekly Report',
-                isLocked: !isPremiumPlus,
-                onTap: isPremiumPlus
-                    ? () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const WeeklyDigestScreen()))
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PremiumPlusScreen())),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        const SizedBox(height: 10),
+        GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 2.2,
+          children: [
+            _PremiumPlusTile(
+              emoji: '📈',
+              label: 'Growth Tracker',
+              isLocked: !isPremiumPlus,
+              onTap: isPremiumPlus
+                  ? () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) =>
+                          GrowthTrackerScreen(profileId: profileId)))
+                  : () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const PremiumPlusScreen())),
+            ),
+            _PremiumPlusTile(
+              emoji: '🧠',
+              label: 'Leap Calendar',
+              isLocked: !isPremiumPlus,
+              onTap: isPremiumPlus
+                  ? () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const DevelopmentalLeapsScreen()))
+                  : () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const PremiumPlusScreen())),
+            ),
+            _PremiumPlusTile(
+              emoji: '📅',
+              label: '4-Week Plan',
+              isLocked: !isPremiumPlus,
+              onTap: isPremiumPlus
+                  ? () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const ActivityPlanScreen()))
+                  : () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const PremiumPlusScreen())),
+            ),
+            _PremiumPlusTile(
+              emoji: '📋',
+              label: 'Weekly Report',
+              isLocked: !isPremiumPlus,
+              onTap: isPremiumPlus
+                  ? () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const WeeklyDigestScreen()))
+                  : () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const PremiumPlusScreen())),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
 class _PremiumPlusTile extends StatelessWidget {
   final String emoji;
@@ -500,12 +540,14 @@ class _PremiumPlusTile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: isLocked ? AppTheme.textMuted : const Color(0xFF8B6914),
+                    color:
+                        isLocked ? AppTheme.textMuted : const Color(0xFF8B6914),
                   ),
                 ),
               ),
               if (isLocked)
-                const Icon(Icons.lock_outline_rounded, size: 14, color: AppTheme.textMuted),
+                const Icon(Icons.lock_outline_rounded,
+                    size: 14, color: AppTheme.textMuted),
             ],
           ),
         ),
@@ -549,7 +591,8 @@ class _InsightButton extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
+                style: TextStyle(
+                    fontSize: 11, fontWeight: FontWeight.w700, color: color),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -575,16 +618,24 @@ class _StreakBadge extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: const Color(0xFFFF7043).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))],
+        boxShadow: [
+          BoxShadow(
+              color: const Color(0xFFFF7043).withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3))
+        ],
       ),
       child: Column(
         children: [
-          const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20),
+          const Icon(Icons.local_fire_department_rounded,
+              color: Colors.white, size: 20),
           Text(
             '$streak',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+            style: const TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
           ),
-          const Text('days', style: TextStyle(fontSize: 8, color: Colors.white70)),
+          const Text('days',
+              style: TextStyle(fontSize: 8, color: Colors.white70)),
         ],
       ),
     );

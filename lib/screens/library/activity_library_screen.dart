@@ -38,7 +38,10 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
             const Text('Activity Library'),
             Text(
               '${allForAge.length} activities for ${profile.displayAge}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppTheme.textMuted),
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -59,10 +62,13 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
                       isExpanded: _expandedId == filtered[i].id,
                       requiresPremium: ap.activityRequiresPremium(filtered[i]),
                       onTap: () => setState(() {
-                        _expandedId = _expandedId == filtered[i].id ? null : filtered[i].id;
+                        _expandedId = _expandedId == filtered[i].id
+                            ? null
+                            : filtered[i].id;
                       }),
                       onUnlock: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const PaywallScreen()),
                       ),
                     ),
                   ),
@@ -110,7 +116,8 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.search_off_rounded, size: 48, color: AppTheme.textMuted),
+          const Icon(Icons.search_off_rounded,
+              size: 48, color: AppTheme.textMuted),
           const SizedBox(height: 12),
           Text('No ${_filter?.label ?? ''} activities for this age',
               style: const TextStyle(color: AppTheme.textMuted)),
@@ -121,12 +128,18 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
 
   Color _categoryColor(SkillCategory cat) {
     switch (cat) {
-      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
-      case SkillCategory.language: return AppTheme.languageColor;
-      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory: return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor:
+        return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor:
+        return AppTheme.fineMotorColor;
+      case SkillCategory.language:
+        return AppTheme.languageColor;
+      case SkillCategory.cognitive:
+        return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional:
+        return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory:
+        return AppTheme.sensoryColor;
     }
   }
 }
@@ -150,12 +163,18 @@ class _ActivityLibraryTile extends StatelessWidget {
 
   Color get _color {
     switch (activity.skillCategory) {
-      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
-      case SkillCategory.language: return AppTheme.languageColor;
-      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory: return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor:
+        return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor:
+        return AppTheme.fineMotorColor;
+      case SkillCategory.language:
+        return AppTheme.languageColor;
+      case SkillCategory.cognitive:
+        return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional:
+        return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory:
+        return AppTheme.sensoryColor;
     }
   }
 
@@ -191,7 +210,9 @@ class _ActivityLibraryTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              requiresPremium ? Icons.lock_rounded : _skillIcon(activity.skillCategory),
+              requiresPremium
+                  ? Icons.lock_rounded
+                  : _skillIcon(activity.skillCategory),
               color: requiresPremium ? AppTheme.textMuted : _color,
               size: 22,
             ),
@@ -209,38 +230,50 @@ class _ActivityLibraryTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: requiresPremium ? AppTheme.textMuted : AppTheme.textDark,
+                          color: requiresPremium
+                              ? AppTheme.textMuted
+                              : AppTheme.textDark,
                         ),
                       ),
                     ),
                     if (isToday)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppTheme.primary,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text('Today',
-                            style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700)),
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700)),
                       ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined, size: 12, color: AppTheme.textMuted),
+                    Icon(Icons.timer_outlined,
+                        size: 12, color: AppTheme.textMuted),
                     const SizedBox(width: 3),
                     Text('${activity.durationMins} min',
-                        style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                        style: const TextStyle(
+                            fontSize: 11, color: AppTheme.textMuted)),
                     const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 1),
                       decoration: BoxDecoration(
                         color: _color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(activity.skillCategory.label,
-                          style: TextStyle(fontSize: 9, color: _color, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 9,
+                              color: _color,
+                              fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -254,11 +287,14 @@ class _ActivityLibraryTile extends StatelessWidget {
                 foregroundColor: AppTheme.secondary,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
-              child: const Text('Unlock', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              child: const Text('Unlock',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
             )
           else
             Icon(
-              isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+              isExpanded
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.keyboard_arrow_down_rounded,
               color: AppTheme.textMuted,
               size: 18,
             ),
@@ -281,17 +317,18 @@ class _ActivityLibraryTile extends StatelessWidget {
           _sectionLabel('Materials', Icons.inventory_2_outlined),
           const SizedBox(height: 4),
           ...activity.materials.map((m) => Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Text('• $m', style: const TextStyle(fontSize: 13, height: 1.5)),
-          )),
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text('• $m',
+                    style: const TextStyle(fontSize: 13, height: 1.5)),
+              )),
           const SizedBox(height: 10),
           _sectionLabel('Steps', Icons.format_list_numbered_rounded),
           const SizedBox(height: 4),
           ...activity.instructions.asMap().entries.map((e) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text('${e.key + 1}. ${e.value}',
-                style: const TextStyle(fontSize: 13, height: 1.5)),
-          )),
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('${e.key + 1}. ${e.value}',
+                    style: const TextStyle(fontSize: 13, height: 1.5)),
+              )),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -306,7 +343,10 @@ class _ActivityLibraryTile extends StatelessWidget {
                 Icon(Icons.stars_rounded, size: 14, color: _color),
                 const SizedBox(width: 5),
                 Text(activity.skillTargeted,
-                    style: TextStyle(fontSize: 11, color: _color, fontWeight: FontWeight.w600)),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: _color,
+                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -322,19 +362,28 @@ class _ActivityLibraryTile extends StatelessWidget {
         const SizedBox(width: 5),
         Text(text.toUpperCase(),
             style: const TextStyle(
-                fontSize: 9, fontWeight: FontWeight.w700, color: AppTheme.textMuted, letterSpacing: 0.8)),
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textMuted,
+                letterSpacing: 0.8)),
       ],
     );
   }
 
   IconData _skillIcon(SkillCategory cat) {
     switch (cat) {
-      case SkillCategory.grossMotor: return Icons.directions_run_rounded;
-      case SkillCategory.fineMotor: return Icons.back_hand_rounded;
-      case SkillCategory.language: return Icons.record_voice_over_rounded;
-      case SkillCategory.cognitive: return Icons.psychology_rounded;
-      case SkillCategory.socialEmotional: return Icons.favorite_rounded;
-      case SkillCategory.sensory: return Icons.sentiment_very_satisfied_rounded;
+      case SkillCategory.grossMotor:
+        return Icons.directions_run_rounded;
+      case SkillCategory.fineMotor:
+        return Icons.back_hand_rounded;
+      case SkillCategory.language:
+        return Icons.record_voice_over_rounded;
+      case SkillCategory.cognitive:
+        return Icons.psychology_rounded;
+      case SkillCategory.socialEmotional:
+        return Icons.favorite_rounded;
+      case SkillCategory.sensory:
+        return Icons.sentiment_very_satisfied_rounded;
     }
   }
 }

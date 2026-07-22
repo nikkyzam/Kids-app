@@ -30,6 +30,10 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Flutter-generated, machine-specific — never commit
+/android/local.properties
+**/GeneratedPluginRegistrant.*
+
 # Symbolication related
 app.*.symbols
 

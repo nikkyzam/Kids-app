@@ -49,7 +49,9 @@ class BackupService {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+              content: Text('Export failed: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
     }
@@ -90,7 +92,8 @@ class BackupService {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Restore', style: TextStyle(color: AppTheme.error)),
+              child: const Text('Restore',
+                  style: TextStyle(color: AppTheme.error)),
             ),
           ],
         ),
@@ -112,15 +115,13 @@ class BackupService {
           final newId = await txn.insert('child_profiles', profileMap);
 
           for (final c in (map['completions'] as List)) {
-            final cm = Map<String, dynamic>.from(c as Map)
-              ..remove('id');
+            final cm = Map<String, dynamic>.from(c as Map)..remove('id');
             cm['profile_id'] = newId;
             await txn.insert('activity_completions', cm,
                 conflictAlgorithm: ConflictAlgorithm.replace);
           }
           for (final a in (map['achievements'] as List)) {
-            final am = Map<String, dynamic>.from(a as Map)
-              ..remove('id');
+            final am = Map<String, dynamic>.from(a as Map)..remove('id');
             am['profile_id'] = newId;
             await txn.insert('milestone_achievements', am,
                 conflictAlgorithm: ConflictAlgorithm.replace);
@@ -143,7 +144,9 @@ class BackupService {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+              content: Text('Import failed: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
       return false;

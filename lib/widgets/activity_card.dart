@@ -55,7 +55,8 @@ class _ActivityCardState extends State<ActivityCard> {
     );
   }
 
-  Widget _buildActivityCard(BuildContext context, ActivityProvider ap, PlayActivity activity) {
+  Widget _buildActivityCard(
+      BuildContext context, ActivityProvider ap, PlayActivity activity) {
     final isCompleted = ap.isCompleted;
     final categoryColor = _skillColor(activity.skillCategory);
 
@@ -71,11 +72,23 @@ class _ActivityCardState extends State<ActivityCard> {
               children: [
                 _buildSkillChip(activity, categoryColor),
                 const SizedBox(height: 16),
-                _buildSection(context, 'Materials', Icons.inventory_2_outlined, categoryColor,
-                  activity.materials.map((m) => '• $m').join('\n')),
+                _buildSection(
+                    context,
+                    'Materials',
+                    Icons.inventory_2_outlined,
+                    categoryColor,
+                    activity.materials.map((m) => '• $m').join('\n')),
                 const SizedBox(height: 14),
-                _buildSection(context, 'Steps', Icons.format_list_numbered_rounded, categoryColor,
-                  activity.instructions.asMap().entries.map((e) => '${e.key + 1}. ${e.value}').join('\n')),
+                _buildSection(
+                    context,
+                    'Steps',
+                    Icons.format_list_numbered_rounded,
+                    categoryColor,
+                    activity.instructions
+                        .asMap()
+                        .entries
+                        .map((e) => '${e.key + 1}. ${e.value}')
+                        .join('\n')),
                 const SizedBox(height: 20),
                 _buildCompleteButton(context, ap, isCompleted, categoryColor),
               ],
@@ -86,10 +99,13 @@ class _ActivityCardState extends State<ActivityCard> {
     );
   }
 
-  Widget _buildCardHeader(BuildContext context, PlayActivity activity, Color categoryColor, bool isCompleted) {
+  Widget _buildCardHeader(BuildContext context, PlayActivity activity,
+      Color categoryColor, bool isCompleted) {
     return Container(
       decoration: BoxDecoration(
-        color: isCompleted ? AppTheme.successLight : categoryColor.withOpacity(0.08),
+        color: isCompleted
+            ? AppTheme.successLight
+            : categoryColor.withOpacity(0.08),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       padding: const EdgeInsets.all(16),
@@ -103,26 +119,33 @@ class _ActivityCardState extends State<ActivityCard> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: isCompleted ? AppTheme.success : categoryColor,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         isCompleted ? 'Completed!' : "Today's Challenge",
-                        style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(activity.title, style: Theme.of(context).textTheme.titleLarge),
+                Text(activity.title,
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined, size: 14, color: AppTheme.textMuted),
+                    Icon(Icons.timer_outlined,
+                        size: 14, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
-                    Text('${activity.durationMins} min${activity.durationMins == 1 ? '' : 's'}',
+                    Text(
+                        '${activity.durationMins} min${activity.durationMins == 1 ? '' : 's'}',
                         style: Theme.of(context).textTheme.bodyMedium),
                   ],
                 ),
@@ -130,7 +153,8 @@ class _ActivityCardState extends State<ActivityCard> {
             ),
           ),
           if (isCompleted)
-            const Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 32),
+            const Icon(Icons.check_circle_rounded,
+                color: AppTheme.success, size: 32),
         ],
       ),
     );
@@ -148,14 +172,18 @@ class _ActivityCardState extends State<ActivityCard> {
           ),
           child: Text(
             activity.skillTargeted,
-            style: TextStyle(fontSize: 12, color: categoryColor, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                fontSize: 12,
+                color: categoryColor,
+                fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, IconData icon, Color color, String content) {
+  Widget _buildSection(BuildContext context, String title, IconData icon,
+      Color color, String content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -163,16 +191,24 @@ class _ActivityCardState extends State<ActivityCard> {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
-            Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.textMuted, letterSpacing: 0.5)),
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textMuted,
+                    letterSpacing: 0.5)),
           ],
         ),
         const SizedBox(height: 6),
-        Text(content, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6)),
+        Text(content,
+            style:
+                Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6)),
       ],
     );
   }
 
-  Widget _buildCompleteButton(BuildContext context, ActivityProvider ap, bool isCompleted, Color categoryColor) {
+  Widget _buildCompleteButton(BuildContext context, ActivityProvider ap,
+      bool isCompleted, Color categoryColor) {
     return SizedBox(
       width: double.infinity,
       child: AnimatedSwitcher(
@@ -194,7 +230,8 @@ class _ActivityCardState extends State<ActivityCard> {
                   await ap.toggleCompletion(widget.profileId);
                   _confettiKey.currentState?.play();
                   if (!context.mounted) return;
-                  StreakMilestoneDialog.showIfMilestone(context, ap.currentStreak);
+                  StreakMilestoneDialog.showIfMilestone(
+                      context, ap.currentStreak);
                   final mp = context.read<MilestoneProvider>();
                   final bp = context.read<BadgeProvider>();
                   final newBadges = await bp.checkAndUnlock(
@@ -232,10 +269,12 @@ class _ActivityCardState extends State<ActivityCard> {
                 color: AppTheme.secondary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.lock_rounded, color: AppTheme.secondary, size: 28),
+              child: const Icon(Icons.lock_rounded,
+                  color: AppTheme.secondary, size: 28),
             ),
             const SizedBox(height: 12),
-            Text("Today's activity is Premium", style: Theme.of(context).textTheme.titleMedium),
+            Text("Today's activity is Premium",
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 6),
             Text(
               'Unlock all daily challenges through 36 months with a one-time purchase.',
@@ -244,8 +283,10 @@ class _ActivityCardState extends State<ActivityCard> {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PaywallScreen())),
-              style: FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PaywallScreen())),
+              style:
+                  FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
               child: const Text('Unlock Premium — \$4.99'),
             ),
           ],
@@ -260,9 +301,11 @@ class _ActivityCardState extends State<ActivityCard> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(Icons.celebration_rounded, color: AppTheme.secondary, size: 48),
+            const Icon(Icons.celebration_rounded,
+                color: AppTheme.secondary, size: 48),
             const SizedBox(height: 12),
-            Text('Great milestone!', style: Theme.of(context).textTheme.titleMedium),
+            Text('Great milestone!',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 6),
             Text(
               'No activity found for this age range. Check back as your child grows!',
@@ -275,7 +318,8 @@ class _ActivityCardState extends State<ActivityCard> {
     );
   }
 
-  Future<void> _offerPhotoMemory(BuildContext context, ActivityProvider ap, int profileId) async {
+  Future<void> _offerPhotoMemory(
+      BuildContext context, ActivityProvider ap, int profileId) async {
     if (ap.todayActivity == null || !ap.isCompleted) return;
     final dateKey = DateTime.now().toIso8601String().split('T').first;
 
@@ -286,17 +330,23 @@ class _ActivityCardState extends State<ActivityCard> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Capture the moment?'),
-        content: const Text("Add a photo of today's activity to your memories timeline."),
+        content: const Text(
+            "Add a photo of today's activity to your memories timeline."),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Maybe later')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Add Photo')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Maybe later')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Add Photo')),
         ],
       ),
     );
     if (add != true || !mounted) return;
 
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final picked =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
     if (picked == null || !mounted) return;
 
     await DatabaseHelper.instance.savePhoto(PhotoMemory(
@@ -320,12 +370,18 @@ class _ActivityCardState extends State<ActivityCard> {
 
   Color _skillColor(SkillCategory category) {
     switch (category) {
-      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
-      case SkillCategory.language: return AppTheme.languageColor;
-      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory: return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor:
+        return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor:
+        return AppTheme.fineMotorColor;
+      case SkillCategory.language:
+        return AppTheme.languageColor;
+      case SkillCategory.cognitive:
+        return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional:
+        return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory:
+        return AppTheme.sensoryColor;
     }
   }
 }
@@ -340,9 +396,16 @@ class _CardShimmer extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Container(height: 80, decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8))),
+            Container(
+                height: 80,
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8))),
             const SizedBox(height: 12),
-            Container(height: 14, width: double.infinity, color: Colors.grey.shade100),
+            Container(
+                height: 14,
+                width: double.infinity,
+                color: Colors.grey.shade100),
             const SizedBox(height: 8),
             Container(height: 14, width: 200, color: Colors.grey.shade100),
           ],

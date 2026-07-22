@@ -2,7 +2,7 @@ class PhotoMemory {
   final int? id;
   final int profileId;
   final String referenceType; // 'activity' | 'milestone'
-  final String referenceId;   // date_key for activity, milestone_id for milestone
+  final String referenceId; // date_key for activity, milestone_id for milestone
   final String imagePath;
   final String? caption;
   final String capturedAt;

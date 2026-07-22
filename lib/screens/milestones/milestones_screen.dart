@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 import '../../models/milestone.dart';
 import '../../providers/profile_provider.dart';
@@ -46,7 +45,8 @@ class MilestonesScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Milestone Ledger', style: Theme.of(context).textTheme.titleLarge),
+                Text('Milestone Ledger',
+                    style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 2),
                 Text(
                   '${mp.achievedCount} of ${mp.totalCount} achieved',
@@ -81,7 +81,11 @@ class MilestonesScreen extends StatelessWidget {
           final color = _domainColor(domain);
 
           return FilterChip(
-            label: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : color)),
+            label: Text(label,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : color)),
             selected: isSelected,
             onSelected: (_) => mp.setFilter(domain),
             backgroundColor: color.withOpacity(0.1),
@@ -95,7 +99,8 @@ class MilestonesScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMilestoneGroups(BuildContext context, MilestoneProvider mp, int profileId) {
+  List<Widget> _buildMilestoneGroups(
+      BuildContext context, MilestoneProvider mp, int profileId) {
     final groups = <Widget>[];
 
     for (final ageGroup in mp.ageGroups) {
@@ -105,7 +110,8 @@ class MilestonesScreen extends StatelessWidget {
       );
       if (milestones.isEmpty) continue;
 
-      final achievedInGroup = milestones.where((m) => mp.isAchieved(m.id)).length;
+      final achievedInGroup =
+          milestones.where((m) => mp.isAchieved(m.id)).length;
 
       groups.add(SliverToBoxAdapter(
         child: Padding(
@@ -113,14 +119,18 @@ class MilestonesScreen extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '$ageGroup Month${ageGroup == 1 ? '' : 's'}',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.primary),
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primary),
                 ),
               ),
               const SizedBox(width: 8),
@@ -153,11 +163,16 @@ class MilestonesScreen extends StatelessWidget {
   Color _domainColor(MilestoneDomain? domain) {
     if (domain == null) return AppTheme.primary;
     switch (domain) {
-      case MilestoneDomain.grossMotor: return AppTheme.grossMotorColor;
-      case MilestoneDomain.fineMotor: return AppTheme.fineMotorColor;
-      case MilestoneDomain.language: return AppTheme.languageColor;
-      case MilestoneDomain.cognitive: return AppTheme.cognitiveColor;
-      case MilestoneDomain.socialEmotional: return AppTheme.socialEmotionalColor;
+      case MilestoneDomain.grossMotor:
+        return AppTheme.grossMotorColor;
+      case MilestoneDomain.fineMotor:
+        return AppTheme.fineMotorColor;
+      case MilestoneDomain.language:
+        return AppTheme.languageColor;
+      case MilestoneDomain.cognitive:
+        return AppTheme.cognitiveColor;
+      case MilestoneDomain.socialEmotional:
+        return AppTheme.socialEmotionalColor;
     }
   }
 
@@ -192,7 +207,9 @@ class MilestonesScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e'), backgroundColor: AppTheme.error),
+          SnackBar(
+              content: Text('Export failed: $e'),
+              backgroundColor: AppTheme.error),
         );
       }
     }

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'package:playsteps/app.dart';
 import 'package:playsteps/providers/profile_provider.dart';
 import 'package:playsteps/providers/activity_provider.dart';
 import 'package:playsteps/providers/milestone_provider.dart';
@@ -17,23 +16,13 @@ void main() {
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    DatabaseHelper.testDatabasePath = inMemoryDatabasePath;
   });
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await DatabaseHelper.instance.resetForTesting();
   });
-
-  Widget buildApp(SharedPreferences prefs) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProfileProvider(prefs)),
-        ChangeNotifierProvider(create: (_) => ActivityProvider(prefs)),
-        ChangeNotifierProvider(create: (_) => MilestoneProvider()),
-      ],
-      child: const PlayStepsApp(),
-    );
-  }
 
   group('OnboardingScreen', () {
     testWidgets('renders name field and date picker', (tester) async {
@@ -66,7 +55,8 @@ void main() {
         child: const MaterialApp(home: OnboardingScreen()),
       ));
 
-      final button = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Get Started'));
+      final button = tester.widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Get Started'));
       expect(button.onPressed, isNull);
     });
 

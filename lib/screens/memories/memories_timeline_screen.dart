@@ -75,7 +75,8 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.camera_alt_rounded, size: 56, color: AppTheme.textMuted),
+            const Icon(Icons.camera_alt_rounded,
+                size: 56, color: AppTheme.textMuted),
             const SizedBox(height: 16),
             Text(
               'No memories yet',
@@ -173,7 +174,8 @@ class _MemoryCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete memory?'),
-        content: const Text('This photo will be permanently removed from your memories.'),
+        content: const Text(
+            'This photo will be permanently removed from your memories.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -212,7 +214,8 @@ class _MemoryCard extends StatelessWidget {
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                 color: AppTheme.primaryLight,
-                child: const Icon(Icons.broken_image_rounded, color: AppTheme.textMuted, size: 36),
+                child: const Icon(Icons.broken_image_rounded,
+                    color: AppTheme.textMuted, size: 36),
               ),
             ),
             Positioned(
@@ -231,7 +234,8 @@ class _MemoryCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: tagColor.withOpacity(0.85),
                         borderRadius: BorderRadius.circular(4),
@@ -276,8 +280,10 @@ class _MemoryDetailSheet extends StatelessWidget {
     final isActivity = photo.referenceType == 'activity';
     final tagColor = isActivity ? AppTheme.primary : AppTheme.secondary;
     final tagLabel = isActivity ? 'Activity' : 'Milestone';
-    final formattedDate = DateFormat('MMMM d, yyyy').format(photo.capturedAtDate);
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom;
+    final formattedDate =
+        DateFormat('MMMM d, yyyy').format(photo.capturedAtDate);
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom +
+        MediaQuery.of(context).padding.bottom;
 
     return Container(
       margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 40),
@@ -316,7 +322,8 @@ class _MemoryDetailSheet extends StatelessWidget {
                           errorBuilder: (_, __, ___) => Container(
                             color: AppTheme.primaryLight,
                             child: const Center(
-                              child: Icon(Icons.broken_image_rounded, color: AppTheme.textMuted, size: 48),
+                              child: Icon(Icons.broken_image_rounded,
+                                  color: AppTheme.textMuted, size: 48),
                             ),
                           ),
                         ),
@@ -329,7 +336,8 @@ class _MemoryDetailSheet extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: tagColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
