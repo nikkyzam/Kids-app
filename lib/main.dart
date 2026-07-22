@@ -12,6 +12,8 @@ import 'providers/milestone_provider.dart';
 import 'providers/badge_provider.dart';
 import 'providers/auth_provider.dart';
 import 'data/database_helper.dart';
+import 'data/database_platform_stub.dart'
+    if (dart.library.html) 'data/database_platform_web.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -28,6 +30,9 @@ void main() async {
       anonKey: SupabaseConfig.anonKey,
     );
   }
+
+  // On web, point sqflite at the IndexedDB-backed factory before first use.
+  await configureDatabaseFactory();
 
   final prefs = await SharedPreferences.getInstance();
   await DatabaseHelper.instance.database;

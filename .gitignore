@@ -34,6 +34,10 @@ migrate_working_dir/
 /android/local.properties
 **/GeneratedPluginRegistrant.*
 
+# Web: sqlite3 wasm is a downloaded binary — fetch with
+# `dart run sqflite_common_ffi_web:setup` (see README).
+/web/sqlite3.wasm
+
 # Symbolication related
 app.*.symbols
 

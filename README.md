@@ -169,6 +169,34 @@ The same `--dart-define` flags apply to `flutter build`. Alternatively, replace 
 
 ---
 
+## Running the Web Demo
+
+PlaySteps also runs in a browser as a clickable demo. Because the app is
+offline-first, the web build uses an IndexedDB-backed SQLite engine
+(`sqflite_common_ffi_web`), which needs a one-time worker/WASM download:
+
+```bash
+# Fetch web/sqflite_sw.js and web/sqlite3.wasm (requires network access to
+# the sqlite3.dart GitHub release assets).
+dart run sqflite_common_ffi_web:setup
+
+# Run in Chrome
+flutter run -d chrome
+```
+
+Mobile-only features degrade gracefully on web: local notifications and
+file-based backup/restore are disabled (with an on-screen notice), and cloud
+sync stays off unless Supabase credentials are configured. All other flows —
+onboarding, daily activities, the milestone ledger, badges, streaks, and growth
+tracking — work fully in the browser.
+
+> **Note:** `web/sqlite3.wasm` is a downloaded binary and is git-ignored; run
+> the `setup` command above after cloning. In restricted networks that block
+> GitHub release-asset downloads, fetch it on a machine with open access and
+> copy it into `web/`.
+
+---
+
 ## Running Locally
 
 ```bash

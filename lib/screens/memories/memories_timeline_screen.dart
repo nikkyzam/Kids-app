@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/database_helper.dart';
 import '../../models/photo_memory.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/local_image.dart';
 
 class MemoriesTimelineScreen extends StatefulWidget {
   final int profileId;
@@ -209,8 +209,8 @@ class _MemoryCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.file(
-              File(photo.imagePath),
+            Image(
+              image: localImageProvider(photo.imagePath),
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
                 color: AppTheme.primaryLight,
@@ -315,8 +315,8 @@ class _MemoryDetailSheet extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       child: AspectRatio(
                         aspectRatio: 4 / 3,
-                        child: Image.file(
-                          File(photo.imagePath),
+                        child: Image(
+                          image: localImageProvider(photo.imagePath),
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => Container(

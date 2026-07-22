@@ -1,17 +1,24 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../data/database_helper.dart';
 import '../theme/app_theme.dart';
+import 'backup_io_native.dart' if (dart.library.html) 'backup_io_web.dart';
 
 class BackupService {
   static Future<void> exportBackup(BuildContext context) async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Backup export is not available in the web demo.')),
+      );
+      return;
+    }
     try {
       final db = DatabaseHelper.instance;
       final profiles = await db.getProfiles();
@@ -36,13 +43,12 @@ class BackupService {
       };
 
       final json = const JsonEncoder.withIndent('  ').convert(payload);
-      final dir = await getApplicationDocumentsDirectory();
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final file = File('${dir.path}/playsteps_backup_$timestamp.json');
-      await file.writeAsString(json);
+      final path =
+          await writeBackupJson('playsteps_backup_$timestamp.json', json);
 
       await Share.shareXFiles(
-        [XFile(file.path)],
+        [XFile(path)],
         subject: 'PlaySteps Backup',
         text: 'PlaySteps data backup — restore anytime in Settings.',
       );
@@ -58,6 +64,13 @@ class BackupService {
   }
 
   static Future<bool> importBackup(BuildContext context) async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Backup restore is not available in the web demo.')),
+      );
+      return false;
+    }
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -65,7 +78,7 @@ class BackupService {
       );
       if (result == null || result.files.single.path == null) return false;
 
-      final rawJson = await File(result.files.single.path!).readAsString();
+      final rawJson = await readTextFile(result.files.single.path!);
       final data = jsonDecode(rawJson) as Map<String, dynamic>;
 
       if ((data['version'] as int?) != 1) {
