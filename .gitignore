@@ -41,6 +41,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android release signing — never commit these
+/android/key.properties
+/android/app/release.keystore
+/android/app/*.jks
+/android/app/*.keystore
+
 # iOS / macOS
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3

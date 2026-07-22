@@ -303,6 +303,44 @@ After the build completes, archive and export from Xcode:
 
 ---
 
+## Continuous Integration & Deployment
+
+Two GitHub Actions workflows live in `.github/workflows/`:
+
+### `ci.yml` — on every push & pull request
+
+Runs on `ubuntu-latest` against `main`/`master`:
+
+1. `flutter pub get`
+2. `dart format --set-exit-if-changed` — fails the build on unformatted code
+3. `flutter analyze`
+4. `flutter test --coverage` (uploads `coverage/lcov.info` as an artifact)
+
+Run the same checks locally before pushing:
+
+```bash
+dart format . && flutter analyze && flutter test
+```
+
+### `release.yml` — on version tags (`v*.*.*`)
+
+Cut a release by tagging a commit:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow then:
+
+- **Android** — decodes the release keystore from secrets, generates `android/key.properties`, and builds a signed `.aab` and `.apk`. If `PLAY_STORE_SERVICE_ACCOUNT_JSON` is configured, it also uploads the bundle to the Play Store **internal** track.
+- **iOS** — compiles `flutter build ios --release --no-codesign` to catch build breakage. Full App Store upload requires signing certificates/provisioning (wire up Fastlane Match + `deliver` in this job when ready).
+- **GitHub Release** — attaches the `.aab` and `.apk` to an auto-generated GitHub Release for the tag.
+
+The signed release build is driven by `android/key.properties`: when that file is present (as it is in CI), Gradle signs with the release keystore; otherwise it falls back to debug signing so local `flutter run --release` still works.
+
+---
+
 ## Environment Variables / Secrets
 
 These variables are required for CI/CD pipelines (GitHub Actions, Bitrise, etc.). Store them as encrypted secrets in your CI provider — never commit them to the repository.
@@ -315,6 +353,7 @@ These variables are required for CI/CD pipelines (GitHub Actions, Bitrise, etc.)
 | `ANDROID_STORE_PASSWORD` | Password for the keystore file |
 | `APPLE_ID` | Apple ID email used for App Store Connect |
 | `APP_STORE_CONNECT_API_KEY` | JSON key file for Fastlane App Store Connect API authentication |
+| `PLAY_STORE_SERVICE_ACCOUNT_JSON` | Google Play service-account JSON — enables automated AAB upload to the internal track (optional; the release job builds artifacts without it) |
 
 To encode the keystore for CI:
 
