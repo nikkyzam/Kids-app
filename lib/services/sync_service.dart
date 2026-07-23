@@ -20,7 +20,8 @@ class SyncService {
 
     final prefs = await SharedPreferences.getInstance();
     final familyId = AuthService.instance.familyId;
-    final lastSync = prefs.getString('last_sync_at') ?? '2000-01-01T00:00:00.000Z';
+    final lastSync =
+        prefs.getString('last_sync_at') ?? '2000-01-01T00:00:00.000Z';
 
     await _pushAll(familyId, lastSync);
     await _pullAll(familyId, lastSync);
@@ -68,18 +69,21 @@ class SyncService {
 
     if (rows.isEmpty) return;
 
-    final payload = rows.map((r) {
-      final uuid = r['uuid'] as String?;
-      if (uuid == null) return null;
-      return {
-        'family_id': familyId,
-        'profile_uuid': uuid,
-        'name': r['name'],
-        'date_of_birth': r['date_of_birth'],
-        'created_at': r['created_at'],
-        'updated_at': r['updated_at'],
-      };
-    }).whereType<Map<String, dynamic>>().toList();
+    final payload = rows
+        .map((r) {
+          final uuid = r['uuid'] as String?;
+          if (uuid == null) return null;
+          return {
+            'family_id': familyId,
+            'profile_uuid': uuid,
+            'name': r['name'],
+            'date_of_birth': r['date_of_birth'],
+            'created_at': r['created_at'],
+            'updated_at': r['updated_at'],
+          };
+        })
+        .whereType<Map<String, dynamic>>()
+        .toList();
 
     if (payload.isEmpty) return;
 
@@ -109,14 +113,16 @@ class SyncService {
 
       if (rows.isEmpty) continue;
 
-      final payload = rows.map((r) => {
-        'family_id': familyId,
-        'profile_uuid': profileUuid,
-        'activity_id': r['activity_id'],
-        'date_key': r['date_key'],
-        'completed_at': r['completed_at'],
-        'updated_at': r['updated_at'],
-      }).toList();
+      final payload = rows
+          .map((r) => {
+                'family_id': familyId,
+                'profile_uuid': profileUuid,
+                'activity_id': r['activity_id'],
+                'date_key': r['date_key'],
+                'completed_at': r['completed_at'],
+                'updated_at': r['updated_at'],
+              })
+          .toList();
 
       await _client
           .from('activity_completions')
@@ -145,14 +151,16 @@ class SyncService {
 
       if (rows.isEmpty) continue;
 
-      final payload = rows.map((r) => {
-        'family_id': familyId,
-        'profile_uuid': profileUuid,
-        'milestone_id': r['milestone_id'],
-        'achieved_date': r['achieved_date'],
-        'notes': r['notes'],
-        'updated_at': r['updated_at'],
-      }).toList();
+      final payload = rows
+          .map((r) => {
+                'family_id': familyId,
+                'profile_uuid': profileUuid,
+                'milestone_id': r['milestone_id'],
+                'achieved_date': r['achieved_date'],
+                'notes': r['notes'],
+                'updated_at': r['updated_at'],
+              })
+          .toList();
 
       await _client
           .from('milestone_achievements')
@@ -181,13 +189,15 @@ class SyncService {
 
       if (rows.isEmpty) continue;
 
-      final payload = rows.map((r) => {
-        'family_id': familyId,
-        'profile_uuid': profileUuid,
-        'badge_id': r['badge_id'],
-        'unlocked_at': r['unlocked_at'],
-        'updated_at': r['updated_at'],
-      }).toList();
+      final payload = rows
+          .map((r) => {
+                'family_id': familyId,
+                'profile_uuid': profileUuid,
+                'badge_id': r['badge_id'],
+                'unlocked_at': r['unlocked_at'],
+                'updated_at': r['updated_at'],
+              })
+          .toList();
 
       await _client
           .from('unlocked_badges')
@@ -216,16 +226,18 @@ class SyncService {
 
       if (rows.isEmpty) continue;
 
-      final payload = rows.map((r) => {
-        'family_id': familyId,
-        'profile_uuid': profileUuid,
-        'local_id': r['id'],
-        'metric': r['metric'],
-        'value': r['value'],
-        'measured_on': r['measured_on'],
-        'notes': r['notes'],
-        'updated_at': r['updated_at'],
-      }).toList();
+      final payload = rows
+          .map((r) => {
+                'family_id': familyId,
+                'profile_uuid': profileUuid,
+                'local_id': r['id'],
+                'metric': r['metric'],
+                'value': r['value'],
+                'measured_on': r['measured_on'],
+                'notes': r['notes'],
+                'updated_at': r['updated_at'],
+              })
+          .toList();
 
       await _client
           .from('growth_measurements')
@@ -254,17 +266,19 @@ class SyncService {
 
       if (rows.isEmpty) continue;
 
-      final payload = rows.map((r) => {
-        'family_id': familyId,
-        'profile_uuid': profileUuid,
-        'local_id': r['id'],
-        'reference_type': r['reference_type'],
-        'reference_id': r['reference_id'],
-        'image_path': r['image_path'],
-        'caption': r['caption'],
-        'captured_at': r['captured_at'],
-        'updated_at': r['updated_at'],
-      }).toList();
+      final payload = rows
+          .map((r) => {
+                'family_id': familyId,
+                'profile_uuid': profileUuid,
+                'local_id': r['id'],
+                'reference_type': r['reference_type'],
+                'reference_id': r['reference_id'],
+                'image_path': r['image_path'],
+                'caption': r['caption'],
+                'captured_at': r['captured_at'],
+                'updated_at': r['updated_at'],
+              })
+          .toList();
 
       await _client
           .from('photo_memories')

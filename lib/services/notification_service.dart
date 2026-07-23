@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,7 @@ class NotificationService {
   static const _prefMinute = 'notif_minute';
 
   Future<void> init() async {
+    if (kIsWeb) return; // Local notifications are not supported on web.
     tz.initializeTimeZones();
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings(
@@ -30,6 +32,7 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
+    if (kIsWeb) return false;
     final ios = await _plugin
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
@@ -47,6 +50,7 @@ class NotificationService {
     await prefs.setInt(_prefHour, time.hour);
     await prefs.setInt(_prefMinute, time.minute);
 
+    if (kIsWeb) return; // Scheduling requires native notification support.
     await _plugin.cancel(_notifId);
     await _plugin.zonedSchedule(
       _notifId,
@@ -64,6 +68,8 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -71,6 +77,7 @@ class NotificationService {
   Future<void> cancel() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefEnabled, false);
+    if (kIsWeb) return;
     await _plugin.cancel(_notifId);
   }
 
@@ -89,7 +96,8 @@ class NotificationService {
 
   tz.TZDateTime _nextInstance(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
-    var next = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var next =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     if (next.isBefore(now)) {
       next = next.add(const Duration(days: 1));
     }

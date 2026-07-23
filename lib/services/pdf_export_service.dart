@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' show Color, Colors;
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -34,7 +33,8 @@ class PdfExportService {
       }
     }
     for (final list in byDomain.values) {
-      list.sort((a, b) => a.milestone.ageGroupMonths.compareTo(b.milestone.ageGroupMonths));
+      list.sort((a, b) =>
+          a.milestone.ageGroupMonths.compareTo(b.milestone.ageGroupMonths));
     }
 
     final total = MilestonesData.all.length;
@@ -102,7 +102,8 @@ class PdfExportService {
               children: [
                 pw.Text(
                   profile.name,
-                  style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
                   profile.displayAge,
@@ -161,8 +162,11 @@ class PdfExportService {
   static pw.Widget _statBox(String value, String label, PdfColor color) {
     return pw.Column(
       children: [
-        pw.Text(value, style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold, color: color)),
-        pw.Text(label, style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+        pw.Text(value,
+            style: pw.TextStyle(
+                fontSize: 26, fontWeight: pw.FontWeight.bold, color: color)),
+        pw.Text(label,
+            style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
       ],
     );
   }
@@ -170,7 +174,8 @@ class PdfExportService {
   static pw.Widget _statDivider() =>
       pw.Container(width: 1, height: 40, color: PdfColors.indigo100);
 
-  static pw.Widget _buildDomainSection(MilestoneDomain domain, List<_MilestoneRow> rows) {
+  static pw.Widget _buildDomainSection(
+      MilestoneDomain domain, List<_MilestoneRow> rows) {
     final domainColor = _domainPdfColor(domain);
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -200,7 +205,8 @@ class PdfExportService {
   }
 
   static pw.Widget _buildMilestoneRow(_MilestoneRow row, PdfColor domainColor) {
-    final dateStr = DateFormat('MMM d, yyyy').format(row.achievement.achievedDate);
+    final dateStr =
+        DateFormat('MMM d, yyyy').format(row.achievement.achievedDate);
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 8),
       child: pw.Row(
@@ -226,20 +232,23 @@ class PdfExportService {
                     pw.Expanded(
                       child: pw.Text(
                         row.milestone.description,
-                        style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                        style: pw.TextStyle(
+                            fontSize: 10, fontWeight: pw.FontWeight.bold),
                       ),
                     ),
                     pw.SizedBox(width: 8),
                     pw.Text(
                       '${row.milestone.ageGroupMonths}m',
-                      style: pw.TextStyle(fontSize: 9, color: PdfColors.grey500),
+                      style:
+                          pw.TextStyle(fontSize: 9, color: PdfColors.grey500),
                     ),
                   ],
                 ),
                 pw.SizedBox(height: 2),
                 pw.Row(children: [
                   pw.Container(
-                    width: 8, height: 8,
+                    width: 8,
+                    height: 8,
                     margin: const pw.EdgeInsets.only(right: 4),
                     decoration: pw.BoxDecoration(
                       color: PdfColors.green600,
@@ -272,11 +281,16 @@ class PdfExportService {
 
   static PdfColor _domainPdfColor(MilestoneDomain domain) {
     switch (domain) {
-      case MilestoneDomain.grossMotor: return PdfColors.blue600;
-      case MilestoneDomain.fineMotor: return PdfColors.purple600;
-      case MilestoneDomain.language: return PdfColors.cyan700;
-      case MilestoneDomain.cognitive: return PdfColors.orange700;
-      case MilestoneDomain.socialEmotional: return PdfColors.deepOrange600;
+      case MilestoneDomain.grossMotor:
+        return PdfColors.blue600;
+      case MilestoneDomain.fineMotor:
+        return PdfColors.purple600;
+      case MilestoneDomain.language:
+        return PdfColors.cyan700;
+      case MilestoneDomain.cognitive:
+        return PdfColors.orange700;
+      case MilestoneDomain.socialEmotional:
+        return PdfColors.deepOrange600;
     }
   }
 }

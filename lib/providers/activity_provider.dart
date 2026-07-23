@@ -24,7 +24,8 @@ class ActivityProvider extends ChangeNotifier {
 
   PlayActivity? get todayActivity => _todayActivity;
   ActivityCompletion? get todayCompletion => _todayCompletion;
-  List<ActivityCompletion> get allCompletions => List.unmodifiable(_allCompletions);
+  List<ActivityCompletion> get allCompletions =>
+      List.unmodifiable(_allCompletions);
   bool get isCompleted => _todayCompletion != null;
   bool get isPremium => _isPremium;
   bool get isPremiumPlus => _isPremiumPlus;
@@ -35,7 +36,8 @@ class ActivityProvider extends ChangeNotifier {
 
   String _keyFor(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
 
-  bool completedOnDay(DateTime day) => _allCompletions.any((c) => c.dateKey == _keyFor(day));
+  bool completedOnDay(DateTime day) =>
+      _allCompletions.any((c) => c.dateKey == _keyFor(day));
 
   int get currentStreak {
     if (_allCompletions.isEmpty) return 0;
@@ -74,21 +76,27 @@ class ActivityProvider extends ChangeNotifier {
   Map<SkillCategory, int> get skillCoverage {
     final counts = <SkillCategory, int>{};
     for (final completion in _allCompletions) {
-      final activity = ActivitiesData.all.where((a) => a.id == completion.activityId).firstOrNull;
+      final activity = ActivitiesData.all
+          .where((a) => a.id == completion.activityId)
+          .firstOrNull;
       if (activity != null) {
-        counts[activity.skillCategory] = (counts[activity.skillCategory] ?? 0) + 1;
+        counts[activity.skillCategory] =
+            (counts[activity.skillCategory] ?? 0) + 1;
       }
     }
     return counts;
   }
 
   List<ActivityCompletion> get recentCompletions {
-    final sorted = [..._allCompletions]..sort((a, b) => b.dateKey.compareTo(a.dateKey));
+    final sorted = [..._allCompletions]
+      ..sort((a, b) => b.dateKey.compareTo(a.dateKey));
     return sorted;
   }
 
   PlayActivity? activityForCompletion(ActivityCompletion completion) =>
-      ActivitiesData.all.where((a) => a.id == completion.activityId).firstOrNull;
+      ActivitiesData.all
+          .where((a) => a.id == completion.activityId)
+          .firstOrNull;
 
   Future<void> loadForProfile(int profileId, int ageInWeeks) async {
     _isLoading = true;
@@ -96,7 +104,8 @@ class ActivityProvider extends ChangeNotifier {
 
     _todayActivity = ActivitiesData.todayActivity(ageInWeeks);
     _allCompletions = await DatabaseHelper.instance.getCompletions(profileId);
-    _todayCompletion = _allCompletions.where((c) => c.dateKey == todayKey).firstOrNull;
+    _todayCompletion =
+        _allCompletions.where((c) => c.dateKey == todayKey).firstOrNull;
 
     _isLoading = false;
     notifyListeners();

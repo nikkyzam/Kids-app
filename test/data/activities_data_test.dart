@@ -10,13 +10,15 @@ void main() {
 
     test('all activities have non-empty titles', () {
       for (final act in ActivitiesData.all) {
-        expect(act.title, isNotEmpty, reason: 'Activity ${act.id} has empty title');
+        expect(act.title, isNotEmpty,
+            reason: 'Activity ${act.id} has empty title');
       }
     });
 
     test('all activities have at least one material', () {
       for (final act in ActivitiesData.all) {
-        expect(act.materials, isNotEmpty, reason: 'Activity ${act.id} has no materials');
+        expect(act.materials, isNotEmpty,
+            reason: 'Activity ${act.id} has no materials');
       }
     });
 
@@ -29,7 +31,8 @@ void main() {
 
     test('all activities have at least 1 instruction step', () {
       for (final act in ActivitiesData.all) {
-        expect(act.instructions, isNotEmpty, reason: 'Activity ${act.id} has no steps');
+        expect(act.instructions, isNotEmpty,
+            reason: 'Activity ${act.id} has no steps');
       }
     });
 
@@ -58,7 +61,8 @@ void main() {
     test('all skill categories are represented', () {
       final categories = ActivitiesData.all.map((a) => a.skillCategory).toSet();
       for (final cat in SkillCategory.values) {
-        expect(categories, contains(cat), reason: 'No activity for ${cat.label}');
+        expect(categories, contains(cat),
+            reason: 'No activity for ${cat.label}');
       }
     });
   });
@@ -67,13 +71,17 @@ void main() {
     test('returns activities for week 0', () {
       final results = ActivitiesData.forAgeBandWeeks(0);
       expect(results, isNotEmpty);
-      expect(results.every((a) => a.ageBandMinWeeks <= 0 && 0 < a.ageBandMaxWeeks), isTrue);
+      expect(
+          results.every((a) => a.ageBandMinWeeks <= 0 && 0 < a.ageBandMaxWeeks),
+          isTrue);
     });
 
     test('returns activities for week 8', () {
       final results = ActivitiesData.forAgeBandWeeks(8);
       expect(results, isNotEmpty);
-      expect(results.every((a) => a.ageBandMinWeeks <= 8 && 8 < a.ageBandMaxWeeks), isTrue);
+      expect(
+          results.every((a) => a.ageBandMinWeeks <= 8 && 8 < a.ageBandMaxWeeks),
+          isTrue);
     });
 
     test('returns empty list for out-of-range age', () {

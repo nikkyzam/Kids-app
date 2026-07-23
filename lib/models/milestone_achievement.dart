@@ -29,7 +29,8 @@ class MilestoneAchievement {
         'notes': notes,
       };
 
-  factory MilestoneAchievement.fromMap(Map<String, dynamic> map) => MilestoneAchievement(
+  factory MilestoneAchievement.fromMap(Map<String, dynamic> map) =>
+      MilestoneAchievement(
         id: map['id'] as int?,
         profileId: map['profile_id'] as int,
         milestoneId: map['milestone_id'] as String,

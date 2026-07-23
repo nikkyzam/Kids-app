@@ -1,11 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import '../../data/database_helper.dart';
 import '../../models/growth_measurement.dart';
-import '../../models/child_profile.dart';
-import '../../providers/profile_provider.dart';
 import '../../theme/app_theme.dart';
 
 class GrowthTrackerScreen extends StatefulWidget {
@@ -248,11 +245,13 @@ class _MetricTabBody extends StatelessWidget {
         else
           ...reversed.map((m) {
             final val = displayValue(m.value);
-            final formatted =
-                val == val.roundToDouble() ? val.toInt().toString() : val.toStringAsFixed(1);
+            final formatted = val == val.roundToDouble()
+                ? val.toInt().toString()
+                : val.toStringAsFixed(1);
             final dateStr = DateFormat('MMM d, yyyy').format(m.measuredOnDate);
-            final subtitle =
-                m.notes != null && m.notes!.isNotEmpty ? '$dateStr · ${m.notes}' : dateStr;
+            final subtitle = m.notes != null && m.notes!.isNotEmpty
+                ? '$dateStr · ${m.notes}'
+                : dateStr;
 
             return ListTile(
               leading: Container(
@@ -288,7 +287,8 @@ class _MetricTabBody extends StatelessWidget {
                 ),
               ),
               trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppTheme.textMuted),
+                icon:
+                    const Icon(Icons.delete_outline, color: AppTheme.textMuted),
                 onPressed: () => onDelete(m),
               ),
             );
@@ -395,7 +395,8 @@ class _ChartPainter extends CustomPainter {
     const gridLines = 4;
     for (int i = 0; i <= gridLines; i++) {
       final y = topPad + chartH * i / gridLines;
-      canvas.drawLine(Offset(leftPad, y), Offset(leftPad + chartW, y), gridPaint);
+      canvas.drawLine(
+          Offset(leftPad, y), Offset(leftPad + chartW, y), gridPaint);
     }
 
     final labelStyle = TextStyle(
@@ -408,9 +409,8 @@ class _ChartPainter extends CustomPainter {
     for (int i = 0; i <= 4; i++) {
       final v = paddedMin + paddedRange * (4 - i) / 4;
       final y = topPad + chartH * i / 4;
-      final vStr = v == v.roundToDouble()
-          ? v.toInt().toString()
-          : v.toStringAsFixed(1);
+      final vStr =
+          v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
       final tp = TextPainter(
         text: TextSpan(text: vStr, style: labelStyle),
         textDirection: TextDirection.ltr,
@@ -620,7 +620,8 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
                 Expanded(
                   child: TextFormField(
                     controller: _valueController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       labelText: widget.metric.label,
                       hintText: '0.0',
@@ -636,7 +637,8 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4F6FB),
                     borderRadius: BorderRadius.circular(12),
@@ -656,7 +658,8 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
             GestureDetector(
               onTap: _pickDate,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F6FB),
                   borderRadius: BorderRadius.circular(12),

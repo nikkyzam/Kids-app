@@ -65,7 +65,8 @@ class TipsData {
   ];
 
   static String forToday() {
-    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
+    final dayOfYear =
+        DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
     return all[dayOfYear % all.length];
   }
 }

@@ -18,12 +18,14 @@ class WeeklyRecapCard extends StatelessWidget {
         final weekStart = today.subtract(Duration(days: today.weekday - 1));
         final days = List.generate(7, (i) => weekStart.add(Duration(days: i)));
 
-        final completedThisWeek = days.where((d) => ap.completedOnDay(d)).length;
+        final completedThisWeek =
+            days.where((d) => ap.completedOnDay(d)).length;
         final bestSkill = _bestSkillThisWeek(ap, days);
 
         // Only show if at least one day of the week has passed since Monday
         final daysSinceMonday = today.weekday - 1; // 0 on Monday
-        if (daysSinceMonday == 0 && completedThisWeek == 0) return const SizedBox.shrink();
+        if (daysSinceMonday == 0 && completedThisWeek == 0)
+          return const SizedBox.shrink();
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -35,14 +37,19 @@ class WeeklyRecapCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.calendar_view_week_rounded, size: 18, color: AppTheme.primary),
+                      const Icon(Icons.calendar_view_week_rounded,
+                          size: 18, color: AppTheme.primary),
                       const SizedBox(width: 8),
-                      Text('This Week', style: Theme.of(context).textTheme.titleMedium),
+                      Text('This Week',
+                          style: Theme.of(context).textTheme.titleMedium),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 3),
                         decoration: BoxDecoration(
-                          color: completedThisWeek == 7 ? AppTheme.successLight : AppTheme.primaryLight,
+                          color: completedThisWeek == 7
+                              ? AppTheme.successLight
+                              : AppTheme.primaryLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -50,7 +57,9 @@ class WeeklyRecapCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: completedThisWeek == 7 ? AppTheme.success : AppTheme.primary,
+                            color: completedThisWeek == 7
+                                ? AppTheme.success
+                                : AppTheme.primary,
                           ),
                         ),
                       ),
@@ -76,12 +85,15 @@ class WeeklyRecapCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded, size: 14, color: AppTheme.secondary),
+                        const Icon(Icons.star_rounded,
+                            size: 14, color: AppTheme.secondary),
                         const SizedBox(width: 6),
                         Text(
                           'Focus: ${bestSkill.label}',
                           style: const TextStyle(
-                              fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
+                              fontSize: 12,
+                              color: AppTheme.textMuted,
+                              fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -99,7 +111,9 @@ class WeeklyRecapCard extends StatelessWidget {
                         '🏆 Perfect week! Every day completed.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.w700),
+                            fontSize: 12,
+                            color: AppTheme.success,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -123,7 +137,8 @@ class WeeklyRecapCard extends StatelessWidget {
       if (completion == null) continue;
       final activity = ap.activityForCompletion(completion);
       if (activity != null) {
-        counts[activity.skillCategory] = (counts[activity.skillCategory] ?? 0) + 1;
+        counts[activity.skillCategory] =
+            (counts[activity.skillCategory] ?? 0) + 1;
       }
     }
     if (counts.isEmpty) return null;

@@ -7,11 +7,16 @@ enum MilestoneDomain {
 
   String get label {
     switch (this) {
-      case MilestoneDomain.grossMotor: return 'Gross Motor';
-      case MilestoneDomain.fineMotor: return 'Fine Motor';
-      case MilestoneDomain.language: return 'Language';
-      case MilestoneDomain.cognitive: return 'Cognitive';
-      case MilestoneDomain.socialEmotional: return 'Social & Emotional';
+      case MilestoneDomain.grossMotor:
+        return 'Gross Motor';
+      case MilestoneDomain.fineMotor:
+        return 'Fine Motor';
+      case MilestoneDomain.language:
+        return 'Language';
+      case MilestoneDomain.cognitive:
+        return 'Cognitive';
+      case MilestoneDomain.socialEmotional:
+        return 'Social & Emotional';
     }
   }
 }

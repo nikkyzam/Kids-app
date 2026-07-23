@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -12,19 +13,38 @@ import 'providers/milestone_provider.dart';
 import 'providers/badge_provider.dart';
 import 'providers/auth_provider.dart';
 import 'data/database_helper.dart';
+import 'data/database_platform_stub.dart'
+    if (dart.library.html) 'data/database_platform_web.dart';
 import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  await Supabase.initialize(
-    url: SupabaseConfig.url,
-    anonKey: SupabaseConfig.anonKey,
-  );
+  // Cloud sync is optional. Only spin up Supabase when real credentials have
+  // been provided — the app is offline-first and must boot without a network
+  // or a configured backend.
+  if (SupabaseConfig.isConfigured) {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      // ignore: deprecated_member_use
+      anonKey: SupabaseConfig.anonKey,
+    );
+  }
+
+  // On web, point sqflite at the IndexedDB-backed factory before first use.
+  await configureDatabaseFactory();
 
   final prefs = await SharedPreferences.getInstance();
-  await DatabaseHelper.instance.database;
+  try {
+    await DatabaseHelper.instance.database;
+  } catch (e) {
+    // Don't white-screen if the local database can't initialize (e.g. the
+    // SQLite WASM worker is unavailable in a web demo). The UI still renders;
+    // data access degrades gracefully.
+    if (!kIsWeb) rethrow;
+    debugPrint('Local database unavailable: $e');
+  }
   await NotificationService.instance.init();
 
   runApp(

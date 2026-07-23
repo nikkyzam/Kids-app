@@ -86,7 +86,8 @@ class _ProgressHeader extends StatelessWidget {
                       value: value,
                       minHeight: 7,
                       backgroundColor: AppTheme.primary.withOpacity(0.15),
-                      valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+                      valueColor:
+                          const AlwaysStoppedAnimation(AppTheme.primary),
                     ),
                   ),
                 ),

@@ -18,15 +18,18 @@ class StreakBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Expanded(child: _StatPill(
+              Expanded(
+                  child: _StatPill(
                 icon: Icons.local_fire_department_rounded,
-                iconColor: streak > 0 ? const Color(0xFFFF7043) : AppTheme.textMuted,
+                iconColor:
+                    streak > 0 ? const Color(0xFFFF7043) : AppTheme.textMuted,
                 value: streak.toString(),
                 label: 'day streak',
                 highlight: streak >= 3,
               )),
               const SizedBox(width: 10),
-              Expanded(child: _StatPill(
+              Expanded(
+                  child: _StatPill(
                 icon: Icons.check_circle_rounded,
                 iconColor: AppTheme.success,
                 value: total.toString(),
@@ -62,9 +65,11 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: highlight ? iconColor.withOpacity(0.08) : const Color(0xFFF4F6FB),
+        color:
+            highlight ? iconColor.withOpacity(0.08) : const Color(0xFFF4F6FB),
         borderRadius: BorderRadius.circular(12),
-        border: highlight ? Border.all(color: iconColor.withOpacity(0.3)) : null,
+        border:
+            highlight ? Border.all(color: iconColor.withOpacity(0.3)) : null,
       ),
       child: Row(
         children: [
@@ -74,8 +79,16 @@ class _StatPill extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: highlight ? iconColor : AppTheme.textDark)),
-                Text(label, style: const TextStyle(fontSize: 9, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
+                Text(value,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: highlight ? iconColor : AppTheme.textDark)),
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 9,
+                        color: AppTheme.textMuted,
+                        fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -100,7 +113,11 @@ class _WeekDots extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('this week', style: TextStyle(fontSize: 9, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
+              const Text('this week',
+                  style: TextStyle(
+                      fontSize: 9,
+                      color: AppTheme.textMuted,
+                      fontWeight: FontWeight.w500)),
               const SizedBox(height: 4),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +135,9 @@ class _WeekDots extends StatelessWidget {
                           : isToday
                               ? AppTheme.primary.withOpacity(0.3)
                               : AppTheme.textMuted.withOpacity(0.2),
-                      border: isToday && !done ? Border.all(color: AppTheme.primary, width: 1.5) : null,
+                      border: isToday && !done
+                          ? Border.all(color: AppTheme.primary, width: 1.5)
+                          : null,
                     ),
                   );
                 }),

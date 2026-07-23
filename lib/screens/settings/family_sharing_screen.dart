@@ -63,6 +63,9 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
   }
 
   Widget _buildBody(BuildContext context, AuthProvider authProvider) {
+    if (!authProvider.isSyncAvailable) {
+      return _buildSyncUnavailable(context);
+    }
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -76,6 +79,49 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
         const SizedBox(height: 24),
         _buildSyncSection(context, authProvider),
       ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sync unavailable (no Supabase credentials configured)
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSyncUnavailable(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: _AppCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryLight,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(Icons.cloud_off_rounded,
+                    color: AppTheme.primary, size: 32),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Cloud sync unavailable',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'This build has no cloud backend configured, so family sharing '
+                'and cross-device sync are turned off. All of your data stays '
+                'safely on this device.',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -95,7 +141,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
               color: AppTheme.primaryLight,
               borderRadius: BorderRadius.circular(18),
             ),
-            child: const Icon(Icons.people_rounded, color: AppTheme.primary, size: 32),
+            child: const Icon(Icons.people_rounded,
+                color: AppTheme.primary, size: 32),
           ),
           const SizedBox(height: 16),
           Text(
@@ -151,7 +198,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
             children: [
               const Icon(Icons.key_rounded, color: AppTheme.primary, size: 20),
               const SizedBox(width: 8),
-              Text('Your Invite Code', style: Theme.of(context).textTheme.titleMedium),
+              Text('Your Invite Code',
+                  style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: 16),
@@ -177,12 +225,14 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.copy_rounded, color: AppTheme.primary),
+                    icon:
+                        const Icon(Icons.copy_rounded, color: AppTheme.primary),
                     tooltip: 'Copy code',
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _myCode!));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Code copied to clipboard!')),
+                        const SnackBar(
+                            content: Text('Code copied to clipboard!')),
                       );
                     },
                   ),
@@ -221,9 +271,11 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.group_add_rounded, color: AppTheme.primary, size: 20),
+              const Icon(Icons.group_add_rounded,
+                  color: AppTheme.primary, size: 20),
               const SizedBox(width: 8),
-              Text('Have an invite code?', style: Theme.of(context).textTheme.titleMedium),
+              Text('Have an invite code?',
+                  style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: 16),
@@ -279,7 +331,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
             children: [
               const Icon(Icons.sync_rounded, color: AppTheme.primary, size: 20),
               const SizedBox(width: 8),
-              Text('Sync Status', style: Theme.of(context).textTheme.titleMedium),
+              Text('Sync Status',
+                  style: Theme.of(context).textTheme.titleMedium),
               const Spacer(),
               _SyncStatusChip(status: authProvider.syncStatus),
             ],
@@ -343,7 +396,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
         );
         await SyncService.instance.syncAll();
       } else {
-        setState(() => _joinError = 'Invalid code. Please check and try again.');
+        setState(
+            () => _joinError = 'Invalid code. Please check and try again.');
       }
     } catch (e) {
       if (mounted) setState(() => _joinError = e.toString());
@@ -390,7 +444,8 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
       await SyncService.instance.syncAll();
       if (mounted) authProvider.setSyncStatus(SyncStatus.done);
     } catch (e) {
-      if (mounted) authProvider.setSyncStatus(SyncStatus.error, error: e.toString());
+      if (mounted)
+        authProvider.setSyncStatus(SyncStatus.error, error: e.toString());
     }
   }
 }
@@ -432,8 +487,16 @@ class _SyncStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, color, bg) = switch (status) {
       SyncStatus.idle => ('Idle', AppTheme.textMuted, const Color(0xFFF0F1F6)),
-      SyncStatus.syncing => ('Syncing…', AppTheme.primary, AppTheme.primaryLight),
-      SyncStatus.done => ('Up to date', AppTheme.success, AppTheme.successLight),
+      SyncStatus.syncing => (
+          'Syncing…',
+          AppTheme.primary,
+          AppTheme.primaryLight
+        ),
+      SyncStatus.done => (
+          'Up to date',
+          AppTheme.success,
+          AppTheme.successLight
+        ),
       SyncStatus.error => ('Error', AppTheme.error, const Color(0xFFFDECEC)),
     };
 

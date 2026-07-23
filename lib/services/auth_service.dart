@@ -1,21 +1,45 @@
 import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/supabase_config.dart';
+
+/// Thrown when a cloud-sync action is attempted on a build without configured
+/// Supabase credentials.
+class SyncUnavailableException implements Exception {
+  final String message;
+  const SyncUnavailableException([
+    this.message =
+        'Cloud sync is not set up for this build. Add Supabase credentials to enable it.',
+  ]);
+
+  @override
+  String toString() => message;
+}
+
 class AuthService {
   AuthService._();
   static final AuthService instance = AuthService._();
 
   SupabaseClient get _client => Supabase.instance.client;
 
+  /// Whether cloud sync is available (Supabase has been configured & initialized).
+  bool get isAvailable => SupabaseConfig.isConfigured;
+
+  void _requireAvailable() {
+    if (!isAvailable) throw const SyncUnavailableException();
+  }
+
   // ---------------------------------------------------------------------------
   // Auth state helpers
   // ---------------------------------------------------------------------------
 
-  bool get isSignedIn => _client.auth.currentUser != null;
+  bool get isSignedIn => isAvailable && _client.auth.currentUser != null;
 
-  User? get currentUser => _client.auth.currentUser;
+  User? get currentUser => isAvailable ? _client.auth.currentUser : null;
 
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+  Stream<AuthState> get authStateChanges => isAvailable
+      ? _client.auth.onAuthStateChange
+      : const Stream<AuthState>.empty();
 
   // ---------------------------------------------------------------------------
   // Family helpers
@@ -43,6 +67,7 @@ class AuthService {
 
   /// Sends a magic-link / OTP to the given email address.
   Future<void> signInWithEmail(String email) async {
+    _requireAvailable();
     await _client.auth.signInWithOtp(
       email: email,
       emailRedirectTo: null,
@@ -51,6 +76,7 @@ class AuthService {
 
   /// Verifies the 6-digit OTP received by email.
   Future<AuthResponse> verifyOtp(String email, String token) async {
+    _requireAvailable();
     return _client.auth.verifyOTP(
       email: email,
       token: token,
@@ -69,6 +95,7 @@ class AuthService {
   /// Creates (or updates) a row in the `families` table for the current user
   /// and returns a freshly generated 6-character invite code.
   Future<String> createFamily() async {
+    _requireAvailable();
     final userId = currentUser!.id;
     final code = _generateCode();
 
@@ -97,6 +124,7 @@ class AuthService {
   /// Looks up the family by invite code and stores the owner's id in the
   /// current user's metadata. Returns true on success.
   Future<bool> joinFamily(String code) async {
+    _requireAvailable();
     final response = await _client
         .from('families')
         .select('owner_id')
@@ -116,6 +144,7 @@ class AuthService {
 
   /// Removes the `family_owner` key from the current user's metadata.
   Future<void> leaveFamily() async {
+    _requireAvailable();
     await _client.auth.updateUser(
       UserAttributes(data: {'family_owner': null}),
     );

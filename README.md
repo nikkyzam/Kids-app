@@ -153,6 +153,50 @@ Add `android/key.properties` and `android/app/release.keystore` to `.gitignore`.
 
 ---
 
+### Optional: Cloud Sync (Supabase)
+
+Cloud sync and family sharing are **opt-in**. PlaySteps boots and runs fully offline by default — no Supabase project is required. When credentials are absent, the sync UI shows a "Cloud sync unavailable" notice and all data stays on-device.
+
+To enable sync, supply your Supabase project credentials at build time (preferred — keeps secrets out of source control):
+
+```bash
+flutter run \
+  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+The same `--dart-define` flags apply to `flutter build`. Alternatively, replace the placeholder defaults in `lib/config/supabase_config.dart`. Apply the schema in `supabase/schema.sql` to your project first.
+
+---
+
+## Running the Web Demo
+
+PlaySteps also runs in a browser as a clickable demo. Because the app is
+offline-first, the web build uses an IndexedDB-backed SQLite engine
+(`sqflite_common_ffi_web`), which needs a one-time worker/WASM download:
+
+```bash
+# Fetch web/sqflite_sw.js and web/sqlite3.wasm (requires network access to
+# the sqlite3.dart GitHub release assets).
+dart run sqflite_common_ffi_web:setup
+
+# Run in Chrome
+flutter run -d chrome
+```
+
+Mobile-only features degrade gracefully on web: local notifications and
+file-based backup/restore are disabled (with an on-screen notice), and cloud
+sync stays off unless Supabase credentials are configured. All other flows —
+onboarding, daily activities, the milestone ledger, badges, streaks, and growth
+tracking — work fully in the browser.
+
+> **Note:** `web/sqlite3.wasm` is a downloaded binary and is git-ignored; run
+> the `setup` command above after cloning. In restricted networks that block
+> GitHub release-asset downloads, fetch it on a machine with open access and
+> copy it into `web/`.
+
+---
+
 ## Running Locally
 
 ```bash
@@ -303,6 +347,44 @@ After the build completes, archive and export from Xcode:
 
 ---
 
+## Continuous Integration & Deployment
+
+Two GitHub Actions workflows live in `.github/workflows/`:
+
+### `ci.yml` — on every push & pull request
+
+Runs on `ubuntu-latest` against `main`/`master`:
+
+1. `flutter pub get`
+2. `dart format --set-exit-if-changed` — fails the build on unformatted code
+3. `flutter analyze`
+4. `flutter test --coverage` (uploads `coverage/lcov.info` as an artifact)
+
+Run the same checks locally before pushing:
+
+```bash
+dart format . && flutter analyze && flutter test
+```
+
+### `release.yml` — on version tags (`v*.*.*`)
+
+Cut a release by tagging a commit:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow then:
+
+- **Android** — decodes the release keystore from secrets, generates `android/key.properties`, and builds a signed `.aab` and `.apk`. If `PLAY_STORE_SERVICE_ACCOUNT_JSON` is configured, it also uploads the bundle to the Play Store **internal** track.
+- **iOS** — compiles `flutter build ios --release --no-codesign` to catch build breakage. Full App Store upload requires signing certificates/provisioning (wire up Fastlane Match + `deliver` in this job when ready).
+- **GitHub Release** — attaches the `.aab` and `.apk` to an auto-generated GitHub Release for the tag.
+
+The signed release build is driven by `android/key.properties`: when that file is present (as it is in CI), Gradle signs with the release keystore; otherwise it falls back to debug signing so local `flutter run --release` still works.
+
+---
+
 ## Environment Variables / Secrets
 
 These variables are required for CI/CD pipelines (GitHub Actions, Bitrise, etc.). Store them as encrypted secrets in your CI provider — never commit them to the repository.
@@ -315,6 +397,7 @@ These variables are required for CI/CD pipelines (GitHub Actions, Bitrise, etc.)
 | `ANDROID_STORE_PASSWORD` | Password for the keystore file |
 | `APPLE_ID` | Apple ID email used for App Store Connect |
 | `APP_STORE_CONNECT_API_KEY` | JSON key file for Fastlane App Store Connect API authentication |
+| `PLAY_STORE_SERVICE_ACCOUNT_JSON` | Google Play service-account JSON — enables automated AAB upload to the internal track (optional; the release job builds artifacts without it) |
 
 To encode the keystore for CI:
 

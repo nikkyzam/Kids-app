@@ -143,8 +143,7 @@ class _HeroStatusCard extends StatelessWidget {
   }
 
   Widget _buildStormyCard(BuildContext context, DevelopmentalLeap leap) {
-    final daysUntilPeak =
-        (leap.leapWeek - ageInWeeks) * 7;
+    final daysUntilPeak = (leap.leapWeek - ageInWeeks) * 7;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: Container(
@@ -193,8 +192,7 @@ class _HeroStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: _stormyColor.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(10),
@@ -349,8 +347,7 @@ class _HeroStatusCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppTheme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
@@ -575,9 +572,8 @@ class _LeapExpansionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isCurrent
-        ? _accentColor.withOpacity(0.5)
-        : const Color(0xFFEEF0F7);
+    final borderColor =
+        isCurrent ? _accentColor.withOpacity(0.5) : const Color(0xFFEEF0F7);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -602,8 +598,7 @@ class _LeapExpansionCard extends StatelessWidget {
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          childrenPadding:
-              const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
           expandedCrossAxisAlignment: CrossAxisAlignment.start,
           title: Row(
             children: [
@@ -622,8 +617,7 @@ class _LeapExpansionCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryLight,
                   borderRadius: BorderRadius.circular(8),
@@ -643,8 +637,7 @@ class _LeapExpansionCard extends StatelessWidget {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 3, bottom: 4),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: _accentColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
@@ -666,8 +659,7 @@ class _LeapExpansionCard extends StatelessWidget {
             _buildInfoRow(
               icon: Icons.calendar_today_outlined,
               label: 'Fussy period',
-              value:
-                  '~week ${leap.stormyStartWeek}–${leap.leapWeek}',
+              value: '~week ${leap.stormyStartWeek}–${leap.leapWeek}',
               color: _stormyColor,
             ),
             const SizedBox(height: 14),

@@ -68,18 +68,26 @@ class AppTheme {
           ),
         ),
         textTheme: const TextTheme(
-          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: textDark),
-          displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: textDark),
-          titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: textDark),
-          titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textDark),
-          bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: textDark),
-          bodyMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: textMuted),
-          labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark),
+          displayLarge: TextStyle(
+              fontSize: 32, fontWeight: FontWeight.w800, color: textDark),
+          displayMedium: TextStyle(
+              fontSize: 26, fontWeight: FontWeight.w800, color: textDark),
+          titleLarge: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.w700, color: textDark),
+          titleMedium: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: textDark),
+          bodyLarge: TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w400, color: textDark),
+          bodyMedium: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w400, color: textMuted),
+          labelLarge: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w700, color: textDark),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFFF4F6FB),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,

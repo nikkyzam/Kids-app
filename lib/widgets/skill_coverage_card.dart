@@ -27,11 +27,14 @@ class SkillCoverageCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.bar_chart_rounded, size: 18, color: AppTheme.primary),
+                      const Icon(Icons.bar_chart_rounded,
+                          size: 18, color: AppTheme.primary),
                       const SizedBox(width: 8),
-                      Text('Skills Practised', style: Theme.of(context).textTheme.titleMedium),
+                      Text('Skills Practised',
+                          style: Theme.of(context).textTheme.titleMedium),
                       const Spacer(),
-                      Text('$total sessions', style: Theme.of(context).textTheme.bodyMedium),
+                      Text('$total sessions',
+                          style: Theme.of(context).textTheme.bodyMedium),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -55,16 +58,23 @@ class _SkillBar extends StatelessWidget {
   final int count;
   final double ratio;
 
-  const _SkillBar({required this.category, required this.count, required this.ratio});
+  const _SkillBar(
+      {required this.category, required this.count, required this.ratio});
 
   Color get color {
     switch (category) {
-      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
-      case SkillCategory.language: return AppTheme.languageColor;
-      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory: return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor:
+        return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor:
+        return AppTheme.fineMotorColor;
+      case SkillCategory.language:
+        return AppTheme.languageColor;
+      case SkillCategory.cognitive:
+        return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional:
+        return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory:
+        return AppTheme.sensoryColor;
     }
   }
 
@@ -76,7 +86,11 @@ class _SkillBar extends StatelessWidget {
         children: [
           SizedBox(
             width: 90,
-            child: Text(category.label, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500)),
+            child: Text(category.label,
+                style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textMuted,
+                    fontWeight: FontWeight.w500)),
           ),
           Expanded(
             child: ClipRRect(
@@ -97,7 +111,11 @@ class _SkillBar extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             width: 20,
-            child: Text('$count', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textDark)),
+            child: Text('$count',
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textDark)),
           ),
         ],
       ),

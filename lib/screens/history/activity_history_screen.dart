@@ -22,12 +22,15 @@ class ActivityHistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.history_rounded, size: 48, color: AppTheme.textMuted),
+                  const Icon(Icons.history_rounded,
+                      size: 48, color: AppTheme.textMuted),
                   const SizedBox(height: 12),
-                  Text('No activities completed yet', style: Theme.of(context).textTheme.titleMedium),
+                  Text('No activities completed yet',
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 6),
                   Text('Complete today\'s challenge to start your history!',
-                      style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center),
                 ],
               ),
             );
@@ -37,8 +40,10 @@ class ActivityHistoryScreen extends StatelessWidget {
           final grouped = <String, List<_CompletionEntry>>{};
           for (final completion in completions) {
             final activity = ap.activityForCompletion(completion);
-            final monthKey = DateFormat('MMMM yyyy').format(DateTime.parse(completion.dateKey));
-            grouped.putIfAbsent(monthKey, () => []).add(_CompletionEntry(completion: completion, activity: activity));
+            final monthKey = DateFormat('MMMM yyyy')
+                .format(DateTime.parse(completion.dateKey));
+            grouped.putIfAbsent(monthKey, () => []).add(
+                _CompletionEntry(completion: completion, activity: activity));
           }
 
           return ListView.builder(
@@ -54,7 +59,11 @@ class ActivityHistoryScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Text(
                       month.toUpperCase(),
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textMuted, letterSpacing: 1.2),
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textMuted,
+                          letterSpacing: 1.2),
                     ),
                   ),
                   ...entries.map((entry) => _HistoryTile(entry: entry)),
@@ -81,18 +90,25 @@ class _HistoryTile extends StatelessWidget {
   Color get skillColor {
     if (entry.activity == null) return AppTheme.primary;
     switch (entry.activity!.skillCategory) {
-      case SkillCategory.grossMotor: return AppTheme.grossMotorColor;
-      case SkillCategory.fineMotor: return AppTheme.fineMotorColor;
-      case SkillCategory.language: return AppTheme.languageColor;
-      case SkillCategory.cognitive: return AppTheme.cognitiveColor;
-      case SkillCategory.socialEmotional: return AppTheme.socialEmotionalColor;
-      case SkillCategory.sensory: return AppTheme.sensoryColor;
+      case SkillCategory.grossMotor:
+        return AppTheme.grossMotorColor;
+      case SkillCategory.fineMotor:
+        return AppTheme.fineMotorColor;
+      case SkillCategory.language:
+        return AppTheme.languageColor;
+      case SkillCategory.cognitive:
+        return AppTheme.cognitiveColor;
+      case SkillCategory.socialEmotional:
+        return AppTheme.socialEmotionalColor;
+      case SkillCategory.sensory:
+        return AppTheme.sensoryColor;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('EEE, MMM d').format(DateTime.parse(entry.completion.dateKey));
+    final dateStr = DateFormat('EEE, MMM d')
+        .format(DateTime.parse(entry.completion.dateKey));
     final activity = entry.activity;
 
     return Padding(
@@ -116,21 +132,32 @@ class _HistoryTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(activity?.title ?? 'Activity', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                    Text(activity?.title ?? 'Activity',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Text(dateStr, style: Theme.of(context).textTheme.bodyMedium),
+                        Text(dateStr,
+                            style: Theme.of(context).textTheme.bodyMedium),
                         if (activity != null) ...[
-                          const Text(' · ', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                          const Text(' · ',
+                              style: TextStyle(
+                                  color: AppTheme.textMuted, fontSize: 13)),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
                               color: skillColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(activity.skillCategory.label,
-                                style: TextStyle(fontSize: 10, color: skillColor, fontWeight: FontWeight.w600)),
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    color: skillColor,
+                                    fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ],
@@ -140,7 +167,10 @@ class _HistoryTile extends StatelessWidget {
               ),
               if (activity != null)
                 Text('${activity.durationMins}m',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                        fontWeight: FontWeight.w600)),
             ],
           ),
         ),

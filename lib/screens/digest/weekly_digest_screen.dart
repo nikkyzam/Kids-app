@@ -40,7 +40,8 @@ class WeeklyDigestScreen extends StatelessWidget {
 
     final weeklyMilestones = mp.achievements.where((a) {
       return !a.achievedDate.isBefore(_weekStart) &&
-          !a.achievedDate.isAfter(_weekEnd.add(const Duration(hours: 23, minutes: 59, seconds: 59)));
+          !a.achievedDate.isAfter(_weekEnd
+              .add(const Duration(hours: 23, minutes: 59, seconds: 59)));
     }).toList();
 
     final topSkill = _topSkillThisWeek(ap);
@@ -77,11 +78,15 @@ class WeeklyDigestScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.calendar_today_rounded, size: 18, color: AppTheme.primary),
+          const Icon(Icons.calendar_today_rounded,
+              size: 18, color: AppTheme.primary),
           const SizedBox(width: 8),
           Text(
             _weekRangeLabel,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.primary),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: AppTheme.primary),
           ),
         ],
       ),
@@ -115,7 +120,8 @@ class WeeklyDigestScreen extends StatelessWidget {
                     color: AppTheme.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.child_care_rounded, color: Colors.white, size: 20),
+                  child: const Icon(Icons.child_care_rounded,
+                      color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 10),
                 Column(
@@ -139,7 +145,10 @@ class WeeklyDigestScreen extends StatelessWidget {
             const Divider(height: 28),
             Text(
               'Activities',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppTheme.textMuted),
+              style: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(color: AppTheme.textMuted),
             ),
             const SizedBox(height: 8),
             Row(
@@ -150,7 +159,10 @@ class WeeklyDigestScreen extends StatelessWidget {
                     children: [
                       Text(
                         DateFormat('E').format(day).substring(0, 1),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 11),
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -160,12 +172,15 @@ class WeeklyDigestScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: done ? AppTheme.success : Colors.transparent,
                           border: Border.all(
-                            color: done ? AppTheme.success : AppTheme.textMuted.withOpacity(0.4),
+                            color: done
+                                ? AppTheme.success
+                                : AppTheme.textMuted.withOpacity(0.4),
                             width: 1.5,
                           ),
                         ),
                         child: done
-                            ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                            ? const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 14)
                             : null,
                       ),
                     ],
@@ -195,7 +210,10 @@ class WeeklyDigestScreen extends StatelessWidget {
             const Divider(height: 28),
             Text(
               'Milestones This Week',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppTheme.textMuted),
+              style: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(color: AppTheme.textMuted),
             ),
             const SizedBox(height: 8),
             if (milestones.isEmpty)
@@ -209,7 +227,8 @@ class WeeklyDigestScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: AppTheme.secondary, size: 16),
+                      const Icon(Icons.star_rounded,
+                          color: AppTheme.secondary, size: 16),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -225,12 +244,16 @@ class WeeklyDigestScreen extends StatelessWidget {
               const Divider(height: 28),
               Text(
                 'Skill Highlights',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppTheme.textMuted),
+                style: Theme.of(context)
+                    .textTheme
+                    .labelLarge
+                    ?.copyWith(color: AppTheme.textMuted),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.emoji_events_rounded, color: AppTheme.secondary, size: 18),
+                  const Icon(Icons.emoji_events_rounded,
+                      color: AppTheme.secondary, size: 18),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -244,7 +267,10 @@ class WeeklyDigestScreen extends StatelessWidget {
             const Divider(height: 28),
             Text(
               'Generated by PlaySteps · $dateLabel',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontSize: 11),
               textAlign: TextAlign.center,
             ),
           ],
@@ -270,8 +296,10 @@ class WeeklyDigestScreen extends StatelessWidget {
   }
 
   String? _topSkillThisWeek(ActivityProvider ap) {
-    final weekKeys = _weekDays.map((d) => DateFormat('yyyy-MM-dd').format(d)).toSet();
-    final weekCompletions = ap.allCompletions.where((c) => weekKeys.contains(c.dateKey)).toList();
+    final weekKeys =
+        _weekDays.map((d) => DateFormat('yyyy-MM-dd').format(d)).toSet();
+    final weekCompletions =
+        ap.allCompletions.where((c) => weekKeys.contains(c.dateKey)).toList();
     if (weekCompletions.isEmpty) return null;
 
     final skillCounts = <String, int>{};
@@ -300,7 +328,8 @@ class WeeklyDigestScreen extends StatelessWidget {
 
     final weeklyMilestones = mp.achievements.where((a) {
       return !a.achievedDate.isBefore(_weekStart) &&
-          !a.achievedDate.isAfter(_weekEnd.add(const Duration(hours: 23, minutes: 59, seconds: 59)));
+          !a.achievedDate.isAfter(_weekEnd
+              .add(const Duration(hours: 23, minutes: 59, seconds: 59)));
     }).toList();
 
     final topSkill = _topSkillThisWeek(ap);
@@ -336,7 +365,8 @@ class WeeklyDigestScreen extends StatelessWidget {
                     pw.SizedBox(height: 4),
                     pw.Text(
                       '$childName · $_weekRangeLabel',
-                      style: const pw.TextStyle(color: PdfColors.white, fontSize: 14),
+                      style: const pw.TextStyle(
+                          color: PdfColors.white, fontSize: 14),
                     ),
                   ],
                 ),
@@ -360,11 +390,13 @@ class WeeklyDigestScreen extends StatelessWidget {
                 ...completedDays.map(
                   (d) => pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 2),
-                    child: pw.Text('  ✓ ${dayFmt.format(d)}', style: const pw.TextStyle(fontSize: 13)),
+                    child: pw.Text('  ✓ ${dayFmt.format(d)}',
+                        style: const pw.TextStyle(fontSize: 13)),
                   ),
                 )
               else
-                pw.Text('  No activities completed this week.', style: const pw.TextStyle(fontSize: 13)),
+                pw.Text('  No activities completed this week.',
+                    style: const pw.TextStyle(fontSize: 13)),
               pw.SizedBox(height: 20),
               pw.Text(
                 'Streak',
@@ -375,7 +407,8 @@ class WeeklyDigestScreen extends StatelessWidget {
                 ),
               ),
               pw.SizedBox(height: 8),
-              pw.Text('Current streak: $streak days', style: const pw.TextStyle(fontSize: 14)),
+              pw.Text('Current streak: $streak days',
+                  style: const pw.TextStyle(fontSize: 14)),
               if (topSkill != null) ...[
                 pw.SizedBox(height: 20),
                 pw.Text(
@@ -387,7 +420,8 @@ class WeeklyDigestScreen extends StatelessWidget {
                   ),
                 ),
                 pw.SizedBox(height: 8),
-                pw.Text('Most practiced skill: $topSkill', style: const pw.TextStyle(fontSize: 14)),
+                pw.Text('Most practiced skill: $topSkill',
+                    style: const pw.TextStyle(fontSize: 14)),
               ],
               pw.SizedBox(height: 20),
               pw.Text(
@@ -400,19 +434,22 @@ class WeeklyDigestScreen extends StatelessWidget {
               ),
               pw.SizedBox(height: 8),
               if (weeklyMilestones.isEmpty)
-                pw.Text('None this week', style: const pw.TextStyle(fontSize: 14))
+                pw.Text('None this week',
+                    style: const pw.TextStyle(fontSize: 14))
               else
                 ...weeklyMilestones.map(
                   (a) => pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 2),
-                    child: pw.Text('  • ${a.milestoneId}', style: const pw.TextStyle(fontSize: 13)),
+                    child: pw.Text('  • ${a.milestoneId}',
+                        style: const pw.TextStyle(fontSize: 13)),
                   ),
                 ),
               pw.Spacer(),
               pw.Divider(),
               pw.Text(
                 'Generated by PlaySteps on $generatedDate',
-                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+                style:
+                    const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
               ),
             ],
           );

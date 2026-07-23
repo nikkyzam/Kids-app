@@ -13,11 +13,15 @@ String _dateKey(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
 
 Future<ChildProfile> _insertTestProfile() async {
   return DatabaseHelper.instance.insertProfile(
-    ChildProfile(name: 'Test', dateOfBirth: DateTime(2024, 1, 1), createdAt: DateTime.now()),
+    ChildProfile(
+        name: 'Test',
+        dateOfBirth: DateTime(2024, 1, 1),
+        createdAt: DateTime.now()),
   );
 }
 
-Future<void> _insertCompletion(int profileId, DateTime day, {String activityId = 'act_0_1'}) async {
+Future<void> _insertCompletion(int profileId, DateTime day,
+    {String activityId = 'act_0_1'}) async {
   await DatabaseHelper.instance.saveCompletion(ActivityCompletion(
     profileId: profileId,
     activityId: activityId,
@@ -30,6 +34,7 @@ void main() {
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    DatabaseHelper.testDatabasePath = inMemoryDatabasePath;
   });
 
   setUp(() async {
@@ -85,32 +90,54 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       final provider = ActivityProvider(prefs);
       const free = PlayActivity(
-        id: 'f', ageBandMinWeeks: 0, ageBandMaxWeeks: 4,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.sensory,
+        id: 'f',
+        ageBandMinWeeks: 0,
+        ageBandMaxWeeks: 4,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.sensory,
       );
       expect(provider.activityRequiresPremium(free), isFalse);
     });
 
-    test('activityRequiresPremium is true for premium activity without subscription', () async {
+    test(
+        'activityRequiresPremium is true for premium activity without subscription',
+        () async {
       final prefs = await SharedPreferences.getInstance();
       final provider = ActivityProvider(prefs);
       const premium = PlayActivity(
-        id: 'p', ageBandMinWeeks: 8, ageBandMaxWeeks: 12,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.grossMotor,
+        id: 'p',
+        ageBandMinWeeks: 8,
+        ageBandMaxWeeks: 12,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.grossMotor,
       );
       expect(provider.activityRequiresPremium(premium), isTrue);
     });
 
-    test('activityRequiresPremium is false for premium activity with subscription', () async {
+    test(
+        'activityRequiresPremium is false for premium activity with subscription',
+        () async {
       SharedPreferences.setMockInitialValues({'is_premium': true});
       final prefs = await SharedPreferences.getInstance();
       final provider = ActivityProvider(prefs);
       const premium = PlayActivity(
-        id: 'p', ageBandMinWeeks: 8, ageBandMaxWeeks: 12,
-        title: 'T', durationMins: 5, materials: [], instructions: [],
-        skillTargeted: 'S', skillCategory: SkillCategory.grossMotor,
+        id: 'p',
+        ageBandMinWeeks: 8,
+        ageBandMaxWeeks: 12,
+        title: 'T',
+        durationMins: 5,
+        materials: [],
+        instructions: [],
+        skillTargeted: 'S',
+        skillCategory: SkillCategory.grossMotor,
       );
       expect(provider.activityRequiresPremium(premium), isFalse);
     });
@@ -133,8 +160,10 @@ void main() {
       final profile = await _insertTestProfile();
       final today = DateTime.now();
       await _insertCompletion(profile.id!, today);
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 1)));
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 2)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 1)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 2)));
 
       final provider = ActivityProvider(prefs);
       await provider.loadForProfile(profile.id!, 0);
@@ -162,7 +191,8 @@ void main() {
       final today = DateTime.now();
       await _insertCompletion(profile.id!, today);
       // Gap: skip yesterday
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 2)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 2)));
 
       final provider = ActivityProvider(prefs);
       await provider.loadForProfile(profile.id!, 0);
@@ -206,14 +236,18 @@ void main() {
 
       // Run of 3 (today, yesterday, day before)
       await _insertCompletion(profile.id!, today);
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 1)));
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 2)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 1)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 2)));
 
       // Gap of 2 days
 
       // Earlier run of 2
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 5)));
-      await _insertCompletion(profile.id!, today.subtract(const Duration(days: 6)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 5)));
+      await _insertCompletion(
+          profile.id!, today.subtract(const Duration(days: 6)));
 
       final provider = ActivityProvider(prefs);
       await provider.loadForProfile(profile.id!, 0);
@@ -258,8 +292,9 @@ void main() {
     test('counts skill category from known activity id', () async {
       final prefs = await SharedPreferences.getInstance();
       final profile = await _insertTestProfile();
-      // act_0_3 is SkillCategory.sensory (Sound Localization)
-      await _insertCompletion(profile.id!, DateTime.now(), activityId: 'act_0_3');
+      // act_0_3 is SkillCategory.grossMotor (Tummy Time on Chest)
+      await _insertCompletion(profile.id!, DateTime.now(),
+          activityId: 'act_0_3');
       await _insertCompletion(
           profile.id!, DateTime.now().subtract(const Duration(days: 1)),
           activityId: 'act_0_3');
@@ -267,13 +302,14 @@ void main() {
       final provider = ActivityProvider(prefs);
       await provider.loadForProfile(profile.id!, 0);
 
-      expect(provider.skillCoverage[SkillCategory.sensory], 2);
+      expect(provider.skillCoverage[SkillCategory.grossMotor], 2);
     });
 
     test('ignores completions with unknown activity ids', () async {
       final prefs = await SharedPreferences.getInstance();
       final profile = await _insertTestProfile();
-      await _insertCompletion(profile.id!, DateTime.now(), activityId: 'nonexistent_id');
+      await _insertCompletion(profile.id!, DateTime.now(),
+          activityId: 'nonexistent_id');
 
       final provider = ActivityProvider(prefs);
       await provider.loadForProfile(profile.id!, 0);

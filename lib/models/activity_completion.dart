@@ -21,7 +21,8 @@ class ActivityCompletion {
         'completed_at': completedAt.toIso8601String(),
       };
 
-  factory ActivityCompletion.fromMap(Map<String, dynamic> map) => ActivityCompletion(
+  factory ActivityCompletion.fromMap(Map<String, dynamic> map) =>
+      ActivityCompletion(
         id: map['id'] as int?,
         profileId: map['profile_id'] as int,
         activityId: map['activity_id'] as String,

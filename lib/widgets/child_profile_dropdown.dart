@@ -20,7 +20,8 @@ class ChildProfileDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (profiles.length == 1) {
-      return Text(activeProfile.name, style: Theme.of(context).appBarTheme.titleTextStyle);
+      return Text(activeProfile.name,
+          style: Theme.of(context).appBarTheme.titleTextStyle);
     }
 
     return GestureDetector(
@@ -28,9 +29,11 @@ class ChildProfileDropdown extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(activeProfile.name, style: Theme.of(context).appBarTheme.titleTextStyle),
+          Text(activeProfile.name,
+              style: Theme.of(context).appBarTheme.titleTextStyle),
           const SizedBox(width: 4),
-          const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppTheme.textMuted),
+          const Icon(Icons.keyboard_arrow_down_rounded,
+              size: 20, color: AppTheme.textMuted),
         ],
       ),
     );
@@ -58,30 +61,35 @@ class ChildProfileDropdown extends StatelessWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Select Profile', style: Theme.of(context).textTheme.titleMedium),
+              child: Text('Select Profile',
+                  style: Theme.of(context).textTheme.titleMedium),
             ),
             const SizedBox(height: 8),
             ...profiles.map((p) => ListTile(
-              leading: CircleAvatar(
-                backgroundColor: p.id == activeProfile.id ? AppTheme.primary : AppTheme.primaryLight,
-                child: Text(
-                  p.name[0].toUpperCase(),
-                  style: TextStyle(
-                    color: p.id == activeProfile.id ? Colors.white : AppTheme.primary,
-                    fontWeight: FontWeight.w700,
+                  leading: CircleAvatar(
+                    backgroundColor: p.id == activeProfile.id
+                        ? AppTheme.primary
+                        : AppTheme.primaryLight,
+                    child: Text(
+                      p.name[0].toUpperCase(),
+                      style: TextStyle(
+                        color: p.id == activeProfile.id
+                            ? Colors.white
+                            : AppTheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              title: Text(p.name),
-              subtitle: Text(p.displayAge),
-              trailing: p.id == activeProfile.id
-                  ? const Icon(Icons.check_rounded, color: AppTheme.primary)
-                  : null,
-              onTap: () {
-                Navigator.of(context).pop();
-                if (p.id != activeProfile.id) onChanged(p);
-              },
-            )),
+                  title: Text(p.name),
+                  subtitle: Text(p.displayAge),
+                  trailing: p.id == activeProfile.id
+                      ? const Icon(Icons.check_rounded, color: AppTheme.primary)
+                      : null,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    if (p.id != activeProfile.id) onChanged(p);
+                  },
+                )),
             const SizedBox(height: 8),
           ],
         ),

@@ -64,7 +64,10 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'All features unlocked. Thank you for supporting PlaySteps!',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.textMuted),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(color: AppTheme.textMuted),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
@@ -150,10 +153,14 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
 
   Widget _buildFeatureList(BuildContext context) {
     final features = [
-      _PlusFeature('📈', 'Growth Tracker', 'Plot weight, height & head circumference over time'),
-      _PlusFeature('🧠', 'Developmental Leap Calendar', 'Know when fussy periods are coming and why'),
-      _PlusFeature('📅', 'Smart 4-Week Plan', 'Personalised activity calendar targeting skill gaps'),
-      _PlusFeature('📋', 'Weekly Family Report', 'Shareable weekly digest for grandparents & doctors'),
+      _PlusFeature('📈', 'Growth Tracker',
+          'Plot weight, height & head circumference over time'),
+      _PlusFeature('🧠', 'Developmental Leap Calendar',
+          'Know when fussy periods are coming and why'),
+      _PlusFeature('📅', 'Smart 4-Week Plan',
+          'Personalised activity calendar targeting skill gaps'),
+      _PlusFeature('📋', 'Weekly Family Report',
+          'Shareable weekly digest for grandparents & doctors'),
     ];
 
     return Padding(
@@ -186,7 +193,9 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                ap.isPremiumPlus ? 'Premium Plus restored!' : 'No subscription found.',
+                ap.isPremiumPlus
+                    ? 'Premium Plus restored!'
+                    : 'No subscription found.',
               ),
             ),
           );
