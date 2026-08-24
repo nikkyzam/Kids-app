@@ -1,16 +1,25 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import '../data/database_helper.dart';
 import 'auth_service.dart';
+import 'sync_backend.dart';
 import '../utils/sync_timestamp.dart';
 
 class SyncService {
   SyncService._();
   static final instance = SyncService._();
 
-  SupabaseClient get _client => Supabase.instance.client;
+  SyncBackend _backend = const SupabaseSyncBackend();
+
+  /// Replaces the remote backend so the merge logic can be exercised without a
+  /// live Supabase project.
+  @visibleForTesting
+  set backend(SyncBackend value) => _backend = value;
+
+  @visibleForTesting
+  void resetBackend() => _backend = const SupabaseSyncBackend();
 
   // ---------------------------------------------------------------------------
   // Public entry point
@@ -28,6 +37,19 @@ class SyncService {
     await _pullAll(familyId, lastSync);
 
     await prefs.setString('last_sync_at', SyncTimestamp.now());
+  }
+
+  /// Runs a full push/pull cycle for an explicit family and cursor.
+  ///
+  /// [syncAll] reads both from the signed-in Supabase session; this seam lets
+  /// the merge behaviour be exercised without one.
+  @visibleForTesting
+  Future<void> syncWith({
+    required String familyId,
+    required String since,
+  }) async {
+    await _pushAll(familyId, since);
+    await _pullAll(familyId, since);
   }
 
   // ---------------------------------------------------------------------------
@@ -88,9 +110,8 @@ class SyncService {
 
     if (payload.isEmpty) return;
 
-    await _client
-        .from('child_profiles')
-        .upsert(payload, onConflict: 'family_id,profile_uuid');
+    await _backend.upsertAll('child_profiles', payload,
+        onConflict: 'family_id,profile_uuid');
   }
 
   // ---------------------------------------------------------------------------
@@ -125,9 +146,8 @@ class SyncService {
               })
           .toList();
 
-      await _client
-          .from('activity_completions')
-          .upsert(payload, onConflict: 'family_id,profile_uuid,date_key');
+      await _backend.upsertAll('activity_completions', payload,
+          onConflict: 'family_id,profile_uuid,date_key');
     }
   }
 
@@ -163,9 +183,8 @@ class SyncService {
               })
           .toList();
 
-      await _client
-          .from('milestone_achievements')
-          .upsert(payload, onConflict: 'family_id,profile_uuid,milestone_id');
+      await _backend.upsertAll('milestone_achievements', payload,
+          onConflict: 'family_id,profile_uuid,milestone_id');
     }
   }
 
@@ -200,9 +219,8 @@ class SyncService {
               })
           .toList();
 
-      await _client
-          .from('unlocked_badges')
-          .upsert(payload, onConflict: 'family_id,profile_uuid,badge_id');
+      await _backend.upsertAll('unlocked_badges', payload,
+          onConflict: 'family_id,profile_uuid,badge_id');
     }
   }
 
@@ -240,9 +258,8 @@ class SyncService {
               })
           .toList();
 
-      await _client
-          .from('growth_measurements')
-          .upsert(payload, onConflict: 'family_id,profile_uuid,local_id');
+      await _backend.upsertAll('growth_measurements', payload,
+          onConflict: 'family_id,profile_uuid,local_id');
     }
   }
 
@@ -281,9 +298,8 @@ class SyncService {
               })
           .toList();
 
-      await _client
-          .from('photo_memories')
-          .upsert(payload, onConflict: 'family_id,profile_uuid,local_id');
+      await _backend.upsertAll('photo_memories', payload,
+          onConflict: 'family_id,profile_uuid,local_id');
     }
   }
 
@@ -294,11 +310,8 @@ class SyncService {
   Future<void> _pullProfiles(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('child_profiles')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('child_profiles',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
@@ -347,11 +360,8 @@ class SyncService {
   Future<void> _pullCompletions(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('activity_completions')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('activity_completions',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
@@ -392,11 +402,8 @@ class SyncService {
   Future<void> _pullMilestones(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('milestone_achievements')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('milestone_achievements',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
@@ -453,11 +460,8 @@ class SyncService {
   Future<void> _pullBadges(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('unlocked_badges')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('unlocked_badges',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
@@ -492,11 +496,8 @@ class SyncService {
   Future<void> _pullGrowth(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('growth_measurements')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('growth_measurements',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
@@ -540,11 +541,8 @@ class SyncService {
   Future<void> _pullPhotos(String familyId, String since) async {
     final db = await DatabaseHelper.instance.database;
 
-    final remote = await _client
-        .from('photo_memories')
-        .select()
-        .eq('family_id', familyId)
-        .gte('updated_at', since);
+    final remote = await _backend.fetchSince('photo_memories',
+        familyId: familyId, since: since);
 
     for (final row in remote) {
       final profileUuid = row['profile_uuid'] as String?;
