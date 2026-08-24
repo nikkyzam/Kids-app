@@ -22,7 +22,7 @@ class _DailyTipCardState extends State<DailyTipCard> {
       child: Card(
         color: const Color(0xFF1A1D2E),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           onTap: () => setState(() => _expanded = !_expanded),
           child: Padding(
             padding: const EdgeInsets.all(16),

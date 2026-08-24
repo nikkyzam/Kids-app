@@ -106,9 +106,11 @@ class _ActivityCardState extends State<ActivityCard> {
         color: isCompleted
             ? AppTheme.successLight
             : categoryColor.withValues(alpha: 0.08),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppTheme.cardRadius),
+        ),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

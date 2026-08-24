@@ -60,6 +60,29 @@ void main() {
       expect(button.onPressed, isNull);
     });
 
+    testWidgets('lays out without overflowing on a small phone',
+        (tester) async {
+      // 320x568 is the smallest screen still in circulation (iPhone SE 1st
+      // gen); the layout must scroll rather than overflow at that size.
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      await tester.pumpWidget(MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProfileProvider(prefs)),
+          ChangeNotifierProvider(create: (_) => ActivityProvider(prefs)),
+          ChangeNotifierProvider(create: (_) => MilestoneProvider()),
+        ],
+        child: const MaterialApp(home: OnboardingScreen()),
+      ));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Get Started'), findsOneWidget);
+    });
+
     testWidgets('shows age badge after date is selected', (tester) async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();

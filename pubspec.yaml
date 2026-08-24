@@ -39,3 +39,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    # Variable font covering ExtraLight..Black in one 277KB file, so every
+    # weight the theme asks for (w400–w900) resolves without shipping six
+    # static faces. Licensed under the SIL OFL — see assets/fonts/OFL.txt.
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf

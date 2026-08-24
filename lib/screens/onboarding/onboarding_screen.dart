@@ -88,20 +88,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 48),
-              _buildHeader(),
-              const SizedBox(height: 40),
-              _buildForm(),
-              const Spacer(),
-              _buildSaveButton(),
-              const SizedBox(height: 32),
-            ],
+      // A soft wash behind the first screen so the page reads as a designed
+      // surface rather than a blank form.
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF1F5FF), AppTheme.surface],
+            stops: [0.0, 0.45],
+          ),
+        ),
+        child: SafeArea(
+          // On a tall screen the Spacer pushes the button to the bottom; on a
+          // short one (small phones, split screen, or a visible keyboard) the
+          // content scrolls instead of overflowing.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 48),
+                        _buildHeader(),
+                        const SizedBox(height: 40),
+                        _buildForm(),
+                        const Spacer(),
+                        const SizedBox(height: 32),
+                        _buildSaveButton(),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -113,19 +138,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 56,
-          height: 56,
+          width: 68,
+          height: 68,
           decoration: BoxDecoration(
-            color: AppTheme.primaryLight,
-            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF7BA5F5), AppTheme.primary],
+            ),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: AppTheme.glow(AppTheme.primary),
           ),
           child: const Icon(Icons.child_care_rounded,
-              color: AppTheme.primary, size: 32),
+              color: Colors.white, size: 38),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         Text('Welcome to\nPlaySteps',
-            style: Theme.of(context).textTheme.displayMedium),
-        const SizedBox(height: 8),
+            style: Theme.of(context).textTheme.displayLarge),
+        const SizedBox(height: 10),
         Text(
           'No accounts. No cloud. Just play.',
           style: Theme.of(context)
@@ -155,33 +185,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 24),
         Text("Date of Birth", style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
-        GestureDetector(
-          onTap: _pickDate,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F6FB),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _selectedDob == null
-                        ? 'Tap to select date of birth'
-                        : DateFormat('MMMM d, yyyy').format(_selectedDob!),
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: _selectedDob == null
-                          ? AppTheme.textMuted
-                          : AppTheme.textDark,
+        // Mirrors inputDecorationTheme (radius, fill, padding) so the date
+        // field and the name field read as the same control.
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _pickDate,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F6FB),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _selectedDob == null
+                      ? const Color(0xFFEDF0F7)
+                      : AppTheme.primary.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _selectedDob == null
+                          ? 'Tap to select date of birth'
+                          : DateFormat('MMMM d, yyyy').format(_selectedDob!),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: _selectedDob == null
+                            ? FontWeight.w400
+                            : FontWeight.w600,
+                        color: _selectedDob == null
+                            ? AppTheme.textMuted
+                            : AppTheme.textDark,
+                      ),
                     ),
                   ),
-                ),
-                const Icon(Icons.calendar_today_rounded,
-                    color: AppTheme.textMuted, size: 18),
-              ],
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    color: _selectedDob == null
+                        ? AppTheme.textMuted
+                        : AppTheme.primary,
+                    size: 18,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -209,31 +258,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ageText = '$months month${months == 1 ? '' : 's'} old';
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryLight,
-        borderRadius: BorderRadius.circular(8),
+    return TweenAnimationBuilder<double>(
+      // Small entrance so the badge feels like a response to picking a date
+      // rather than a jump in layout.
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutBack,
+      builder: (context, t, child) => Transform.scale(
+        scale: 0.85 + (0.15 * t),
+        alignment: Alignment.centerLeft,
+        child: Opacity(opacity: t.clamp(0, 1), child: child),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.cake_rounded, size: 14, color: AppTheme.primary),
-          const SizedBox(width: 6),
-          Text(ageText,
-              style: const TextStyle(
-                  fontSize: 13,
-                  color: AppTheme.primary,
-                  fontWeight: FontWeight.w600)),
-        ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryLight,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cake_rounded, size: 15, color: AppTheme.primary),
+            const SizedBox(width: 7),
+            Text(ageText,
+                style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.w700)),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSaveButton() {
-    return AnimatedOpacity(
-      opacity: _canSave ? 1.0 : 0.4,
-      duration: const Duration(milliseconds: 200),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        // The glow appears only once the form is valid, so the button visibly
+        // "wakes up" instead of just changing opacity.
+        boxShadow: _canSave ? AppTheme.glow(AppTheme.primary) : const [],
+      ),
       child: FilledButton(
         onPressed: (_canSave && !_isSaving) ? _saveProfile : null,
         child: _isSaving

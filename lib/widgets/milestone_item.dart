@@ -54,7 +54,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
           children: [
             Card(
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 onTap: () async {
                   final wasAchieved = mp.isAchieved(widget.milestone.id);
                   await mp.toggleMilestone(
