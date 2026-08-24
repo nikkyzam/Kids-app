@@ -236,6 +236,63 @@ The test suite uses `sqflite_common_ffi` to run SQLite queries against an in-mem
 
 ---
 
+## Before You Can Ship
+
+The app builds and runs without any of the following, but each one must be done
+before a public release.
+
+### 1. Create the in-app purchase products
+
+Purchases go through StoreKit / Google Play Billing (`lib/services/purchase_service.dart`).
+The product identifiers are compiled into the app and **must match the store
+consoles exactly**, or the paywall shows "Store unavailable":
+
+| Entitlement | Product ID | Type |
+|---|---|---|
+| Premium | `playsteps_premium_lifetime` | Non-consumable (one-time) |
+| Premium Plus | `playsteps_premium_plus_yearly` | Auto-renewing subscription (yearly) |
+
+- **App Store Connect** → My Apps → Subscriptions / In-App Purchases.
+- **Google Play Console** → Monetise → Products.
+
+Prices are read from the store at runtime, so you set the price in the console —
+there is no price hard-coded in the app.
+
+Purchases cannot be tested in the simulator or on web. Use a real device with a
+sandbox tester (iOS) or an internal-testing track (Android).
+
+### 2. Add server-side receipt validation
+
+`PurchaseService._isValid()` currently performs **local checks only**, which are
+defeatable on a rooted or jailbroken device. Before launch, post
+`purchase.verificationData.serverVerificationData` to a backend that calls
+Apple's `verifyReceipt` or Google's `purchases.products.get`, and grant the
+entitlement only on that server's response.
+
+### 3. Publish a privacy policy
+
+Both stores require a public privacy policy URL, and this app stores a child's
+name, date of birth, photographs, and growth measurements.
+
+A draft describing the app's actual behaviour is in [PRIVACY.md](PRIVACY.md).
+**It must be reviewed by a lawyer** — see the note in that file about COPPA,
+GDPR Article 8, the UK Age Appropriate Design Code, and Google Play's Families
+policy.
+
+### 4. Configure Supabase (only if you want Family Sharing)
+
+Cloud sync is disabled unless real credentials are supplied — the app is
+offline-first and boots fine without them:
+
+```bash
+flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co --dart-define=SUPABASE_ANON_KEY=your-anon-key
+```
+
+Apply the schema in `supabase/` to your project first. With no credentials, the
+sign-in and family-sharing screens show an "unavailable" state by design.
+
+---
+
 ## Building Release Artifacts
 
 ### Android APK / AAB
