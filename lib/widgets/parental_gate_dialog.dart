@@ -131,8 +131,11 @@ class _ParentalGateDialogState extends State<ParentalGateDialog> {
       Navigator.of(context).pop(true);
     } else {
       setState(() {
-        _failed = true;
+        // Order matters: _generateChallenge clears _failed, so setting the
+        // flag first meant the "Incorrect — try again" banner never appeared
+        // and a wrong answer silently swapped the question instead.
         _generateChallenge();
+        _failed = true;
       });
     }
   }
