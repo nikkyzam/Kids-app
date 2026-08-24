@@ -366,13 +366,16 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: iconColor),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textDark,
-              fontFamily: 'Nunito',
+          // Section titles are long enough to overflow beside their icon.
+          Flexible(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textDark,
+                fontFamily: 'Nunito',
+              ),
             ),
           ),
         ],
@@ -738,13 +741,16 @@ class _LookingAheadCard extends StatelessWidget {
                     const Icon(Icons.lock_outline_rounded,
                         size: 16, color: AppTheme.primary),
                     const SizedBox(width: 8),
-                    Text(
-                      '$ageGroup Month${ageGroup == 1 ? '' : 's'} — Coming Up',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.primary,
-                        fontFamily: 'Nunito',
+                    Flexible(
+                      child: Text(
+                        '$ageGroup Month${ageGroup == 1 ? '' : 's'} — Coming Up',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primary,
+                          fontFamily: 'Nunito',
+                        ),
                       ),
                     ),
                   ],

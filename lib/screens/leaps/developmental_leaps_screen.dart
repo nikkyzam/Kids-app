@@ -576,127 +576,156 @@ class _LeapExpansionCard extends StatelessWidget {
         ? _accentColor.withValues(alpha: 0.5)
         : const Color(0xFFEEF0F7);
 
+    final accentEdge = isCurrent || status == _LeapStatus.next
+        ? _accentColor
+        : Colors.transparent;
+
+    // Flutter forbids a borderRadius on a Border whose sides differ in colour
+    // and throws during paint, so the accent edge cannot be a BorderSide here.
+    // The card keeps a uniform rounded border and draws the accent as a clipped
+    // strip inside it.
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: BorderSide(
-            color: isCurrent || status == _LeapStatus.next
-                ? _accentColor
-                : Colors.transparent,
-            width: 4,
-          ),
-          top: BorderSide(color: borderColor),
-          right: BorderSide(color: borderColor),
-          bottom: BorderSide(color: borderColor),
-        ),
+        border: Border.all(color: borderColor),
       ),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          dividerColor: Colors.transparent,
-        ),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          expandedCrossAxisAlignment: CrossAxisAlignment.start,
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Leap ${leap.number}: ${leap.name}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: status == _LeapStatus.future
-                        ? AppTheme.textMuted
-                        : AppTheme.textDark,
-                    fontFamily: 'Nunito',
+      // A Stack rather than a Row: the accent strip stretches to whatever
+      // height the tile ends up (it grows when expanded) without imposing a
+      // height constraint on the tile itself.
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            // ExpansionTile paints its ink splash on the nearest Material
+            // ancestor. Without one here the surrounding decorated Container
+            // hides the ripple, so tapping a leap gives no feedback.
+            child: Material(
+              type: MaterialType.transparency,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  dividerColor: Colors.transparent,
+                ),
+                child: ExpansionTile(
+                  tilePadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Leap ${leap.number}: ${leap.name}',
+                          // Long leap names wrapped to a third line and
+                          // overflowed the tile's height on narrow screens.
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: status == _LeapStatus.future
+                                ? AppTheme.textMuted
+                                : AppTheme.textDark,
+                            fontFamily: 'Nunito',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '~${leap.leapWeek} wks',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primary,
+                            fontFamily: 'Nunito',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '~${leap.leapWeek} wks',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.primary,
-                    fontFamily: 'Nunito',
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 3, bottom: 4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: _accentColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _statusLabel,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: _statusTextColor,
+                          fontFamily: 'Nunito',
+                        ),
+                      ),
+                    ),
                   ),
+                  children: [
+                    _buildDivider(),
+                    const SizedBox(height: 12),
+                    _buildInfoRow(
+                      icon: Icons.calendar_today_outlined,
+                      label: 'Fussy period',
+                      value: '~week ${leap.stormyStartWeek}–${leap.leapWeek}',
+                      color: _stormyColor,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildSection(
+                      context,
+                      label: "What's developing",
+                      content: leap.whatsDeveloping,
+                      icon: Icons.psychology_outlined,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildSection(
+                      context,
+                      label: 'What to expect',
+                      content: leap.whatToExpect,
+                      icon: Icons.visibility_outlined,
+                      color: _stormyColor,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildBulletSection(
+                      context,
+                      label: 'Parent tips',
+                      items: leap.tips,
+                      icon: Icons.lightbulb_outline_rounded,
+                      color: AppTheme.success,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildBulletSection(
+                      context,
+                      label: 'Suggested activities',
+                      items: leap.activitySuggestions,
+                      icon: Icons.toys_outlined,
+                      color: AppTheme.secondary,
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 3, bottom: 4),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: _accentColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                _statusLabel,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: _statusTextColor,
-                  fontFamily: 'Nunito',
-                ),
-              ),
             ),
           ),
-          children: [
-            _buildDivider(),
-            const SizedBox(height: 12),
-            _buildInfoRow(
-              icon: Icons.calendar_today_outlined,
-              label: 'Fussy period',
-              value: '~week ${leap.stormyStartWeek}–${leap.leapWeek}',
-              color: _stormyColor,
-            ),
-            const SizedBox(height: 14),
-            _buildSection(
-              context,
-              label: "What's developing",
-              content: leap.whatsDeveloping,
-              icon: Icons.psychology_outlined,
-              color: AppTheme.primary,
-            ),
-            const SizedBox(height: 14),
-            _buildSection(
-              context,
-              label: 'What to expect',
-              content: leap.whatToExpect,
-              icon: Icons.visibility_outlined,
-              color: _stormyColor,
-            ),
-            const SizedBox(height: 14),
-            _buildBulletSection(
-              context,
-              label: 'Parent tips',
-              items: leap.tips,
-              icon: Icons.lightbulb_outline_rounded,
-              color: AppTheme.success,
-            ),
-            const SizedBox(height: 14),
-            _buildBulletSection(
-              context,
-              label: 'Suggested activities',
-              items: leap.activitySuggestions,
-              icon: Icons.toys_outlined,
-              color: AppTheme.secondary,
-            ),
-          ],
-        ),
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 4,
+            child: ColoredBox(color: accentEdge),
+          ),
+        ],
       ),
     );
   }
@@ -718,13 +747,15 @@ class _LeapExpansionCard extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 6),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: color,
-            fontFamily: 'Nunito',
+        Flexible(
+          child: Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: color,
+              fontFamily: 'Nunito',
+            ),
           ),
         ),
         Text(
@@ -754,13 +785,15 @@ class _LeapExpansionCard extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: color,
-                fontFamily: 'Nunito',
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  fontFamily: 'Nunito',
+                ),
               ),
             ),
           ],
@@ -794,13 +827,15 @@ class _LeapExpansionCard extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: color,
-                fontFamily: 'Nunito',
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  fontFamily: 'Nunito',
+                ),
               ),
             ),
           ],

@@ -82,12 +82,14 @@ class WeeklyDigestScreen extends StatelessWidget {
           const Icon(Icons.calendar_today_rounded,
               size: 18, color: AppTheme.primary),
           const SizedBox(width: 8),
-          Text(
-            _weekRangeLabel,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: AppTheme.primary),
+          Flexible(
+            child: Text(
+              _weekRangeLabel,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: AppTheme.primary),
+            ),
           ),
         ],
       ),
@@ -125,7 +127,10 @@ class WeeklyDigestScreen extends StatelessWidget {
                       color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 10),
-                Column(
+                // Unconstrained, this Column sized to its longest line and
+                // pushed past the card edge on a 360px phone.
+                Expanded(
+                    child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -140,7 +145,7 @@ class WeeklyDigestScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
-                ),
+                )),
               ],
             ),
             const Divider(height: 28),
@@ -202,9 +207,12 @@ class WeeklyDigestScreen extends StatelessWidget {
               children: [
                 const Text('🔥', style: TextStyle(fontSize: 20)),
                 const SizedBox(width: 6),
-                Text(
-                  '$streak-day streak',
-                  style: Theme.of(context).textTheme.titleMedium,
+                Flexible(
+                  child: Text(
+                    '$streak-day streak',
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
               ],
             ),

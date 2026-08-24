@@ -277,13 +277,15 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: AppTheme.primary),
           const SizedBox(width: 6),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textDark,
-              fontFamily: 'Nunito',
+          Flexible(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textDark,
+                fontFamily: 'Nunito',
+              ),
             ),
           ),
         ],
