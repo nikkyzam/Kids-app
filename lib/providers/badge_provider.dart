@@ -6,6 +6,7 @@ import '../models/activity.dart';
 import '../models/badge_definition.dart';
 import '../providers/activity_provider.dart';
 import '../providers/milestone_provider.dart';
+import '../utils/clock.dart';
 
 class BadgeProvider extends ChangeNotifier {
   List<String> _unlockedIds = [];
@@ -53,7 +54,7 @@ class BadgeProvider extends ChangeNotifier {
     if (achievedCount >= 25) await tryUnlock('milestone_25');
 
     // Perfect week: Mon–Sun all completed
-    final today = DateTime.now();
+    final today = Clock.now();
     final weekStart = today.subtract(Duration(days: today.weekday - 1));
     final isPerfect = List.generate(7, (i) => weekStart.add(Duration(days: i)))
         .every((day) => ap.completedOnDay(day));

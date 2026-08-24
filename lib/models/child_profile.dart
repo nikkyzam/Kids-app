@@ -1,3 +1,5 @@
+import '../utils/clock.dart';
+
 class ChildProfile {
   final int? id;
   final String? uuid;
@@ -13,12 +15,12 @@ class ChildProfile {
     required this.createdAt,
   });
 
-  int get ageInDays => DateTime.now().difference(dateOfBirth).inDays;
+  int get ageInDays => Clock.now().difference(dateOfBirth).inDays;
 
   int get ageInWeeks => ageInDays ~/ 7;
 
   int get ageInMonths {
-    final now = DateTime.now();
+    final now = Clock.now();
     int months =
         (now.year - dateOfBirth.year) * 12 + now.month - dateOfBirth.month;
     if (now.day < dateOfBirth.day) months--;
@@ -27,8 +29,12 @@ class ChildProfile {
 
   // Returns age in weeks (0–26 weeks) then months (6–36+ months)
   String get displayAge {
-    if (ageInWeeks < 4) return '$ageInWeeks week${ageInWeeks == 1 ? '' : 's'}';
-    if (ageInWeeks < 26) return '$ageInWeeks weeks';
+    // Floored at zero: a date of birth in the future (from a restored backup
+    // or a synced record written by a device with a wrong clock) would
+    // otherwise render as "-10 weeks".
+    final weeks = ageInWeeks < 0 ? 0 : ageInWeeks;
+    if (weeks < 4) return '$weeks week${weeks == 1 ? '' : 's'}';
+    if (weeks < 26) return '$weeks weeks';
     final m = ageInMonths;
     if (m < 24) return '$m month${m == 1 ? '' : 's'}';
     final years = m ~/ 12;

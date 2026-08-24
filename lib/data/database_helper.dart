@@ -8,6 +8,7 @@ import '../models/activity_completion.dart';
 import '../models/milestone_achievement.dart';
 import '../models/photo_memory.dart';
 import '../models/growth_measurement.dart';
+import '../utils/sync_timestamp.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();
@@ -202,7 +203,7 @@ class DatabaseHelper {
   Future<ChildProfile> insertProfile(ChildProfile profile) async {
     final db = await database;
     const uuidGen = Uuid();
-    final now = DateTime.now().toIso8601String();
+    final now = SyncTimestamp.now();
     final map = profile.toMap()
       ..remove('id')
       ..['uuid'] = uuidGen.v4()
@@ -215,7 +216,7 @@ class DatabaseHelper {
     final db = await database;
     await db.update(
       'child_profiles',
-      {...profile.toMap(), 'updated_at': DateTime.now().toIso8601String()},
+      {...profile.toMap(), 'updated_at': SyncTimestamp.now()},
       where: 'id = ?',
       whereArgs: [profile.id],
     );
@@ -254,10 +255,7 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'activity_completions',
-      {
-        ...completion.toMap()..remove('id'),
-        'updated_at': DateTime.now().toIso8601String()
-      },
+      {...completion.toMap()..remove('id'), 'updated_at': SyncTimestamp.now()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -287,10 +285,7 @@ class DatabaseHelper {
     final db = await database;
     await db.insert(
       'milestone_achievements',
-      {
-        ...achievement.toMap()..remove('id'),
-        'updated_at': DateTime.now().toIso8601String()
-      },
+      {...achievement.toMap()..remove('id'), 'updated_at': SyncTimestamp.now()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -333,7 +328,7 @@ class DatabaseHelper {
     final db = await database;
     final id = await db.insert('growth_measurements', {
       ...m.toMap()..remove('id'),
-      'updated_at': DateTime.now().toIso8601String(),
+      'updated_at': SyncTimestamp.now(),
     });
     return GrowthMeasurement(
       id: id,
@@ -378,7 +373,7 @@ class DatabaseHelper {
     final db = await database;
     final id = await db.insert('photo_memories', {
       ...photo.toMap()..remove('id'),
-      'updated_at': DateTime.now().toIso8601String(),
+      'updated_at': SyncTimestamp.now(),
     });
     return PhotoMemory(
       id: id,
@@ -411,7 +406,7 @@ class DatabaseHelper {
 
   Future<void> saveBadge(int profileId, String badgeId) async {
     final db = await database;
-    final now = DateTime.now().toIso8601String();
+    final now = SyncTimestamp.now();
     await db.insert(
       'unlocked_badges',
       {

@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/database_helper.dart';
 import 'auth_service.dart';
+import '../utils/sync_timestamp.dart';
 
 class SyncService {
   SyncService._();
@@ -26,7 +27,7 @@ class SyncService {
     await _pushAll(familyId, lastSync);
     await _pullAll(familyId, lastSync);
 
-    await prefs.setString('last_sync_at', DateTime.now().toIso8601String());
+    await prefs.setString('last_sync_at', SyncTimestamp.now());
   }
 
   // ---------------------------------------------------------------------------
@@ -320,12 +321,15 @@ class SyncService {
       } else {
         final local = existing.first;
         final remoteUpdatedAt = row['updated_at'] as String;
-        final localUpdatedAt = local['updated_at'] as String;
-        if (remoteUpdatedAt.compareTo(localUpdatedAt) > 0) {
+        final localUpdatedAt = local['updated_at'] as String?;
+        if (SyncTimestamp.isRemoteNewer(remoteUpdatedAt, localUpdatedAt)) {
           await db.update(
             'child_profiles',
             {
               'name': row['name'],
+              // date_of_birth was previously omitted, so correcting a child's
+              // birth date on one device never reached the others.
+              'date_of_birth': row['date_of_birth'],
               'updated_at': remoteUpdatedAt,
             },
             where: 'uuid = ?',
@@ -425,8 +429,8 @@ class SyncService {
       } else {
         final local = existing.first;
         final remoteUpdatedAt = row['updated_at'] as String;
-        final localUpdatedAt = local['updated_at'] as String;
-        if (remoteUpdatedAt.compareTo(localUpdatedAt) > 0) {
+        final localUpdatedAt = local['updated_at'] as String?;
+        if (SyncTimestamp.isRemoteNewer(remoteUpdatedAt, localUpdatedAt)) {
           await db.update(
             'milestone_achievements',
             {

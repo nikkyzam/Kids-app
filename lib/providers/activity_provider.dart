@@ -7,6 +7,7 @@ import '../models/activity_completion.dart';
 import '../data/database_helper.dart';
 import '../data/activities_data.dart';
 import '../services/purchase_service.dart';
+import '../utils/clock.dart';
 
 class ActivityProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -33,7 +34,7 @@ class ActivityProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   int get totalCompletions => _allCompletions.length;
 
-  String get todayKey => DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String get todayKey => DateFormat('yyyy-MM-dd').format(Clock.now());
 
   String _keyFor(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
 
@@ -53,8 +54,7 @@ class ActivityProvider extends ChangeNotifier {
     if (_allCompletions.isEmpty) return 0;
     final days = _allCompletions.map((c) => c.dateKey).toSet();
     int streak = 0;
-    final now = DateTime.now();
-    var day = DateTime(now.year, now.month, now.day);
+    var day = Clock.today();
     // Allow today to not yet be done without breaking the streak
     if (!days.contains(_keyFor(day))) {
       day = _previousDay(day);
@@ -140,7 +140,7 @@ class ActivityProvider extends ChangeNotifier {
         profileId: profileId,
         activityId: _todayActivity!.id,
         dateKey: todayKey,
-        completedAt: DateTime.now(),
+        completedAt: Clock.now(),
       );
       await DatabaseHelper.instance.saveCompletion(completion);
       _allCompletions.add(completion);
