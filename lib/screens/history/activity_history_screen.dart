@@ -141,13 +141,22 @@ class _HistoryTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Text(dateStr,
-                            style: Theme.of(context).textTheme.bodyMedium),
+                        // The date and the skill pill are natural-width, so a
+                        // long skill label overflowed the row on narrower
+                        // phones and at larger text scales.
+                        Flexible(
+                          child: Text(
+                            dateStr,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
                         if (activity != null) ...[
                           const Text(' · ',
                               style: TextStyle(
                                   color: AppTheme.textMuted, fontSize: 13)),
-                          Container(
+                          Flexible(
+                              child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
@@ -155,11 +164,12 @@ class _HistoryTile extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(activity.skillCategory.label,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     fontSize: 10,
                                     color: skillColor,
                                     fontWeight: FontWeight.w600)),
-                          ),
+                          )),
                         ],
                       ],
                     ),

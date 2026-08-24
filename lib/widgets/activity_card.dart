@@ -14,6 +14,7 @@ import 'badge_unlocked_dialog.dart';
 import 'confetti_overlay.dart';
 import 'streak_milestone_dialog.dart';
 import '../screens/paywall/paywall_screen.dart';
+import '../utils/clock.dart';
 
 class ActivityCard extends StatefulWidget {
   final int profileId;
@@ -165,19 +166,24 @@ class _ActivityCardState extends State<ActivityCard> {
   Widget _buildSkillChip(PlayActivity activity, Color categoryColor) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: categoryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: categoryColor.withValues(alpha: 0.3)),
-          ),
-          child: Text(
-            activity.skillTargeted,
-            style: TextStyle(
-                fontSize: 12,
-                color: categoryColor,
-                fontWeight: FontWeight.w600),
+        // skillTargeted is free text and can be long; without Flexible the
+        // chip sized to its content and overflowed the card on narrower
+        // phones and at larger text scales.
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: categoryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: categoryColor.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              activity.skillTargeted,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: categoryColor,
+                  fontWeight: FontWeight.w600),
+            ),
           ),
         ),
       ],
@@ -323,7 +329,7 @@ class _ActivityCardState extends State<ActivityCard> {
   Future<void> _offerPhotoMemory(
       BuildContext context, ActivityProvider ap, int profileId) async {
     if (ap.todayActivity == null || !ap.isCompleted) return;
-    final dateKey = DateTime.now().toIso8601String().split('T').first;
+    final dateKey = Clock.now().toIso8601String().split('T').first;
 
     await Future.delayed(const Duration(milliseconds: 400));
     if (!context.mounted) return;
@@ -356,7 +362,7 @@ class _ActivityCardState extends State<ActivityCard> {
       referenceType: 'activity',
       referenceId: dateKey,
       imagePath: picked.path,
-      capturedAt: DateTime.now().toIso8601String(),
+      capturedAt: Clock.now().toIso8601String(),
     ));
 
     if (context.mounted) {

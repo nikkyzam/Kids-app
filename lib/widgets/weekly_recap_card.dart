@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../providers/activity_provider.dart';
 import '../models/activity.dart';
 import '../theme/app_theme.dart';
+import '../utils/clock.dart';
 
 class WeeklyRecapCard extends StatelessWidget {
   const WeeklyRecapCard({super.key});
@@ -13,7 +14,7 @@ class WeeklyRecapCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ActivityProvider>(
       builder: (context, ap, _) {
-        final today = DateTime.now();
+        final today = Clock.now();
         // Build Mon–Sun of current week
         final weekStart = today.subtract(Duration(days: today.weekday - 1));
         final days = List.generate(7, (i) => weekStart.add(Duration(days: i)));
@@ -89,12 +90,17 @@ class WeeklyRecapCard extends StatelessWidget {
                         const Icon(Icons.star_rounded,
                             size: 14, color: AppTheme.secondary),
                         const SizedBox(width: 6),
-                        Text(
-                          'Focus: ${bestSkill.label}',
-                          style: const TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.textMuted,
-                              fontWeight: FontWeight.w500),
+                        // Skill labels are long enough to overflow this row on
+                        // a 360px phone.
+                        Flexible(
+                          child: Text(
+                            'Focus: ${bestSkill.label}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textMuted,
+                                fontWeight: FontWeight.w500),
+                          ),
                         ),
                       ],
                     ),

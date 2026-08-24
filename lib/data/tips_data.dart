@@ -1,3 +1,5 @@
+import '../utils/clock.dart';
+
 class TipsData {
   TipsData._();
 
@@ -65,8 +67,7 @@ class TipsData {
   ];
 
   static String forToday() {
-    final dayOfYear =
-        DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
+    final dayOfYear = Clock.now().difference(DateTime(Clock.now().year)).inDays;
     return all[dayOfYear % all.length];
   }
 }

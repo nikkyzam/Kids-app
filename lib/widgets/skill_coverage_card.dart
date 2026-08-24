@@ -30,8 +30,11 @@ class SkillCoverageCard extends StatelessWidget {
                       const Icon(Icons.bar_chart_rounded,
                           size: 18, color: AppTheme.primary),
                       const SizedBox(width: 8),
-                      Text('Skills Practised',
-                          style: Theme.of(context).textTheme.titleMedium),
+                      Flexible(
+                        child: Text('Skills Practised',
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium),
+                      ),
                       const Spacer(),
                       Text('$total sessions',
                           style: Theme.of(context).textTheme.bodyMedium),

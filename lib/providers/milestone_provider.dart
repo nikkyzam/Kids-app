@@ -4,6 +4,7 @@ import '../models/milestone.dart';
 import '../models/milestone_achievement.dart';
 import '../data/database_helper.dart';
 import '../data/milestones_data.dart';
+import '../utils/clock.dart';
 
 class MilestoneProvider extends ChangeNotifier {
   List<MilestoneAchievement> _achievements = [];
@@ -51,7 +52,7 @@ class MilestoneProvider extends ChangeNotifier {
       final achievement = MilestoneAchievement(
         profileId: profileId,
         milestoneId: milestoneId,
-        achievedDate: DateTime.now(),
+        achievedDate: Clock.now(),
       );
       await DatabaseHelper.instance.saveAchievement(achievement);
       _achievements.add(achievement);

@@ -1,4 +1,5 @@
 import '../models/activity.dart';
+import '../utils/clock.dart';
 
 class ActivitiesData {
   ActivitiesData._();
@@ -802,8 +803,7 @@ class ActivitiesData {
   static PlayActivity? todayActivity(int ageInWeeks) {
     final band = forAgeBandWeeks(ageInWeeks);
     if (band.isEmpty) return null;
-    final dayOfYear =
-        DateTime.now().difference(DateTime(DateTime.now().year)).inDays;
+    final dayOfYear = Clock.now().difference(DateTime(Clock.now().year)).inDays;
     return band[dayOfYear % band.length];
   }
 }

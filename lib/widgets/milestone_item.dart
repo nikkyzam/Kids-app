@@ -11,6 +11,7 @@ import '../models/milestone.dart';
 import '../models/photo_memory.dart';
 import '../providers/milestone_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/clock.dart';
 
 class MilestoneItem extends StatefulWidget {
   final Milestone milestone;
@@ -217,7 +218,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
       referenceType: 'milestone',
       referenceId: widget.milestone.id,
       imagePath: picked.path,
-      capturedAt: DateTime.now().toIso8601String(),
+      capturedAt: Clock.now().toIso8601String(),
     ));
 
     if (context.mounted) {

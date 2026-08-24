@@ -8,12 +8,13 @@ import '../../providers/activity_provider.dart';
 import '../../providers/milestone_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/clock.dart';
 
 class WeeklyDigestScreen extends StatelessWidget {
   const WeeklyDigestScreen({super.key});
 
   DateTime get _weekStart {
-    final now = DateTime.now();
+    final now = Clock.now();
     return now.subtract(Duration(days: now.weekday - 1));
   }
 
@@ -102,7 +103,7 @@ class WeeklyDigestScreen extends StatelessWidget {
     required List milestones,
     required String? topSkill,
   }) {
-    final now = DateTime.now();
+    final now = Clock.now();
     final dateLabel = DateFormat('MMMM d, y').format(now);
 
     return Card(
@@ -333,7 +334,7 @@ class WeeklyDigestScreen extends StatelessWidget {
     }).toList();
 
     final topSkill = _topSkillThisWeek(ap);
-    final generatedDate = DateFormat('MMMM d, y').format(DateTime.now());
+    final generatedDate = DateFormat('MMMM d, y').format(Clock.now());
     final dayFmt = DateFormat('EEEE, MMM d');
 
     final doc = pw.Document();

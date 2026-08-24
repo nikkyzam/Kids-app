@@ -6,6 +6,7 @@ import '../../models/activity.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/clock.dart';
 
 class ActivityPlanScreen extends StatefulWidget {
   const ActivityPlanScreen({super.key});
@@ -144,7 +145,7 @@ class _ActivityPlanScreenState extends State<ActivityPlanScreen>
       );
     }
 
-    final today = DateTime.now();
+    final today = Clock.now();
     final planEnd = today.add(const Duration(days: 27));
     final dateRangeLabel =
         '${DateFormat('MMM d').format(today)} – ${DateFormat('MMM d').format(planEnd)}';

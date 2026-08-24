@@ -4,6 +4,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import '../../data/database_helper.dart';
 import '../../models/growth_measurement.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/clock.dart';
 
 class GrowthTrackerScreen extends StatefulWidget {
   final int profileId;
@@ -525,7 +526,7 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
   final _valueController = TextEditingController();
   final _notesController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = Clock.now();
   bool _saving = false;
 
   @override
@@ -549,7 +550,7 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2010),
-      lastDate: DateTime.now(),
+      lastDate: Clock.now(),
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
@@ -578,7 +579,7 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
   }
 
   bool _isToday(DateTime d) {
-    final now = DateTime.now();
+    final now = Clock.now();
     return d.year == now.year && d.month == now.month && d.day == now.day;
   }
 

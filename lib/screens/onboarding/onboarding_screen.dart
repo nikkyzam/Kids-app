@@ -7,6 +7,7 @@ import '../../models/child_profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme/app_theme.dart';
 import '../home/home_screen.dart';
+import '../../utils/clock.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -27,7 +28,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
+    final now = Clock.now();
     DateTime? picked;
 
     if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -68,7 +69,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final profile = ChildProfile(
         name: name,
         dateOfBirth: _selectedDob!,
-        createdAt: DateTime.now(),
+        createdAt: Clock.now(),
       );
       await context.read<ProfileProvider>().addProfile(profile);
       if (mounted) {
@@ -243,7 +244,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildAgeBadge() {
-    final now = DateTime.now();
+    final now = Clock.now();
     final days = now.difference(_selectedDob!).inDays;
     final weeks = days ~/ 7;
     String ageText;

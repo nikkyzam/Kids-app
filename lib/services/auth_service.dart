@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
+import '../utils/clock.dart';
 
 /// Thrown when a cloud-sync action is attempted on a build without configured
 /// Supabase credentials.
@@ -157,7 +158,7 @@ class AuthService {
   static const _codeChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   String _generateCode() {
-    final seed = DateTime.now().millisecondsSinceEpoch;
+    final seed = Clock.now().millisecondsSinceEpoch;
     final rng = Random(seed);
     return List.generate(6, (_) => _codeChars[rng.nextInt(_codeChars.length)])
         .join();

@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import '../data/database_helper.dart';
 import '../theme/app_theme.dart';
 import 'backup_io_native.dart' if (dart.library.html) 'backup_io_web.dart';
+import '../utils/clock.dart';
 
 class BackupService {
   static Future<void> exportBackup(BuildContext context) async {
@@ -38,12 +39,12 @@ class BackupService {
 
       final payload = <String, dynamic>{
         'version': 1,
-        'exported_at': DateTime.now().toIso8601String(),
+        'exported_at': Clock.now().toIso8601String(),
         'profiles': profilesData,
       };
 
       final json = const JsonEncoder.withIndent('  ').convert(payload);
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final timestamp = Clock.now().millisecondsSinceEpoch;
       final path =
           await writeBackupJson('playsteps_backup_$timestamp.json', json);
 
@@ -145,7 +146,7 @@ class BackupService {
               {
                 'profile_id': newId,
                 'badge_id': badgeId as String,
-                'unlocked_at': DateTime.now().toIso8601String(),
+                'unlocked_at': Clock.now().toIso8601String(),
               },
               conflictAlgorithm: ConflictAlgorithm.replace,
             );

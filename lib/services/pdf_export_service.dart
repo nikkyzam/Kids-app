@@ -7,6 +7,7 @@ import '../models/child_profile.dart';
 import '../models/milestone.dart';
 import '../models/milestone_achievement.dart';
 import '../data/milestones_data.dart';
+import '../utils/clock.dart';
 
 class PdfExportService {
   PdfExportService._();
@@ -68,7 +69,7 @@ class PdfExportService {
     );
 
     final filename =
-        '${profile.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_milestones_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
+        '${profile.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}_milestones_${DateFormat('yyyyMMdd').format(Clock.now())}.pdf';
     await Printing.sharePdf(bytes: await pdf.save(), filename: filename);
   }
 
@@ -113,7 +114,7 @@ class PdfExportService {
                       fontSize: 11, color: PdfColors.grey700),
                 ),
                 pw.Text(
-                  'Generated ${DateFormat('MMMM d, yyyy').format(DateTime.now())}',
+                  'Generated ${DateFormat('MMMM d, yyyy').format(Clock.now())}',
                   style:
                       const pw.TextStyle(fontSize: 9, color: PdfColors.grey500),
                 ),

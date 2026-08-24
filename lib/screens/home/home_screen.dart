@@ -26,6 +26,7 @@ import '../digest/weekly_digest_screen.dart';
 import '../paywall/premium_plus_screen.dart';
 import '../../widgets/weekly_recap_card.dart';
 import '../../widgets/red_flag_banner.dart';
+import '../../utils/clock.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -264,7 +265,7 @@ class _ActivityTab extends StatelessWidget {
 
   Widget _buildGreeting(
       BuildContext context, String name, String age, int streak) {
-    final hour = DateTime.now().hour;
+    final hour = Clock.now().hour;
     final greeting = hour < 12
         ? 'Good morning'
         : hour < 17

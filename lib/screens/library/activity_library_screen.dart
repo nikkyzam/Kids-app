@@ -262,18 +262,23 @@ class _ActivityLibraryTile extends StatelessWidget {
                         style: const TextStyle(
                             fontSize: 11, color: AppTheme.textMuted)),
                     const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: _color.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                    // Longer category labels pushed this pill past the card
+                    // edge next to the "Unlock" button.
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: _color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(activity.skillCategory.label,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: _color,
+                                fontWeight: FontWeight.w600)),
                       ),
-                      child: Text(activity.skillCategory.label,
-                          style: TextStyle(
-                              fontSize: 9,
-                              color: _color,
-                              fontWeight: FontWeight.w600)),
                     ),
                   ],
                 ),
@@ -342,11 +347,16 @@ class _ActivityLibraryTile extends StatelessWidget {
               children: [
                 Icon(Icons.stars_rounded, size: 14, color: _color),
                 const SizedBox(width: 5),
-                Text(activity.skillTargeted,
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: _color,
-                        fontWeight: FontWeight.w600)),
+                // skillTargeted is free text; a long one overflowed this chip
+                // off the right edge of the card.
+                Flexible(
+                  child: Text(activity.skillTargeted,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: _color,
+                          fontWeight: FontWeight.w600)),
+                ),
               ],
             ),
           ),

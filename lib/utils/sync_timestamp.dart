@@ -15,7 +15,7 @@ class SyncTimestamp {
   /// device's timezone offset look like recency: a phone in UTC+10 would appear
   /// ten hours "newer" than one in UTC, and would win every conflict against a
   /// genuinely later edit made further west.
-  static String now() => DateTime.now().toUtc().toIso8601String();
+  static String now() => Clock.now().toUtc().toIso8601String();
 
   static String from(DateTime time) => time.toUtc().toIso8601String();
 

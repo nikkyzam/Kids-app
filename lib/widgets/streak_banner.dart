@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/activity_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/clock.dart';
 
 class StreakBanner extends StatelessWidget {
   const StreakBanner({super.key});
@@ -105,7 +106,7 @@ class _WeekDots extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ActivityProvider>(
       builder: (context, ap, _) {
-        final today = DateTime.now();
+        final today = Clock.now();
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
