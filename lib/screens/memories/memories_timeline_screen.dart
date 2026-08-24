@@ -233,7 +233,10 @@ class _MemoryCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Container(
+                    // The tag pill sizes to its label and overflowed the photo
+                    // tile on narrow grids.
+                    Flexible(
+                        child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -242,13 +245,14 @@ class _MemoryCard extends StatelessWidget {
                       ),
                       child: Text(
                         tagLabel,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
-                    ),
+                    )),
                     const Spacer(),
                     Text(
                       dateLabel,
