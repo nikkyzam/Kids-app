@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/activity_provider.dart';
+import '../../services/purchase_service.dart';
 import '../../theme/app_theme.dart';
 
 class PaywallScreen extends StatefulWidget {
@@ -16,6 +17,23 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The store confirms purchases asynchronously, so dismiss the paywall
+    // whenever the entitlement lands — whether from a purchase or a restore.
+    final isPremium = context.watch<ActivityProvider>().isPremium;
+    if (isPremium) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final navigator = Navigator.of(context);
+        if (navigator.canPop()) navigator.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Welcome to Premium! All features unlocked.'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+      });
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -97,21 +115,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Widget _buildFeatureList() {
     final features = [
-      _Feature(
+      const _Feature(
           Icons.play_circle_rounded,
           AppTheme.primary,
           'Unlimited Daily Activities',
           'New play challenges every day through 36 months'),
-      _Feature(Icons.checklist_rounded, AppTheme.success,
+      const _Feature(Icons.checklist_rounded, AppTheme.success,
           'Full Milestone Ledger', 'Track all domains from birth to 3 years'),
-      _Feature(Icons.picture_as_pdf_rounded, AppTheme.secondary,
+      const _Feature(Icons.picture_as_pdf_rounded, AppTheme.secondary,
           'Pediatrician Export', 'One-tap PDF share for doctor visits'),
-      _Feature(
+      const _Feature(
           Icons.sort_rounded,
           AppTheme.cognitiveColor,
           'Advanced Domain Filter',
           'Focus on the skills that matter most right now'),
-      _Feature(Icons.lock_outline_rounded, AppTheme.grossMotorColor,
+      const _Feature(Icons.lock_outline_rounded, AppTheme.grossMotorColor,
           '100% Private', 'Zero cloud. Zero data collection. Always.'),
     ];
 
@@ -121,17 +139,23 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildPurchaseButton() {
+    final store = PurchaseService.instance;
+    // Show the store's own localised price so the button never contradicts
+    // what the purchase sheet charges.
+    final price = store.priceFor(Entitlement.premium);
+    final label = price == null ? 'Unlock Premium' : 'Unlock Premium — $price';
+
     return Column(
       children: [
         FilledButton(
-          onPressed: _isPurchasing ? null : _purchase,
+          onPressed: (_isPurchasing || !store.isAvailable) ? null : _purchase,
           child: _isPurchasing
               ? const SizedBox(
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(
                       color: Colors.white, strokeWidth: 2))
-              : const Text('Unlock Premium — \$4.99'),
+              : Text(store.isAvailable ? label : 'Store unavailable'),
         ),
         const SizedBox(height: 6),
         Text(
@@ -163,21 +187,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Future<void> _purchase() async {
     setState(() => _isPurchasing = true);
     try {
-      // In production: initiate StoreKit / Google Play Billing purchase flow
-      // For now simulate a short delay then unlock
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) {
-        await context.read<ActivityProvider>().unlockPremium();
-        if (mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Welcome to Premium! All features unlocked.'),
-              backgroundColor: AppTheme.success,
-            ),
-          );
-        }
-      }
+      // Hands off to StoreKit / Play Billing. The entitlement is granted later
+      // via the purchase stream, so this only opens the platform sheet.
+      await PurchaseService.instance.buy(Entitlement.premium);
+    } on PurchaseUnavailableException catch (e) {
+      if (mounted) _showMessage(e.message);
     } finally {
       if (mounted) setState(() => _isPurchasing = false);
     }
@@ -187,20 +201,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
     setState(() => _isPurchasing = true);
     try {
       await context.read<ActivityProvider>().restorePurchases();
-      if (mounted) {
-        final isPremium = context.read<ActivityProvider>().isPremium;
-        if (isPremium) Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isPremium
-                ? 'Premium restored!'
-                : 'No previous purchase found.'),
-          ),
-        );
-      }
+      if (mounted) _showMessage('Checking for previous purchases…');
+    } on PurchaseUnavailableException catch (e) {
+      if (mounted) _showMessage(e.message);
     } finally {
       if (mounted) setState(() => _isPurchasing = false);
     }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -226,7 +237,7 @@ class _FeatureTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: feature.color.withOpacity(0.1),
+              color: feature.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(feature.icon, color: feature.color, size: 22),

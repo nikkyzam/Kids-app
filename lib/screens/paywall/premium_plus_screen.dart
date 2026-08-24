@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/activity_provider.dart';
+import '../../services/purchase_service.dart';
 import '../../theme/app_theme.dart';
 
 class PremiumPlusScreen extends StatefulWidget {
@@ -107,9 +108,9 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.4)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
             ),
             child: const Text(
               '⭐ Premium Plus',
@@ -129,9 +130,9 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
                 ),
           ),
           const SizedBox(height: 20),
-          Text(
+          const Text(
             '\$7.99 / year',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.w800,
@@ -141,7 +142,7 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
           Text(
             'That\'s less than 67 cents a month',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -153,13 +154,13 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
 
   Widget _buildFeatureList(BuildContext context) {
     final features = [
-      _PlusFeature('📈', 'Growth Tracker',
+      const _PlusFeature('📈', 'Growth Tracker',
           'Plot weight, height & head circumference over time'),
-      _PlusFeature('🧠', 'Developmental Leap Calendar',
+      const _PlusFeature('🧠', 'Developmental Leap Calendar',
           'Know when fussy periods are coming and why'),
-      _PlusFeature('📅', 'Smart 4-Week Plan',
+      const _PlusFeature('📅', 'Smart 4-Week Plan',
           'Personalised activity calendar targeting skill gaps'),
-      _PlusFeature('📋', 'Weekly Family Report',
+      const _PlusFeature('📋', 'Weekly Family Report',
           'Shareable weekly digest for grandparents & doctors'),
     ];
 
@@ -172,33 +173,51 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
   }
 
   Widget _buildSubscribeButton(BuildContext context, ActivityProvider ap) {
+    final store = PurchaseService.instance;
+    // Prefer the store's localised subscription price over a hard-coded one.
+    final price = store.priceFor(Entitlement.premiumPlus);
+
     return FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFFF5A623),
         foregroundColor: Colors.white,
       ),
-      onPressed: () async {
-        await ap.unlockPremiumPlus();
-        if (context.mounted) Navigator.of(context).pop(true);
-      },
-      child: const Text('Subscribe — \$7.99/year'),
+      onPressed: store.isAvailable
+          ? () async {
+              // Entitlement arrives via the purchase stream; this screen swaps
+              // to its "already active" state once it lands.
+              try {
+                await PurchaseService.instance.buy(Entitlement.premiumPlus);
+              } on PurchaseUnavailableException catch (e) {
+                if (context.mounted) _showMessage(context, e.message);
+              }
+            }
+          : null,
+      child: Text(
+        store.isAvailable
+            ? 'Subscribe — ${price ?? "see price in store"}'
+            : 'Store unavailable',
+      ),
     );
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Widget _buildRestoreButton(BuildContext context, ActivityProvider ap) {
     return TextButton(
       onPressed: () async {
-        await ap.restorePurchases();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                ap.isPremiumPlus
-                    ? 'Premium Plus restored!'
-                    : 'No subscription found.',
-              ),
-            ),
-          );
+        // Restored entitlements arrive on the purchase stream, which flips this
+        // screen to its "already active" state.
+        try {
+          await ap.restorePurchases();
+          if (context.mounted) {
+            _showMessage(context, 'Checking for previous purchases…');
+          }
+        } on PurchaseUnavailableException catch (e) {
+          if (context.mounted) _showMessage(context, e.message);
         }
       },
       child: const Text('Restore subscription'),

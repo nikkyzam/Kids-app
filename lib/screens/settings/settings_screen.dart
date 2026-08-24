@@ -8,6 +8,7 @@ import '../../services/notification_service.dart';
 import '../../services/backup_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/sync_service.dart';
+import '../../services/purchase_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/parental_gate_dialog.dart';
 import '../auth/sign_in_screen.dart';
@@ -38,11 +39,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadNotifState() async {
     final enabled = await NotificationService.instance.isEnabled();
     final time = await NotificationService.instance.scheduledTime();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _notifEnabled = enabled;
         _notifTime = time;
       });
+    }
   }
 
   @override
@@ -89,6 +91,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// Appends the store's localised price when it is known, so the row never
+  /// advertises a price that disagrees with the purchase sheet.
+  String _priceLabel(String label, Entitlement entitlement) {
+    final price = PurchaseService.instance.priceFor(entitlement);
+    return price == null ? label : '$label — $price';
+  }
+
   Future<void> _challengeGate() async {
     final passed = await showDialog<bool>(
       context: context,
@@ -103,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, profileProvider, activityProvider, _) {
         return ListView(
           children: [
-            _SectionHeader(title: 'Children'),
+            const _SectionHeader(title: 'Children'),
             ...profileProvider.profiles.map((p) => _ProfileTile(
                   profile: p,
                   isActive: p.id == profileProvider.activeProfile?.id,
@@ -121,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: _addProfile,
               ),
             const Divider(height: 1),
-            _SectionHeader(title: 'Premium'),
+            const _SectionHeader(title: 'Premium'),
             if (activityProvider.isPremium)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: AppTheme.secondary),
@@ -132,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ListTile(
                 leading: const Icon(Icons.star_outline_rounded,
                     color: AppTheme.secondary),
-                title: const Text('Unlock Premium — \$4.99'),
+                title: Text(_priceLabel('Unlock Premium', Entitlement.premium)),
                 subtitle: const Text(
                     'Full activity library, ages 4 weeks – 36 months'),
                 trailing: const Icon(Icons.chevron_right_rounded),
@@ -150,7 +159,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ListTile(
                 leading: const Icon(Icons.star_outline_rounded,
                     color: Color(0xFFF5A623)),
-                title: const Text('Premium Plus — \$7.99/year'),
+                title:
+                    Text(_priceLabel('Premium Plus', Entitlement.premiumPlus)),
                 subtitle: const Text(
                     'Growth charts, leap calendar, smart plan, weekly report'),
                 trailing: const Icon(Icons.chevron_right_rounded),
@@ -162,20 +172,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const Icon(Icons.restore_rounded, color: AppTheme.textMuted),
               title: const Text('Restore Purchases'),
               onTap: () async {
-                await activityProvider.restorePurchases();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(activityProvider.isPremium
-                          ? 'Premium restored!'
-                          : 'No purchases found.'),
-                    ),
-                  );
+                // Restored entitlements arrive on the store's purchase stream,
+                // so the result is not known synchronously here.
+                try {
+                  await activityProvider.restorePurchases();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Checking for previous purchases…'),
+                      ),
+                    );
+                  }
+                } on PurchaseUnavailableException catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(e.message)),
+                    );
+                  }
                 }
               },
             ),
             const Divider(height: 1),
-            _SectionHeader(title: 'Notifications'),
+            const _SectionHeader(title: 'Notifications'),
             SwitchListTile(
               secondary: const Icon(Icons.notifications_outlined,
                   color: AppTheme.primary),
@@ -185,7 +203,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   : 'Tap to enable daily play reminders'),
               value: _notifEnabled,
               onChanged: _toggleNotification,
-              activeColor: AppTheme.primary,
+              activeThumbColor: AppTheme.primary,
             ),
             if (_notifEnabled)
               ListTile(
@@ -203,11 +221,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // otherwise PlaySteps runs fully offline and there is nothing to sync.
             if (AuthService.instance.isAvailable) ...[
               const Divider(height: 1),
-              _SectionHeader(title: 'Account & Sync'),
+              const _SectionHeader(title: 'Account & Sync'),
               _buildAccountSection(context),
             ],
             const Divider(height: 1),
-            _SectionHeader(title: 'Data'),
+            const _SectionHeader(title: 'Data'),
             ListTile(
               leading: const Icon(Icons.emoji_events_outlined,
                   color: AppTheme.secondary),
@@ -244,7 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             const Divider(height: 1),
-            _SectionHeader(title: 'About'),
+            const _SectionHeader(title: 'About'),
             const ListTile(
               leading:
                   Icon(Icons.privacy_tip_outlined, color: AppTheme.textMuted),
@@ -310,8 +328,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   }
                 } catch (e) {
-                  if (context.mounted)
+                  if (context.mounted) {
                     auth.setSyncStatus(SyncStatus.error, error: e.toString());
+                  }
                 }
               },
             ),

@@ -6,6 +6,7 @@ import '../models/activity.dart';
 import '../models/activity_completion.dart';
 import '../data/database_helper.dart';
 import '../data/activities_data.dart';
+import '../services/purchase_service.dart';
 
 class ActivityProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
@@ -140,21 +141,29 @@ class ActivityProvider extends ChangeNotifier {
     return activityRequiresPremium(_todayActivity!);
   }
 
-  Future<void> unlockPremium() async {
-    _isPremium = true;
-    await _prefs.setBool('is_premium', true);
+  /// Persists an entitlement confirmed by the store.
+  ///
+  /// Only [PurchaseService] should call this — it is driven by the platform
+  /// purchase stream, so it also covers restores and purchases that finish
+  /// while the app was closed. The cached flag is a convenience for offline
+  /// launches; the store remains the source of truth and re-confirms on init.
+  Future<void> grantEntitlement(Entitlement entitlement) async {
+    switch (entitlement) {
+      case Entitlement.premium:
+        if (_isPremium) return;
+        _isPremium = true;
+        await _prefs.setBool('is_premium', true);
+      case Entitlement.premiumPlus:
+        if (_isPremiumPlus) return;
+        _isPremiumPlus = true;
+        await _prefs.setBool('is_premium_plus', true);
+    }
     notifyListeners();
   }
 
-  Future<void> unlockPremiumPlus() async {
-    _isPremiumPlus = true;
-    await _prefs.setBool('is_premium_plus', true);
-    notifyListeners();
-  }
-
-  Future<void> restorePurchases() async {
-    _isPremium = _prefs.getBool('is_premium') ?? false;
-    _isPremiumPlus = _prefs.getBool('is_premium_plus') ?? false;
-    notifyListeners();
-  }
+  /// Asks the store to replay past purchases.
+  ///
+  /// Entitlements arrive asynchronously through [grantEntitlement]; this only
+  /// kicks off the request.
+  Future<void> restorePurchases() => PurchaseService.instance.restore();
 }

@@ -16,6 +16,7 @@ import 'data/database_helper.dart';
 import 'data/database_platform_stub.dart'
     if (dart.library.html) 'data/database_platform_web.dart';
 import 'services/notification_service.dart';
+import 'services/purchase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,11 +48,21 @@ void main() async {
   }
   await NotificationService.instance.init();
 
+  final activityProvider = ActivityProvider(prefs);
+
+  // Route store-confirmed entitlements into the provider. Wired before init()
+  // so purchases that completed while the app was closed are picked up by the
+  // first purchaseStream event.
+  PurchaseService.instance.onEntitlement = activityProvider.grantEntitlement;
+  PurchaseService.instance.onError =
+      (message) => debugPrint('Purchase error: $message');
+  await PurchaseService.instance.init();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ProfileProvider(prefs)),
-        ChangeNotifierProvider(create: (_) => ActivityProvider(prefs)),
+        ChangeNotifierProvider.value(value: activityProvider),
         ChangeNotifierProvider(create: (_) => MilestoneProvider()),
         ChangeNotifierProvider(create: (_) => BadgeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),

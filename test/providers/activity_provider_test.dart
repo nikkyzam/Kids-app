@@ -8,6 +8,7 @@ import 'package:playsteps/models/child_profile.dart';
 import 'package:playsteps/models/activity_completion.dart';
 import 'package:playsteps/models/activity.dart';
 import 'package:playsteps/data/database_helper.dart';
+import 'package:playsteps/services/purchase_service.dart';
 
 String _dateKey(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
 
@@ -78,12 +79,30 @@ void main() {
       expect(ActivityProvider(prefs).isPremium, isTrue);
     });
 
-    test('unlockPremium persists to prefs', () async {
+    test('grantEntitlement(premium) persists to prefs', () async {
       final prefs = await SharedPreferences.getInstance();
       final provider = ActivityProvider(prefs);
-      await provider.unlockPremium();
+      await provider.grantEntitlement(Entitlement.premium);
       expect(provider.isPremium, isTrue);
       expect(prefs.getBool('is_premium'), isTrue);
+    });
+
+    test('grantEntitlement(premiumPlus) persists to prefs', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final provider = ActivityProvider(prefs);
+      await provider.grantEntitlement(Entitlement.premiumPlus);
+      expect(provider.isPremiumPlus, isTrue);
+      expect(prefs.getBool('is_premium_plus'), isTrue);
+    });
+
+    test('granting premium does not imply premiumPlus', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final provider = ActivityProvider(prefs);
+      await provider.grantEntitlement(Entitlement.premium);
+      expect(provider.isPremium, isTrue);
+      expect(provider.isPremiumPlus, isFalse);
     });
 
     test('activityRequiresPremium is false for free tier activity', () async {
