@@ -43,7 +43,7 @@ class _ActivityPlanScreenState extends State<ActivityPlanScreen>
     final ageInWeeks = profile.ageInWeeks;
     final coverage = ap.skillCoverage;
 
-    final allCategories = SkillCategory.values;
+    const allCategories = SkillCategory.values;
     final sorted = [...allCategories]..sort((a, b) {
         final aCount = coverage[a] ?? 0;
         final bCount = coverage[b] ?? 0;
@@ -235,7 +235,7 @@ class _HeaderCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppTheme.primaryLight,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.primary.withOpacity(0.18)),
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.18)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,11 +347,12 @@ class _DayTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       decoration: BoxDecoration(
-        color: isToday ? AppTheme.primary.withOpacity(0.07) : Colors.white,
+        color:
+            isToday ? AppTheme.primary.withValues(alpha: 0.07) : Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isToday
-              ? AppTheme.primary.withOpacity(0.3)
+              ? AppTheme.primary.withValues(alpha: 0.3)
               : const Color(0xFFEEF0F7),
         ),
       ),
@@ -392,7 +393,7 @@ class _DayTile extends StatelessWidget {
           ),
         ),
         trailing: isToday && isCompleted
-            ? Icon(
+            ? const Icon(
                 Icons.check_circle_rounded,
                 color: AppTheme.success,
                 size: 22,
@@ -415,7 +416,7 @@ class _DayCircle extends StatelessWidget {
       width: 38,
       height: 38,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -443,7 +444,7 @@ class _SkillChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -480,8 +481,8 @@ class _WhyThisPlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.lightbulb_outline_rounded,
                   size: 16, color: AppTheme.secondary),
               SizedBox(width: 6),

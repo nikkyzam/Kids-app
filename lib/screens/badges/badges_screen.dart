@@ -85,7 +85,7 @@ class _ProgressHeader extends StatelessWidget {
                     builder: (_, value, __) => LinearProgressIndicator(
                       value: value,
                       minHeight: 7,
-                      backgroundColor: AppTheme.primary.withOpacity(0.15),
+                      backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
                       valueColor:
                           const AlwaysStoppedAnimation(AppTheme.primary),
                     ),
@@ -108,11 +108,11 @@ class _BadgeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: isUnlocked ? badge.color.withOpacity(0.07) : null,
+      color: isUnlocked ? badge.color.withValues(alpha: 0.07) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isUnlocked
-            ? BorderSide(color: badge.color.withOpacity(0.3))
+            ? BorderSide(color: badge.color.withValues(alpha: 0.3))
             : BorderSide.none,
       ),
       child: Padding(

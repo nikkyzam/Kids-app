@@ -102,7 +102,7 @@ class _SkillBar extends StatelessWidget {
                 builder: (_, value, __) => LinearProgressIndicator(
                   value: value,
                   minHeight: 8,
-                  backgroundColor: color.withOpacity(0.1),
+                  backgroundColor: color.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation(color),
                 ),
               ),

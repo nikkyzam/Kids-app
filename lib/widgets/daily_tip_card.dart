@@ -35,12 +35,12 @@ class _DailyTipCardState extends State<DailyTipCard> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppTheme.secondary.withOpacity(0.2),
+                        color: AppTheme.secondary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Icon(Icons.lightbulb_rounded,
                               size: 12, color: AppTheme.secondary),
                           SizedBox(width: 4),

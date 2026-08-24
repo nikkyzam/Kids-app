@@ -68,18 +68,24 @@ class BadgeProvider extends ChangeNotifier {
             (skillCount[activity.skillCategory] ?? 0) + 1;
       }
     }
-    if ((skillCount[SkillCategory.grossMotor] ?? 0) >= 10)
+    if ((skillCount[SkillCategory.grossMotor] ?? 0) >= 10) {
       await tryUnlock('gross_motor_10');
-    if ((skillCount[SkillCategory.language] ?? 0) >= 10)
+    }
+    if ((skillCount[SkillCategory.language] ?? 0) >= 10) {
       await tryUnlock('language_10');
-    if ((skillCount[SkillCategory.cognitive] ?? 0) >= 10)
+    }
+    if ((skillCount[SkillCategory.cognitive] ?? 0) >= 10) {
       await tryUnlock('cognitive_10');
-    if ((skillCount[SkillCategory.socialEmotional] ?? 0) >= 10)
+    }
+    if ((skillCount[SkillCategory.socialEmotional] ?? 0) >= 10) {
       await tryUnlock('social_10');
-    if ((skillCount[SkillCategory.sensory] ?? 0) >= 10)
+    }
+    if ((skillCount[SkillCategory.sensory] ?? 0) >= 10) {
       await tryUnlock('sensory_10');
-    if ((skillCount[SkillCategory.fineMotor] ?? 0) >= 10)
+    }
+    if ((skillCount[SkillCategory.fineMotor] ?? 0) >= 10) {
       await tryUnlock('fine_motor_10');
+    }
 
     if (newly.isNotEmpty) notifyListeners();
     return newly;

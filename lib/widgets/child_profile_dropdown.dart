@@ -54,7 +54,7 @@ class ChildProfileDropdown extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.textMuted.withOpacity(0.3),
+                color: AppTheme.textMuted.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

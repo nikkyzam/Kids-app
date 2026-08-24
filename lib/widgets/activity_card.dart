@@ -105,7 +105,7 @@ class _ActivityCardState extends State<ActivityCard> {
       decoration: BoxDecoration(
         color: isCompleted
             ? AppTheme.successLight
-            : categoryColor.withOpacity(0.08),
+            : categoryColor.withValues(alpha: 0.08),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       padding: const EdgeInsets.all(16),
@@ -141,7 +141,7 @@ class _ActivityCardState extends State<ActivityCard> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined,
+                    const Icon(Icons.timer_outlined,
                         size: 14, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
                     Text(
@@ -166,9 +166,9 @@ class _ActivityCardState extends State<ActivityCard> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: categoryColor.withOpacity(0.1),
+            color: categoryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: categoryColor.withOpacity(0.3)),
+            border: Border.all(color: categoryColor.withValues(alpha: 0.3)),
           ),
           child: Text(
             activity.skillTargeted,
@@ -266,7 +266,7 @@ class _ActivityCardState extends State<ActivityCard> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: AppTheme.secondary.withOpacity(0.1),
+                color: AppTheme.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(Icons.lock_rounded,
@@ -324,7 +324,7 @@ class _ActivityCardState extends State<ActivityCard> {
     final dateKey = DateTime.now().toIso8601String().split('T').first;
 
     await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     final add = await showDialog<bool>(
       context: context,
@@ -357,7 +357,7 @@ class _ActivityCardState extends State<ActivityCard> {
       capturedAt: DateTime.now().toIso8601String(),
     ));
 
-    if (mounted) {
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Photo memory saved!'),

@@ -88,7 +88,7 @@ class MilestonesScreen extends StatelessWidget {
                     color: isSelected ? Colors.white : color)),
             selected: isSelected,
             onSelected: (_) => mp.setFilter(domain),
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             selectedColor: color,
             checkmarkColor: Colors.white,
             side: BorderSide.none,

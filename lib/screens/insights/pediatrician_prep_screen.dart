@@ -119,7 +119,7 @@ class PediatricianPrepScreen extends StatelessWidget {
                 nextAge: nextAge,
               ),
               const SizedBox(height: 16),
-              _SectionHeader(
+              const _SectionHeader(
                 icon: Icons.medical_services_outlined,
                 title: 'What your doctor will check',
               ),
@@ -129,7 +129,7 @@ class PediatricianPrepScreen extends StatelessWidget {
                 domainColor: _domainColor,
               ),
               const SizedBox(height: 16),
-              _SectionHeader(
+              const _SectionHeader(
                 icon: Icons.help_outline_rounded,
                 title: 'Questions to ask',
               ),
@@ -138,13 +138,13 @@ class PediatricianPrepScreen extends StatelessWidget {
                 childName: profile.name,
               ),
               const SizedBox(height: 16),
-              _SectionHeader(
+              const _SectionHeader(
                 icon: Icons.warning_amber_rounded,
                 title: 'Things to mention',
               ),
               _RedFlagsCard(redFlags: redFlags),
               const SizedBox(height: 16),
-              _SectionHeader(
+              const _SectionHeader(
                 icon: Icons.bar_chart_rounded,
                 title: 'Milestone summary',
               ),
@@ -222,7 +222,7 @@ class _VisitInfoCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -240,7 +240,7 @@ class _VisitInfoCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -341,10 +341,10 @@ class _DomainsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
+                          color: color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: color.withOpacity(0.4), width: 1),
+                              color: color.withValues(alpha: 0.4), width: 1),
                         ),
                         child: Text(
                           domain.label,
@@ -441,7 +441,7 @@ class _QuestionsCard extends StatelessWidget {
                       width: 24,
                       height: 24,
                       alignment: Alignment.center,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppTheme.primaryLight,
                         shape: BoxShape.circle,
                       ),
@@ -498,7 +498,7 @@ class _RedFlagsCard extends StatelessWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.successLight,
                   shape: BoxShape.circle,
                 ),
@@ -530,11 +530,11 @@ class _RedFlagsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
               child: Text(
                 'Bring these up with your doctor:',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textMuted,
@@ -576,9 +576,10 @@ class _RedFlagTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.warning.withOpacity(0.1),
+        color: AppTheme.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.warning.withOpacity(0.4), width: 1),
+        border: Border.all(
+            color: AppTheme.warning.withValues(alpha: 0.4), width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

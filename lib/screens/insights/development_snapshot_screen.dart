@@ -89,8 +89,8 @@ class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
           body: CustomScrollView(
             slivers: [
               // ── AppBar ─────────────────────────────────────────────────
-              SliverAppBar(
-                title: const Text('Development Snapshot'),
+              const SliverAppBar(
+                title: Text('Development Snapshot'),
                 pinned: true,
                 backgroundColor: AppTheme.surface,
                 foregroundColor: AppTheme.textDark,
@@ -110,7 +110,7 @@ class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
 
               // ── 2. Red flag section ────────────────────────────────────
               if (hasRedFlags) ...[
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: _SectionHeader(
                     title: 'Worth Mentioning to Your Doctor',
                     icon: Icons.health_and_safety_outlined,
@@ -136,7 +136,7 @@ class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
               ],
 
               // ── 3. Age group progress cards ────────────────────────────
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: _SectionHeader(
                   title: "Progress by Age Group",
                   icon: Icons.bar_chart_rounded,
@@ -166,7 +166,7 @@ class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
 
               // ── 4. Looking ahead ───────────────────────────────────────
               if (nextGroup != null) ...[
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: _SectionHeader(
                     title: 'Looking Ahead',
                     icon: Icons.lock_outline_rounded,
@@ -244,7 +244,7 @@ class _StatusHeroCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: config.textColor.withOpacity(0.7),
+                          color: config.textColor.withValues(alpha: 0.7),
                           fontFamily: 'Nunito',
                         ),
                       ),
@@ -259,7 +259,7 @@ class _StatusHeroCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: config.textColor.withOpacity(0.85),
+                color: config.textColor.withValues(alpha: 0.85),
                 height: 1.4,
                 fontFamily: 'Nunito',
               ),
@@ -271,7 +271,7 @@ class _StatusHeroCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: achievedCount / expectedCount,
                   minHeight: 8,
-                  backgroundColor: config.textColor.withOpacity(0.15),
+                  backgroundColor: config.textColor.withValues(alpha: 0.15),
                   valueColor: AlwaysStoppedAnimation<Color>(config.textColor),
                 ),
               ),
@@ -281,7 +281,7 @@ class _StatusHeroCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: config.textColor.withOpacity(0.7),
+                  color: config.textColor.withValues(alpha: 0.7),
                   fontFamily: 'Nunito',
                 ),
               ),
@@ -406,7 +406,7 @@ class _RedFlagSection extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.error.withOpacity(0.25)),
+          border: Border.all(color: AppTheme.error.withValues(alpha: 0.25)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,8 +505,8 @@ class _RedFlagItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isNoted
-                    ? AppTheme.success.withOpacity(0.12)
-                    : AppTheme.error.withOpacity(0.08),
+                    ? AppTheme.success.withValues(alpha: 0.12)
+                    : AppTheme.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -588,7 +588,7 @@ class _AgeGroupCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
-                      color: trafficColor.withOpacity(0.12),
+                      color: trafficColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -613,7 +613,7 @@ class _AgeGroupCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: ratio,
                   minHeight: 6,
-                  backgroundColor: trafficColor.withOpacity(0.12),
+                  backgroundColor: trafficColor.withValues(alpha: 0.12),
                   valueColor: AlwaysStoppedAnimation<Color>(trafficColor),
                 ),
               ),
@@ -696,7 +696,7 @@ class _MilestoneRow extends StatelessWidget {
             size: 18,
             color: isAchieved
                 ? AppTheme.success
-                : AppTheme.error.withOpacity(0.35),
+                : AppTheme.error.withValues(alpha: 0.35),
           ),
         ],
       ),
@@ -725,7 +725,7 @@ class _LookingAheadCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppTheme.primaryLight,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -798,7 +798,7 @@ class _LookAheadMilestoneRow extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: domainColor.withOpacity(0.55),
+                color: domainColor.withValues(alpha: 0.55),
                 shape: BoxShape.circle,
               ),
             ),

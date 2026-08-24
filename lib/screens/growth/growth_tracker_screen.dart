@@ -258,7 +258,7 @@ class _MetricTabBody extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: color.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -399,7 +399,7 @@ class _ChartPainter extends CustomPainter {
           Offset(leftPad, y), Offset(leftPad + chartW, y), gridPaint);
     }
 
-    final labelStyle = TextStyle(
+    const labelStyle = TextStyle(
       fontSize: 10,
       color: AppTheme.textMuted,
       fontFamily: 'Nunito',
@@ -445,7 +445,7 @@ class _ChartPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color.withOpacity(0.18), color.withOpacity(0.0)],
+        colors: [color.withValues(alpha: 0.18), color.withValues(alpha: 0.0)],
       ).createShader(Rect.fromLTWH(leftPad, topPad, chartW, chartH));
     canvas.drawPath(gradientPath, gradientPaint);
 
@@ -604,7 +604,7 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppTheme.textMuted.withOpacity(0.3),
+                  color: AppTheme.textMuted.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

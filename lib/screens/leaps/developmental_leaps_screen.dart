@@ -40,14 +40,14 @@ class DevelopmentalLeapsScreen extends StatelessWidget {
     final ageInWeeks = profile.ageInWeeks;
     final current = DevelopmentalLeapsData.currentLeap(ageInWeeks);
     final next = DevelopmentalLeapsData.nextLeap(ageInWeeks);
-    final allLeaps = DevelopmentalLeapsData.all;
+    const allLeaps = DevelopmentalLeapsData.all;
 
     return Scaffold(
       backgroundColor: AppTheme.surface,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            title: const Text('Developmental Leaps'),
+          const SliverAppBar(
+            title: Text('Developmental Leaps'),
             pinned: true,
             backgroundColor: AppTheme.surface,
             foregroundColor: AppTheme.textDark,
@@ -62,17 +62,17 @@ class DevelopmentalLeapsScreen extends StatelessWidget {
               nextLeap: next,
             ),
           ),
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 10),
               child: Row(
                 children: [
-                  const Icon(Icons.linear_scale_rounded,
+                  Icon(Icons.linear_scale_rounded,
                       size: 18, color: AppTheme.primary),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text(
                     'All 10 Leaps',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.textDark,
@@ -152,7 +152,7 @@ class _HeroStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: _stormyBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _stormyColor.withOpacity(0.3)),
+          border: Border.all(color: _stormyColor.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +181,7 @@ class _HeroStatusCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: _stormyColor.withOpacity(0.75),
+                          color: _stormyColor.withValues(alpha: 0.75),
                           fontFamily: 'Nunito',
                         ),
                       ),
@@ -194,7 +194,7 @@ class _HeroStatusCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _stormyColor.withOpacity(0.12),
+                color: _stormyColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -215,7 +215,7 @@ class _HeroStatusCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: _stormyColor.withOpacity(0.85),
+                color: _stormyColor.withValues(alpha: 0.85),
                 height: 1.45,
                 fontFamily: 'Nunito',
               ),
@@ -235,7 +235,7 @@ class _HeroStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: _leapBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.success.withOpacity(0.3)),
+          border: Border.all(color: AppTheme.success.withValues(alpha: 0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,7 +307,7 @@ class _HeroStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: _nextBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.primary.withOpacity(0.25)),
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.25)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +349,7 @@ class _HeroStatusCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -377,7 +377,7 @@ class _HeroStatusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: _celebrateBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.secondary.withOpacity(0.35)),
+          border: Border.all(color: AppTheme.secondary.withValues(alpha: 0.35)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -440,7 +440,7 @@ class _TimelineLeapRow extends StatelessWidget {
       case _LeapStatus.next:
         return AppTheme.primary;
       case _LeapStatus.future:
-        return AppTheme.primary.withOpacity(0.3);
+        return AppTheme.primary.withValues(alpha: 0.3);
     }
   }
 
@@ -477,7 +477,7 @@ class _TimelineLeapRow extends StatelessWidget {
                       boxShadow: _isHighlighted
                           ? [
                               BoxShadow(
-                                color: _dotColor.withOpacity(0.35),
+                                color: _dotColor.withValues(alpha: 0.35),
                                 blurRadius: 6,
                                 spreadRadius: 1,
                               )
@@ -490,7 +490,7 @@ class _TimelineLeapRow extends StatelessWidget {
                       child: Container(
                         width: 2,
                         margin: const EdgeInsets.symmetric(vertical: 4),
-                        color: _dotColor.withOpacity(0.25),
+                        color: _dotColor.withValues(alpha: 0.25),
                       ),
                     ),
                 ],
@@ -572,8 +572,9 @@ class _LeapExpansionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        isCurrent ? _accentColor.withOpacity(0.5) : const Color(0xFFEEF0F7);
+    final borderColor = isCurrent
+        ? _accentColor.withValues(alpha: 0.5)
+        : const Color(0xFFEEF0F7);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -639,7 +640,7 @@ class _LeapExpansionCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: _accentColor.withOpacity(0.1),
+                color: _accentColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -701,9 +702,9 @@ class _LeapExpansionCard extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Divider(
+    return const Divider(
       height: 1,
-      color: const Color(0xFFEEF0F7),
+      color: Color(0xFFEEF0F7),
     );
   }
 
@@ -817,7 +818,7 @@ class _LeapExpansionCard extends StatelessWidget {
                     width: 5,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.7),
+                      color: color.withValues(alpha: 0.7),
                       shape: BoxShape.circle,
                     ),
                   ),

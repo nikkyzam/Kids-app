@@ -59,7 +59,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
                   final wasAchieved = mp.isAchieved(widget.milestone.id);
                   await mp.toggleMilestone(
                       widget.profileId, widget.milestone.id);
-                  if (!wasAchieved && mounted) {
+                  if (!wasAchieved && context.mounted) {
                     _confetti.play();
                     _promptAddPhoto(context);
                   }
@@ -138,7 +138,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
                           border: Border.all(
                             color: isAchieved
                                 ? AppTheme.success
-                                : AppTheme.textMuted.withOpacity(0.4),
+                                : AppTheme.textMuted.withValues(alpha: 0.4),
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(6),
@@ -180,7 +180,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
       width: 4,
       height: 40,
       decoration: BoxDecoration(
-        color: isAchieved ? color : color.withOpacity(0.25),
+        color: isAchieved ? color : color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(2),
       ),
     );
@@ -188,7 +188,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
 
   Future<void> _promptAddPhoto(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
+    if (!context.mounted) return;
     final add = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -220,7 +220,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
       capturedAt: DateTime.now().toIso8601String(),
     ));
 
-    if (mounted) {
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Photo memory saved!'),

@@ -174,7 +174,7 @@ class WeeklyDigestScreen extends StatelessWidget {
                           border: Border.all(
                             color: done
                                 ? AppTheme.success
-                                : AppTheme.textMuted.withOpacity(0.4),
+                                : AppTheme.textMuted.withValues(alpha: 0.4),
                             width: 1.5,
                           ),
                         ),
@@ -356,7 +356,7 @@ class WeeklyDigestScreen extends StatelessWidget {
                   children: [
                     pw.Text(
                       'PlaySteps — Weekly Report',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         color: PdfColors.white,
                         fontSize: 22,
                         fontWeight: pw.FontWeight.bold,
@@ -374,7 +374,7 @@ class WeeklyDigestScreen extends StatelessWidget {
               pw.SizedBox(height: 24),
               pw.Text(
                 'Activities',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.blue,
@@ -400,7 +400,7 @@ class WeeklyDigestScreen extends StatelessWidget {
               pw.SizedBox(height: 20),
               pw.Text(
                 'Streak',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.blue,
@@ -413,7 +413,7 @@ class WeeklyDigestScreen extends StatelessWidget {
                 pw.SizedBox(height: 20),
                 pw.Text(
                   'Skill Highlights',
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 16,
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.blue,
@@ -426,7 +426,7 @@ class WeeklyDigestScreen extends StatelessWidget {
               pw.SizedBox(height: 20),
               pw.Text(
                 'Milestones Achieved This Week',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.blue,
@@ -463,7 +463,7 @@ class WeeklyDigestScreen extends StatelessWidget {
 
     await Printing.sharePdf(
       bytes: bytes,
-      filename: 'playsteps_week_${startStr}_${endStr}.pdf',
+      filename: 'playsteps_week_${startStr}_$endStr.pdf',
     );
   }
 }

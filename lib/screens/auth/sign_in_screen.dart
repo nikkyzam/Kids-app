@@ -91,7 +91,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Container(
                     width: 72,
                     height: 72,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryLight,
                       shape: BoxShape.circle,
                     ),
@@ -181,7 +181,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Container(
                     width: 72,
                     height: 72,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryLight,
                       shape: BoxShape.circle,
                     ),

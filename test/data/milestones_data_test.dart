@@ -72,7 +72,7 @@ void main() {
 
   group('MilestonesData.filterByDomain', () {
     test('null domain returns all milestones', () {
-      final all = MilestonesData.all;
+      const all = MilestonesData.all;
       final filtered = MilestonesData.filterByDomain(all, null);
       expect(filtered.length, all.length);
     });
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('filtered results are a subset of the original list', () {
-      final all = MilestonesData.all;
+      const all = MilestonesData.all;
       for (final domain in MilestoneDomain.values) {
         final filtered = MilestonesData.filterByDomain(all, domain);
         expect(filtered.length, lessThanOrEqualTo(all.length));

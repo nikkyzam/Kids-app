@@ -430,7 +430,7 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
     if (confirmed != true || !mounted) return;
 
     await AuthService.instance.leaveFamily();
-    if (mounted) {
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Left family.')),
       );
@@ -444,8 +444,9 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
       await SyncService.instance.syncAll();
       if (mounted) authProvider.setSyncStatus(SyncStatus.done);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         authProvider.setSyncStatus(SyncStatus.error, error: e.toString());
+      }
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../providers/activity_provider.dart';
 import '../../models/activity.dart';
+import '../../models/activity_completion.dart';
 import '../../theme/app_theme.dart';
 
 class ActivityHistoryScreen extends StatelessWidget {
@@ -78,7 +79,7 @@ class ActivityHistoryScreen extends StatelessWidget {
 }
 
 class _CompletionEntry {
-  final completion;
+  final ActivityCompletion completion;
   final PlayActivity? activity;
   const _CompletionEntry({required this.completion, required this.activity});
 }
@@ -122,7 +123,7 @@ class _HistoryTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: skillColor.withOpacity(0.1),
+                  color: skillColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.check_rounded, color: skillColor, size: 20),
@@ -150,7 +151,7 @@ class _HistoryTile extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
-                              color: skillColor.withOpacity(0.1),
+                              color: skillColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(activity.skillCategory.label,

@@ -24,8 +24,9 @@ class WeeklyRecapCard extends StatelessWidget {
 
         // Only show if at least one day of the week has passed since Monday
         final daysSinceMonday = today.weekday - 1; // 0 on Monday
-        if (daysSinceMonday == 0 && completedThisWeek == 0)
+        if (daysSinceMonday == 0 && completedThisWeek == 0) {
           return const SizedBox.shrink();
+        }
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -194,8 +195,8 @@ class _DayDot extends StatelessWidget {
                   : isToday
                       ? AppTheme.primary
                       : isFuture
-                          ? AppTheme.textMuted.withOpacity(0.15)
-                          : AppTheme.textMuted.withOpacity(0.3),
+                          ? AppTheme.textMuted.withValues(alpha: 0.15)
+                          : AppTheme.textMuted.withValues(alpha: 0.3),
               width: isToday ? 2 : 1.5,
             ),
           ),
@@ -210,7 +211,7 @@ class _DayDot extends StatelessWidget {
                       color: isToday
                           ? AppTheme.primary
                           : isFuture
-                              ? AppTheme.textMuted.withOpacity(0.4)
+                              ? AppTheme.textMuted.withValues(alpha: 0.4)
                               : AppTheme.textMuted,
                     ),
                   ),

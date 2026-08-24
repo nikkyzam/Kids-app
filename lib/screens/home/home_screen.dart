@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         right: 8,
                         child: Container(
                           padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: AppTheme.secondary,
                             shape: BoxShape.circle,
                           ),
@@ -416,12 +416,12 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
           children: [
             const Text('⭐', style: TextStyle(fontSize: 14)),
             const SizedBox(width: 6),
-            Text(
+            const Text(
               'Premium Plus',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFFF5A623),
+                color: Color(0xFFF5A623),
                 letterSpacing: 1.2,
               ),
             ),
@@ -431,11 +431,11 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),
                 ),
-                child: Text(
+                child: const Text(
                   'Upgrade →',
                   style: TextStyle(
                     fontSize: 11,
-                    color: const Color(0xFFF5A623),
+                    color: Color(0xFFF5A623),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -522,7 +522,7 @@ class _PremiumPlusTile extends StatelessWidget {
         side: BorderSide(
           color: isLocked
               ? Colors.transparent
-              : const Color(0xFFF5A623).withOpacity(0.4),
+              : const Color(0xFFF5A623).withValues(alpha: 0.4),
         ),
       ),
       child: InkWell(
@@ -583,7 +583,7 @@ class _InsightButton extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -620,7 +620,7 @@ class _StreakBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFFFF7043).withOpacity(0.3),
+              color: const Color(0xFFFF7043).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 3))
         ],

@@ -65,11 +65,13 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color:
-            highlight ? iconColor.withOpacity(0.08) : const Color(0xFFF4F6FB),
+        color: highlight
+            ? iconColor.withValues(alpha: 0.08)
+            : const Color(0xFFF4F6FB),
         borderRadius: BorderRadius.circular(12),
-        border:
-            highlight ? Border.all(color: iconColor.withOpacity(0.3)) : null,
+        border: highlight
+            ? Border.all(color: iconColor.withValues(alpha: 0.3))
+            : null,
       ),
       child: Row(
         children: [
@@ -133,8 +135,8 @@ class _WeekDots extends StatelessWidget {
                       color: done
                           ? AppTheme.success
                           : isToday
-                              ? AppTheme.primary.withOpacity(0.3)
-                              : AppTheme.textMuted.withOpacity(0.2),
+                              ? AppTheme.primary.withValues(alpha: 0.3)
+                              : AppTheme.textMuted.withValues(alpha: 0.2),
                       border: isToday && !done
                           ? Border.all(color: AppTheme.primary, width: 1.5)
                           : null,

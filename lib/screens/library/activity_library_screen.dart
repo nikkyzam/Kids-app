@@ -100,7 +100,7 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
                     color: isSelected ? Colors.white : color)),
             selected: isSelected,
             onSelected: (_) => setState(() => _filter = cat),
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             selectedColor: color,
             checkmarkColor: Colors.white,
             side: BorderSide.none,
@@ -205,8 +205,8 @@ class _ActivityLibraryTile extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: requiresPremium
-                  ? AppTheme.textMuted.withOpacity(0.08)
-                  : _color.withOpacity(0.12),
+                  ? AppTheme.textMuted.withValues(alpha: 0.08)
+                  : _color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -255,7 +255,7 @@ class _ActivityLibraryTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.timer_outlined,
+                    const Icon(Icons.timer_outlined,
                         size: 12, color: AppTheme.textMuted),
                     const SizedBox(width: 3),
                     Text('${activity.durationMins} min',
@@ -266,7 +266,7 @@ class _ActivityLibraryTile extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 1),
                       decoration: BoxDecoration(
-                        color: _color.withOpacity(0.1),
+                        color: _color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(activity.skillCategory.label,
@@ -306,7 +306,7 @@ class _ActivityLibraryTile extends StatelessWidget {
   Widget _buildExpanded(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _color.withOpacity(0.04),
+        color: _color.withValues(alpha: 0.04),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
       ),
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -333,9 +333,9 @@ class _ActivityLibraryTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: _color.withOpacity(0.1),
+              color: _color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _color.withOpacity(0.3)),
+              border: Border.all(color: _color.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

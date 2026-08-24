@@ -60,12 +60,11 @@ class _ParentalGateDialogState extends State<ParentalGateDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
-          const Icon(Icons.lock_outline_rounded,
-              color: AppTheme.primary, size: 20),
-          const SizedBox(width: 8),
-          const Text('Parent Check'),
+          Icon(Icons.lock_outline_rounded, color: AppTheme.primary, size: 20),
+          SizedBox(width: 8),
+          Text('Parent Check'),
         ],
       ),
       // A bounded width is required because the content holds a GridView (a
@@ -86,7 +85,7 @@ class _ParentalGateDialogState extends State<ParentalGateDialog> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.error.withOpacity(0.1),
+                  color: AppTheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text('Incorrect — try again',

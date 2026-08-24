@@ -59,16 +59,21 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
   }
 
   String get _subtext {
-    if (widget.streak >= 100)
+    if (widget.streak >= 100) {
       return 'You\'ve played with your baby every day for 100 days. That\'s extraordinary.';
-    if (widget.streak >= 60)
+    }
+    if (widget.streak >= 60) {
       return 'Two months of daily play. Your dedication is building your baby\'s brain.';
-    if (widget.streak >= 30)
+    }
+    if (widget.streak >= 30) {
       return 'A full month! Science shows consistent play at this age has lasting effects.';
-    if (widget.streak >= 21)
+    }
+    if (widget.streak >= 21) {
       return 'Three weeks builds a habit. Play is now part of your daily rhythm.';
-    if (widget.streak >= 14)
+    }
+    if (widget.streak >= 14) {
       return 'Two weeks of daily challenges. Your baby is noticing the difference.';
+    }
     return 'Seven days straight! You\'ve built the habit. Keep it going.';
   }
 
@@ -101,7 +106,7 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primary.withOpacity(0.3),
+                    color: AppTheme.primary.withValues(alpha: 0.3),
                     blurRadius: 30,
                     offset: const Offset(0, 10),
                   ),

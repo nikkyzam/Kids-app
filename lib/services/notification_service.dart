@@ -57,7 +57,7 @@ class NotificationService {
       'Time to play, $childName!',
       "Today's activity is waiting — 10 fun minutes that make a real difference 🎉",
       _nextInstance(time.hour, time.minute),
-      NotificationDetails(
+      const NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           'Daily Reminders',
@@ -65,7 +65,7 @@ class NotificationService {
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
-        iOS: const DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:

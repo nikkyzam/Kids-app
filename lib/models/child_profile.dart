@@ -28,7 +28,7 @@ class ChildProfile {
   // Returns age in weeks (0–26 weeks) then months (6–36+ months)
   String get displayAge {
     if (ageInWeeks < 4) return '$ageInWeeks week${ageInWeeks == 1 ? '' : 's'}';
-    if (ageInWeeks < 26) return '${ageInWeeks} weeks';
+    if (ageInWeeks < 26) return '$ageInWeeks weeks';
     final m = ageInMonths;
     if (m < 24) return '$m month${m == 1 ? '' : 's'}';
     final years = m ~/ 12;
