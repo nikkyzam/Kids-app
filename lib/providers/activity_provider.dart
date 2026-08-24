@@ -40,18 +40,28 @@ class ActivityProvider extends ChangeNotifier {
   bool completedOnDay(DateTime day) =>
       _allCompletions.any((c) => c.dateKey == _keyFor(day));
 
+  /// The calendar day before [d].
+  ///
+  /// Built from date components rather than `subtract(Duration(days: 1))`:
+  /// a Duration is exactly 24 hours, but a calendar day is 23 or 25 hours
+  /// across a daylight-saving transition, which silently skips or repeats a
+  /// date near midnight.
+  static DateTime _previousDay(DateTime d) =>
+      DateTime(d.year, d.month, d.day - 1);
+
   int get currentStreak {
     if (_allCompletions.isEmpty) return 0;
     final days = _allCompletions.map((c) => c.dateKey).toSet();
     int streak = 0;
-    var day = DateTime.now();
+    final now = DateTime.now();
+    var day = DateTime(now.year, now.month, now.day);
     // Allow today to not yet be done without breaking the streak
     if (!days.contains(_keyFor(day))) {
-      day = day.subtract(const Duration(days: 1));
+      day = _previousDay(day);
     }
     while (days.contains(_keyFor(day))) {
       streak++;
-      day = day.subtract(const Duration(days: 1));
+      day = _previousDay(day);
     }
     return streak;
   }
@@ -64,7 +74,13 @@ class ActivityProvider extends ChangeNotifier {
     for (int i = 1; i < days.length; i++) {
       final prev = DateTime.parse(days[i - 1]);
       final curr = DateTime.parse(days[i]);
-      if (curr.difference(prev).inDays == 1) {
+      // Compare calendar days, not elapsed hours: across a DST boundary two
+      // consecutive dates are 23 hours apart, so `difference().inDays` is 0
+      // and the streak would break for every user in a DST timezone.
+      final expected = DateTime(prev.year, prev.month, prev.day + 1);
+      if (curr.year == expected.year &&
+          curr.month == expected.month &&
+          curr.day == expected.day) {
         current++;
         if (current > longest) longest = current;
       } else {

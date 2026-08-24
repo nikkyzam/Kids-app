@@ -39,6 +39,14 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      # CI runners are UTC, which has no daylight-saving transitions, so
+      # date-arithmetic bugs around DST cannot surface there. Re-run the suite
+      # in a DST timezone to catch them.
+      - name: Run tests in a DST timezone
+        run: flutter test
+        env:
+          TZ: America/New_York
+
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
