@@ -53,11 +53,17 @@ class BadgeProvider extends ChangeNotifier {
     if (achievedCount >= 1) await tryUnlock('milestone_first');
     if (achievedCount >= 25) await tryUnlock('milestone_25');
 
-    // Perfect week: Mon–Sun all completed
-    final today = Clock.now();
-    final weekStart = today.subtract(Duration(days: today.weekday - 1));
-    final isPerfect = List.generate(7, (i) => weekStart.add(Duration(days: i)))
-        .every((day) => ap.completedOnDay(day));
+    // Perfect week: Mon–Sun all completed.
+    // Built from date components rather than Durations — a Duration is always
+    // 24 hours, so across a daylight-saving change the generated week would
+    // repeat or skip a date and a genuinely perfect week could fail to unlock.
+    final today = Clock.today();
+    final monday =
+        DateTime(today.year, today.month, today.day - (today.weekday - 1));
+    final isPerfect = List.generate(
+      7,
+      (i) => DateTime(monday.year, monday.month, monday.day + i),
+    ).every((day) => ap.completedOnDay(day));
     if (isPerfect) await tryUnlock('perfect_week');
 
     // Per-skill counts

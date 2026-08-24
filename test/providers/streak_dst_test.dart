@@ -5,6 +5,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:playsteps/models/activity_completion.dart';
 import 'package:playsteps/providers/activity_provider.dart';
 import 'package:playsteps/data/database_helper.dart';
+import 'package:playsteps/models/child_profile.dart';
 
 /// Streaks are counted in calendar days, but a `Duration` is always exactly
 /// 24 hours. On the days around a daylight-saving transition those two things
@@ -26,6 +27,13 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await DatabaseHelper.instance.resetForTesting();
+    // Foreign keys are enforced, so rows must belong to a real child.
+    // AUTOINCREMENT makes this profile id 1, which the tests below use.
+    await DatabaseHelper.instance.insertProfile(ChildProfile(
+      name: 'Test Child',
+      dateOfBirth: DateTime(2025, 1, 1),
+      createdAt: DateTime(2025, 1, 1),
+    ));
   });
 
   Future<ActivityProvider> providerWith(List<String> dateKeys) async {

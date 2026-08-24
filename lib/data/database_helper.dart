@@ -32,9 +32,19 @@ class DatabaseHelper {
     return openDatabase(
       path,
       version: 5,
+      onConfigure: _onConfigure,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+  }
+
+  /// SQLite disables foreign keys per connection by default, so the
+  /// `ON DELETE CASCADE` clauses in the schema were declared but never
+  /// enforced: deleting a child left their completions, milestones, badges,
+  /// growth measurements and photos behind. The parent believed the data was
+  /// gone while it stayed on disk and kept syncing.
+  Future<void> _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -204,12 +214,16 @@ class DatabaseHelper {
     final db = await database;
     const uuidGen = Uuid();
     final now = SyncTimestamp.now();
+    final uuid = uuidGen.v4();
     final map = profile.toMap()
       ..remove('id')
-      ..['uuid'] = uuidGen.v4()
+      ..['uuid'] = uuid
       ..['updated_at'] = now;
     final id = await db.insert('child_profiles', map);
-    return profile.copyWith(id: id);
+    // The uuid must come back with the profile: it is the identity sync uses,
+    // and returning it as null made the in-memory object disagree with the row
+    // that was just written.
+    return profile.copyWith(id: id, uuid: uuid);
   }
 
   Future<void> updateProfile(ChildProfile profile) async {

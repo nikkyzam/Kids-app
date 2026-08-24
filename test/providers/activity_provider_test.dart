@@ -41,6 +41,13 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await DatabaseHelper.instance.resetForTesting();
+    // Foreign keys are enforced, so rows must belong to a real child.
+    // AUTOINCREMENT makes this profile id 1, which the tests below use.
+    await DatabaseHelper.instance.insertProfile(ChildProfile(
+      name: 'Test Child',
+      dateOfBirth: DateTime(2025, 1, 1),
+      createdAt: DateTime(2025, 1, 1),
+    ));
   });
 
   group('ActivityProvider — initial state', () {
