@@ -41,6 +41,14 @@
 	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Parental gate uses Face ID for quick access verification.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PlaySteps uses the camera so you can capture photo memories of your child's activities and milestones. Photos stay on this device.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PlaySteps needs photo access to save the memories you capture of your child's activities and milestones.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>PlaySteps saves the photo memories you capture to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>PlaySteps does not record audio; this access is only requested by the camera component.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
