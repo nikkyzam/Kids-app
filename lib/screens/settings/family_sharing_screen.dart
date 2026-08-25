@@ -33,9 +33,15 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
   }
 
   Future<void> _loadCode() async {
-    final code = await AuthService.instance.getMyInviteCode();
-    if (mounted && code != null) {
-      setState(() => _myCode = code);
+    // Fetched on open, so a transient backend failure must leave the rest of
+    // the screen usable rather than taking it down with an unhandled error.
+    try {
+      final code = await AuthService.instance.getMyInviteCode();
+      if (mounted && code != null) {
+        setState(() => _myCode = code);
+      }
+    } catch (_) {
+      // No code to show; the generate button remains available.
     }
   }
 
@@ -214,14 +220,19 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _myCode!,
-                    style: const TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.primary,
-                      letterSpacing: 6,
+                  // 28pt with 6px tracking beside the copy button is wider
+                  // than a 360px phone allows.
+                  Flexible(
+                    child: Text(
+                      _myCode!,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primary,
+                        letterSpacing: 6,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -274,8 +285,11 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
               const Icon(Icons.group_add_rounded,
                   color: AppTheme.primary, size: 20),
               const SizedBox(width: 8),
-              Text('Have an invite code?',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Flexible(
+                child: Text('Have an invite code?',
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
             ],
           ),
           const SizedBox(height: 16),

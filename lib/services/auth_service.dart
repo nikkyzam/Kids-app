@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
@@ -18,8 +19,22 @@ class SyncUnavailableException implements Exception {
 }
 
 class AuthService {
-  AuthService._();
-  static final AuthService instance = AuthService._();
+  AuthService();
+
+  static AuthService _instance = AuthService();
+
+  /// The active auth service.
+  ///
+  /// Everything here is backed by Supabase, so screens that depend on a
+  /// signed-in session are otherwise untestable. Tests substitute a subclass
+  /// via [instance]; production never touches the setter.
+  static AuthService get instance => _instance;
+
+  @visibleForTesting
+  static set instance(AuthService value) => _instance = value;
+
+  @visibleForTesting
+  static void resetInstance() => _instance = AuthService();
 
   SupabaseClient get _client => Supabase.instance.client;
 
