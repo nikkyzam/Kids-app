@@ -1,5 +1,5 @@
 name: playsteps
-description: Daily play activities and milestone tracking for parents. No cloud, no accounts.
+description: Daily play activities and milestone tracking for parents. Private by default, with optional family sync.
 version: 1.0.0+1
 publish_to: none
 

@@ -52,11 +52,12 @@ Denying either permission leaves the rest of the app fully usable.
 
 If you create an account and enable Family Sharing, the following is uploaded to
 the app's backend so a co-parent can see the same information: child profile
-details, activity completions, milestone achievements, unlocked badges, growth
-measurements, and photo captions.
+details, activity completions, milestone achievements, unlocked badges, and
+growth measurements.
 
-**Photographs themselves are not uploaded.** Only the on-device file path and
-caption are synchronised, so photos remain solely on the device that took them.
+**Photo memories are not synchronised at all.** Neither the image nor its
+caption leaves the device that captured it, so a photo is only ever visible on
+that device.
 
 If you never enable Family Sharing, the app makes no network requests for your
 data and no account is created.

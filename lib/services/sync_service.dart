@@ -62,7 +62,10 @@ class SyncService {
     await _pushMilestones(familyId, since);
     await _pushBadges(familyId, since);
     await _pushGrowth(familyId, since);
-    await _pushPhotos(familyId, since);
+    // Photo memories are deliberately not synced. Only the on-device file
+    // path would travel, never the image, so a co-parent received tiles that
+    // could never resolve to a picture. Photos stay on the device that took
+    // them; see PRIVACY.md.
   }
 
   // ---------------------------------------------------------------------------
@@ -75,7 +78,6 @@ class SyncService {
     await _pullMilestones(familyId, since);
     await _pullBadges(familyId, since);
     await _pullGrowth(familyId, since);
-    await _pullPhotos(familyId, since);
   }
 
   // ---------------------------------------------------------------------------
@@ -265,43 +267,6 @@ class SyncService {
 
   // ---------------------------------------------------------------------------
   // Push: photo_memories
-  // ---------------------------------------------------------------------------
-
-  Future<void> _pushPhotos(String familyId, String since) async {
-    final db = await DatabaseHelper.instance.database;
-    final profiles = await db.query('child_profiles', columns: ['id', 'uuid']);
-
-    for (final profile in profiles) {
-      final profileId = profile['id'];
-      final profileUuid = profile['uuid'] as String?;
-      if (profileUuid == null) continue;
-
-      final rows = await db.query(
-        'photo_memories',
-        where: 'profile_id = ? AND updated_at >= ?',
-        whereArgs: [profileId, since],
-      );
-
-      if (rows.isEmpty) continue;
-
-      final payload = rows
-          .map((r) => {
-                'family_id': familyId,
-                'profile_uuid': profileUuid,
-                'local_id': r['id'],
-                'reference_type': r['reference_type'],
-                'reference_id': r['reference_id'],
-                'image_path': r['image_path'],
-                'caption': r['caption'],
-                'captured_at': r['captured_at'],
-                'updated_at': r['updated_at'],
-              })
-          .toList();
-
-      await _backend.upsertAll('photo_memories', payload,
-          onConflict: 'family_id,profile_uuid,local_id');
-    }
-  }
 
   // ---------------------------------------------------------------------------
   // Pull: child_profiles
@@ -536,51 +501,4 @@ class SyncService {
 
   // ---------------------------------------------------------------------------
   // Pull: photo_memories
-  // ---------------------------------------------------------------------------
-
-  Future<void> _pullPhotos(String familyId, String since) async {
-    final db = await DatabaseHelper.instance.database;
-
-    final remote = await _backend.fetchSince('photo_memories',
-        familyId: familyId, since: since);
-
-    for (final row in remote) {
-      final profileUuid = row['profile_uuid'] as String?;
-      if (profileUuid == null) continue;
-
-      final profileRows = await db.query(
-        'child_profiles',
-        columns: ['id'],
-        where: 'uuid = ?',
-        whereArgs: [profileUuid],
-      );
-      if (profileRows.isEmpty) continue;
-      final profileId = profileRows.first['id'];
-
-      final referenceType = row['reference_type'] as String;
-      final referenceId = row['reference_id'] as String;
-      final capturedAt = row['captured_at'] as String;
-
-      final existing = await db.query(
-        'photo_memories',
-        where:
-            'profile_id = ? AND reference_type = ? AND reference_id = ? AND captured_at = ?',
-        whereArgs: [profileId, referenceType, referenceId, capturedAt],
-      );
-
-      if (existing.isEmpty) {
-        // image_path will be a stale path on this device — that's OK;
-        // the app can re-download the image separately if needed.
-        await db.insert('photo_memories', {
-          'profile_id': profileId,
-          'reference_type': referenceType,
-          'reference_id': referenceId,
-          'image_path': row['image_path'],
-          'caption': row['caption'],
-          'captured_at': capturedAt,
-          'updated_at': row['updated_at'],
-        });
-      }
-    }
-  }
 }

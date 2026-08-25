@@ -158,7 +158,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: Theme.of(context).textTheme.displayLarge),
         const SizedBox(height: 10),
         Text(
-          'No accounts. No cloud. Just play.',
+          // The app has optional accounts and cloud sync for family sharing,
+          // so the old "No accounts. No cloud." line was no longer true. What
+          // is still true is that nothing leaves the device on its own.
+          'No ads. No tracking. Just play.',
           style: Theme.of(context)
               .textTheme
               .bodyLarge

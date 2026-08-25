@@ -102,7 +102,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text(
-          'Everything you need to support your child\'s first three years — all offline.',
+          'Everything you need to support your child\'s first three years.',
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -115,11 +115,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Widget _buildFeatureList() {
     final features = [
+      // Describes the library as it actually is. The daily activity is drawn
+      // from the handful matching the child's current age band, so promising a
+      // new challenge every day was not something the content could deliver.
       const _Feature(
           Icons.play_circle_rounded,
           AppTheme.primary,
-          'Unlimited Daily Activities',
-          'New play challenges every day through 36 months'),
+          'Full Activity Library',
+          'Every age-matched activity from 4 weeks to 36 months'),
       const _Feature(Icons.checklist_rounded, AppTheme.success,
           'Full Milestone Ledger', 'Track all domains from birth to 3 years'),
       const _Feature(Icons.picture_as_pdf_rounded, AppTheme.secondary,
@@ -129,8 +132,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
           AppTheme.cognitiveColor,
           'Advanced Domain Filter',
           'Focus on the skills that matter most right now'),
-      const _Feature(Icons.lock_outline_rounded, AppTheme.grossMotorColor,
-          '100% Private', 'Zero cloud. Zero data collection. Always.'),
+      // "Zero cloud, always" stopped being true when family sharing shipped.
+      // Private-by-default is the accurate claim: nothing leaves the device
+      // unless the parent turns sharing on.
+      const _Feature(
+          Icons.lock_outline_rounded,
+          AppTheme.grossMotorColor,
+          'Private by Default',
+          'No accounts, no ads, no tracking. Cloud sync only if you turn it on.'),
     ];
 
     return Column(

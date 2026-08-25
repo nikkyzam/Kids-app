@@ -273,30 +273,8 @@ void main() {
     });
   });
 
-  group('photo memories', () {
-    test('pull inserts a remote memory', () async {
-      backend.remote['photo_memories'] = [
-        {
-          'family_id': _familyId,
-          'profile_uuid': child.uuid,
-          'local_id': 1,
-          'reference_type': 'activity',
-          'reference_id': '2026-05-19',
-          'image_path': '/tmp/remote.jpg',
-          'caption': 'A good day',
-          'captured_at': DateTime(2026, 5, 19).toIso8601String(),
-          'updated_at': stamp,
-        }
-      ];
-
-      await sync();
-
-      final saved = await DatabaseHelper.instance.getPhotos(child.id!);
-      expect(saved, hasLength(1));
-      expect(saved.single.caption, 'A good day');
-    });
-
-    test('push sends a local memory', () async {
+  group('photo memories are deliberately not synced', () {
+    test('a local memory is never pushed', () async {
       await DatabaseHelper.instance.savePhoto(PhotoMemory(
         profileId: child.id!,
         referenceType: 'milestone',
@@ -307,7 +285,46 @@ void main() {
 
       await sync();
 
-      expect(backend.pushedTo('photo_memories'), hasLength(1));
+      // Only the on-device path would travel, never the image, so a co-parent
+      // would receive a tile that could never resolve to a picture.
+      expect(backend.pushedTo('photo_memories'), isEmpty);
+    });
+
+    test('a remote memory is not pulled in', () async {
+      backend.remote['photo_memories'] = [
+        {
+          'family_id': _familyId,
+          'profile_uuid': child.uuid,
+          'local_id': 1,
+          'reference_type': 'activity',
+          'reference_id': '2026-05-19',
+          'image_path': '/tmp/on-another-device.jpg',
+          'caption': 'A good day',
+          'captured_at': DateTime(2026, 5, 19).toIso8601String(),
+          'updated_at': stamp,
+        }
+      ];
+
+      await sync();
+
+      expect(await DatabaseHelper.instance.getPhotos(child.id!), isEmpty);
+    });
+
+    test('local memories survive a sync untouched', () async {
+      await DatabaseHelper.instance.savePhoto(PhotoMemory(
+        profileId: child.id!,
+        referenceType: 'activity',
+        referenceId: '2026-05-20',
+        imagePath: '/tmp/mine.jpg',
+        caption: 'Mine',
+        capturedAt: DateTime(2026, 5, 20).toIso8601String(),
+      ));
+
+      await sync();
+
+      final saved = await DatabaseHelper.instance.getPhotos(child.id!);
+      expect(saved, hasLength(1));
+      expect(saved.single.caption, 'Mine');
     });
   });
 
@@ -331,14 +348,6 @@ void main() {
         value: 7.0,
         measuredOn: DateTime(2026, 5, 20).toIso8601String(),
       ));
-      await DatabaseHelper.instance.savePhoto(PhotoMemory(
-        profileId: child.id!,
-        referenceType: 'activity',
-        referenceId: '2026-05-20',
-        imagePath: '/tmp/a.jpg',
-        capturedAt: DateTime(2026, 5, 20).toIso8601String(),
-      ));
-
       await sync();
 
       final tables = backend.pushes.map((p) => p.table).toSet();
@@ -350,7 +359,6 @@ void main() {
           'milestone_achievements',
           'unlocked_badges',
           'growth_measurements',
-          'photo_memories',
         ]),
       );
     });

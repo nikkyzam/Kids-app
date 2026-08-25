@@ -212,10 +212,26 @@ class _MemoryCard extends StatelessWidget {
             Image(
               image: localImageProvider(photo.imagePath),
               fit: BoxFit.cover,
+              // A photo file can go missing if it was removed outside the app
+              // or the memory came from a restored backup, so say what
+              // happened rather than showing a bare broken-image glyph.
               errorBuilder: (_, __, ___) => Container(
                 color: AppTheme.primaryLight,
-                child: const Icon(Icons.broken_image_rounded,
-                    color: AppTheme.textMuted, size: 36),
+                padding: const EdgeInsets.all(8),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.image_not_supported_outlined,
+                        color: AppTheme.textMuted, size: 28),
+                    SizedBox(height: 6),
+                    Text(
+                      'Photo unavailable\non this device',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 10, color: AppTheme.textMuted, height: 1.3),
+                    ),
+                  ],
+                ),
               ),
             ),
             Positioned(

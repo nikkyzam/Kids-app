@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-PlaySteps is a baby and toddler development tracker for parents of children from birth through 36 months. It delivers daily age-appropriate play activities and a CDC-aligned milestone ledger — entirely on-device, with no accounts, no cloud sync, and no subscription required for the core experience. The freemium model offers full access for birth–4 weeks at no cost; a single one-time purchase of $4.99 unlocks all content through 36 months. Because all data lives in a local SQLite database, parents retain full ownership of their child's developmental records.
+PlaySteps is a baby and toddler development tracker for parents of children from birth through 36 months. It delivers daily age-appropriate play activities and a CDC-aligned milestone ledger — on-device by default, with no ads, no tracking, and no subscription required for the core experience; accounts and cloud sync exist only for optional family sharing. The freemium model offers full access for birth–4 weeks at no cost; a single one-time purchase unlocks all content through 36 months. Because all data lives in a local SQLite database, parents retain full ownership of their child's developmental records.
 
 ---
 
