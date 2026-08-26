@@ -10,12 +10,13 @@ PlaySteps is a baby and toddler development tracker for parents of children from
 
 | Tool | Version | Notes |
 |---|---|---|
-| Flutter SDK | ≥ 3.3.0 | [Install guide](https://docs.flutter.dev/get-started/install) |
-| Dart SDK | ≥ 3.3.0 | Bundled with Flutter |
+| Flutter SDK | 3.44.7 | [Install guide](https://docs.flutter.dev/get-started/install) |
+| Dart SDK | 3.12+ | Bundled with Flutter |
 | Xcode | ≥ 15 | macOS only, required for iOS builds |
-| Android Studio / Android SDK | Latest stable | Include NDK via SDK Manager |
+| Android SDK | Platform 36, Build-Tools 36 | Android Studio, or just the command-line tools — see below |
 | CocoaPods | Latest | iOS dependency management |
 | Ruby | ≥ 2.7 | Required for CocoaPods and Fastlane |
+| JDK | 17 or 21 | Required by Gradle |
 
 Verify your Flutter environment before starting:
 
@@ -44,37 +45,42 @@ After `pod install` completes, open the iOS project only via `ios/Runner.xcworks
 
 ### Android
 
-**`android/app/build.gradle`** — confirm the following SDK versions:
+**Toolchain** — these versions are pinned together and move as a set. Flutter
+3.44 requires Gradle >= 8.7 and AGP >= 8.6; the AndroidX libraries pulled in by
+`supabase_flutter` (androidx.browser 1.9, androidx.activity 1.12) additionally
+require AGP >= 8.9.1 and compiling against SDK 36.
 
-```groovy
-android {
-    compileSdkVersion 34
+| Component | Version | Where |
+|---|---|---|
+| Gradle | 8.11.1 | `android/gradle/wrapper/gradle-wrapper.properties` |
+| Android Gradle Plugin | 8.9.1 | `android/settings.gradle` |
+| Kotlin plugin | 1.9.24 | `android/settings.gradle` |
+| compileSdk | 36 | `android/app/build.gradle` |
+| targetSdk | 34 | `android/app/build.gradle` |
+| minSdk | `flutter.minSdkVersion` | `android/app/build.gradle` |
 
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 34
-    }
-}
+`flutter_local_notifications` schedules with `java.time`, so its AAR requires
+core library desugaring. That is enabled in `android/app/build.gradle` and is
+why source/target compatibility is Java 11 rather than 8 — removing either
+breaks the build.
+
+**SDK packages** — with only the command-line tools installed:
+
+```bash
+brew install --cask android-commandlinetools
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+yes | sdkmanager --licenses
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+flutter config --android-sdk "$ANDROID_HOME"
 ```
 
 **In-App Purchase** — the `in_app_purchase` plugin pulls in `com.android.billingclient` automatically. No manual dependency entry is required.
 
-**Scheduled Notifications** — add the `SCHEDULE_EXACT_ALARM` permission to `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-```
-
-**File Picker** — add storage permissions to `AndroidManifest.xml`:
-
-```xml
-<!-- Android ≤ 12 -->
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-<!-- Android 13+ -->
-<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-<!-- If full external storage access is needed (rare) -->
-<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-```
+**Permissions** — already declared in `android/app/src/main/AndroidManifest.xml`;
+no manual edit needed. `POST_NOTIFICATIONS`, `VIBRATE`, `SCHEDULE_EXACT_ALARM`
+and `USE_EXACT_ALARM` for the daily reminder, `RECEIVE_BOOT_COMPLETED` (with
+the flutter_local_notifications boot receivers) so a scheduled reminder
+survives a restart, and `CAMERA` for photo memories.
 
 **Release Signing** — generate a keystore and configure signing:
 
@@ -298,7 +304,11 @@ sign-in and family-sharing screens show an "unavailable" state by design.
 ### Android APK / AAB
 
 ```bash
-# Signed APK — suitable for direct installation / QA testing
+# Per-architecture APKs — much smaller than the universal build.
+# app-arm64-v8a-release.apk (~24MB) suits essentially any modern phone.
+flutter build apk --release --split-per-abi
+
+# Universal APK — runs anywhere, ~65MB
 flutter build apk --release
 
 # App Bundle — required format for Google Play Store submission
