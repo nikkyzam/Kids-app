@@ -14,6 +14,7 @@ import 'badge_unlocked_dialog.dart';
 import 'confetti_overlay.dart';
 import 'streak_milestone_dialog.dart';
 import '../screens/paywall/paywall_screen.dart';
+import '../services/purchase_service.dart';
 import '../utils/clock.dart';
 
 class ActivityCard extends StatefulWidget {
@@ -285,18 +286,28 @@ class _ActivityCardState extends State<ActivityCard> {
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 6),
             Text(
-              'Unlock all daily challenges through 36 months with a one-time purchase.',
+              'Unlock the full activity library through 36 months with a '
+              'one-time purchase.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PaywallScreen())),
-              style:
-                  FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
-              child: const Text('Unlock Premium — \$4.99'),
-            ),
+            Builder(builder: (context) {
+              // Read the price from the store rather than hard-coding it, so
+              // this card cannot advertise a different amount than the
+              // purchase sheet charges in the user's currency.
+              final price =
+                  PurchaseService.instance.priceFor(Entitlement.premium);
+              return FilledButton(
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PaywallScreen())),
+                style:
+                    FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
+                child: Text(price == null
+                    ? 'Unlock Premium'
+                    : 'Unlock Premium — $price'),
+              );
+            }),
           ],
         ),
       ),

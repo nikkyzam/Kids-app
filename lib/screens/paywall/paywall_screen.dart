@@ -139,7 +139,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           Icons.lock_outline_rounded,
           AppTheme.grossMotorColor,
           'Private by Default',
-          'No accounts, no ads, no tracking. Cloud sync only if you turn it on.'),
+          'No ads, no tracking. Accounts and cloud sync only if you turn on '
+              'family sharing.'),
     ];
 
     return Column(

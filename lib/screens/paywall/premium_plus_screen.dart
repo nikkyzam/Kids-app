@@ -130,9 +130,12 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
                 ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            '\$7.99 / year',
-            style: TextStyle(
+          // Store-localised: a hard-coded figure would disagree with what the
+          // subscription sheet charges outside the US.
+          Text(
+            PurchaseService.instance.priceFor(Entitlement.premiumPlus) ??
+                'See price in store',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.w800,
@@ -140,7 +143,10 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'That\'s less than 67 cents a month',
+            // Was "less than 67 cents a month", which only held while the
+            // price was hard-coded at \$7.99 and would be wrong in any other
+            // currency.
+            'Billed once a year. Cancel anytime.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14,
