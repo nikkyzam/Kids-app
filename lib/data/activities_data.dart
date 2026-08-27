@@ -1,10 +1,12 @@
 import '../models/activity.dart';
+import 'activities_draft_data.dart';
 import '../utils/clock.dart';
 
 class ActivitiesData {
   ActivitiesData._();
 
-  static const List<PlayActivity> all = [
+  /// Activities that have been through content review.
+  static const List<PlayActivity> reviewed = [
     // ─── 0–4 weeks (FREE TIER) ───────────────────────────────────────────────
     PlayActivity(
       id: 'act_0_1',
@@ -791,6 +793,16 @@ class ActivitiesData {
       skillTargeted: 'Empathy, Emotional Reasoning & Narrative Play',
       skillCategory: SkillCategory.socialEmotional,
     ),
+  ];
+
+  /// Every activity the app can offer.
+  ///
+  /// [ActivitiesDraftData.pendingReview] is drafted content that has not been
+  /// professionally reviewed — see the warning at the top of that file. Drop it
+  /// from this list to ship only reviewed activities.
+  static const List<PlayActivity> all = [
+    ...reviewed,
+    ...ActivitiesDraftData.pendingReview,
   ];
 
   static List<PlayActivity> forAgeBandWeeks(int ageInWeeks) {

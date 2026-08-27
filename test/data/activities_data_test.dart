@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playsteps/data/activities_data.dart';
+import 'package:playsteps/data/activities_draft_data.dart';
 import 'package:playsteps/models/activity.dart';
 
 void main() {
@@ -128,6 +129,50 @@ void main() {
       final a = ActivitiesData.todayActivity(0);
       final b = ActivitiesData.todayActivity(0);
       expect(a?.id, b?.id);
+    });
+  });
+
+  group('daily rotation depth', () {
+    // todayActivity picks band[dayOfYear % band.length], so a band holding N
+    // activities repeats every N days. Four per band meant a parent saw the
+    // same four activities all month.
+    test('every age band offers at least ten activities', () {
+      final bands = <String, int>{};
+      for (final a in ActivitiesData.all) {
+        final key = '${a.ageBandMinWeeks}-${a.ageBandMaxWeeks}';
+        bands[key] = (bands[key] ?? 0) + 1;
+      }
+
+      expect(bands, isNotEmpty);
+      bands.forEach((band, count) {
+        expect(count, greaterThanOrEqualTo(10),
+            reason: 'band $band has only $count activities, so the daily '
+                'activity repeats every $count days');
+      });
+    });
+
+    test('activity ids are unique', () {
+      final ids = ActivitiesData.all.map((a) => a.id).toList();
+      expect(ids.toSet().length, ids.length,
+          reason: 'a duplicate id would make one activity unreachable');
+    });
+
+    test('every band is covered with no gaps from 0 to 156 weeks', () {
+      for (var week = 0; week < 156; week += 1) {
+        expect(ActivitiesData.forAgeBandWeeks(week), isNotEmpty,
+            reason: 'no activity available at $week weeks');
+      }
+    });
+
+    test('drafted activities are separable from reviewed ones', () {
+      // The draft batch has not been professionally reviewed; keeping the two
+      // lists distinct is what makes it removable.
+      expect(ActivitiesData.reviewed, isNotEmpty);
+      expect(
+        ActivitiesData.all.length,
+        ActivitiesData.reviewed.length +
+            ActivitiesDraftData.pendingReview.length,
+      );
     });
   });
 }
