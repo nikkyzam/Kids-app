@@ -1,82 +1,74 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playsteps/models/child_profile.dart';
+import 'package:playsteps/utils/clock.dart';
 
+/// Ages are asserted against a frozen clock and explicit dates.
+///
+/// These previously built a date of birth with `DateTime(year, month - 6, day)`
+/// relative to today, which Dart silently normalises when the target month is
+/// shorter than the current day: run on the 31st of August,
+/// `DateTime(2026, 2, 31)` becomes 3 March, so "six months ago" was really five
+/// months and 28 days and the test failed. It only broke on certain calendar
+/// days, which is the worst kind of flake.
 void main() {
+  // A mid-month date, so no arithmetic below can roll over a month boundary.
+  final today = DateTime(2026, 8, 15, 12);
+  setUp(() => Clock.freeze(today));
+  tearDown(Clock.reset);
+
+  ChildProfile bornOn(DateTime dob) =>
+      ChildProfile(name: 'A', dateOfBirth: dob, createdAt: dob);
+
   group('ChildProfile.ageInWeeks', () {
     test('returns 0 for newborn born today', () {
-      final profile = ChildProfile(
-          name: 'A', dateOfBirth: DateTime.now(), createdAt: DateTime.now());
-      expect(profile.ageInWeeks, 0);
+      expect(bornOn(today).ageInWeeks, 0);
     });
 
     test('returns 2 for 14-day-old baby', () {
-      final dob = DateTime.now().subtract(const Duration(days: 14));
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.ageInWeeks, 2);
+      expect(bornOn(DateTime(2026, 8, 1)).ageInWeeks, 2);
     });
 
     test('returns 26 for 182-day-old baby', () {
-      final dob = DateTime.now().subtract(const Duration(days: 182));
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.ageInWeeks, 26);
+      expect(bornOn(DateTime(2026, 2, 14)).ageInWeeks, 26);
     });
   });
 
   group('ChildProfile.ageInMonths', () {
     test('returns 0 for newborn', () {
-      final profile = ChildProfile(
-          name: 'A', dateOfBirth: DateTime.now(), createdAt: DateTime.now());
-      expect(profile.ageInMonths, 0);
+      expect(bornOn(today).ageInMonths, 0);
     });
 
     test('returns 6 for a 6-month-old', () {
-      final now = DateTime.now();
-      final dob = DateTime(now.year, now.month - 6, now.day);
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.ageInMonths, 6);
+      expect(bornOn(DateTime(2026, 2, 15)).ageInMonths, 6);
     });
 
     test('returns 12 for a 1-year-old', () {
-      final now = DateTime.now();
-      final dob = DateTime(now.year - 1, now.month, now.day);
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.ageInMonths, 12);
+      expect(bornOn(DateTime(2025, 8, 15)).ageInMonths, 12);
+    });
+
+    test('a birth date on the 31st does not roll into the next month', () {
+      // 31 March to 15 August is four full months, not five: the day of the
+      // month has not come round yet.
+      Clock.freeze(DateTime(2026, 8, 15, 12));
+      expect(bornOn(DateTime(2026, 3, 31)).ageInMonths, 4);
     });
   });
 
   group('ChildProfile.displayAge', () {
     test('shows weeks for baby under 4 weeks', () {
-      final dob = DateTime.now().subtract(const Duration(days: 10));
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.displayAge, contains('week'));
+      expect(bornOn(DateTime(2026, 8, 5)).displayAge, contains('week'));
     });
 
     test('shows weeks for baby between 4 and 26 weeks', () {
-      final dob = DateTime.now().subtract(const Duration(days: 70));
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.displayAge, contains('week'));
+      expect(bornOn(DateTime(2026, 6, 6)).displayAge, contains('week'));
     });
 
     test('shows months for baby between 6 and 24 months', () {
-      final now = DateTime.now();
-      final dob = DateTime(now.year, now.month - 9, now.day);
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.displayAge, contains('month'));
+      expect(bornOn(DateTime(2025, 11, 15)).displayAge, contains('month'));
     });
 
     test('shows yr for baby 2+ years', () {
-      final now = DateTime.now();
-      final dob = DateTime(now.year - 2, now.month, now.day);
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.displayAge, contains('yr'));
+      expect(bornOn(DateTime(2024, 8, 15)).displayAge, contains('yr'));
     });
   });
 
@@ -95,10 +87,7 @@ void main() {
     });
 
     test('returns actual value within range', () {
-      final dob = DateTime.now().subtract(const Duration(days: 70));
-      final profile =
-          ChildProfile(name: 'A', dateOfBirth: dob, createdAt: DateTime.now());
-      expect(profile.ageBandWeeks, 10);
+      expect(bornOn(DateTime(2026, 6, 6)).ageBandWeeks, 10);
     });
   });
 
