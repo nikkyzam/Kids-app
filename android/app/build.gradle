@@ -54,7 +54,10 @@ android {
     defaultConfig {
         applicationId "com.playsteps.app"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 34
+        // Play requires new apps and updates to target an API level within a
+        // year of the latest Android release; API 36 is the current floor.
+        // Targeting 35+ also opts into enforced edge-to-edge display.
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
