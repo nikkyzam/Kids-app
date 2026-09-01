@@ -1,4 +1,4 @@
-package com.playsteps.app
+package com.nikkyzam.playsteps.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.playsteps.app"
+    namespace "com.nikkyzam.playsteps.app"
     compileSdkVersion 36
     ndkVersion flutter.ndkVersion
 
@@ -52,7 +52,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.playsteps.app"
+        applicationId "com.nikkyzam.playsteps.app"
         minSdkVersion flutter.minSdkVersion
         // Play requires new apps and updates to target an API level within a
         // year of the latest Android release; API 36 is the current floor.
