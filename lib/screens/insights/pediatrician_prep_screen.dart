@@ -216,46 +216,47 @@ class _VisitInfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          Row(
+          // A Wrap rather than a Row: both pills are sized to their own text,
+          // and a long name, a corrected age, or a larger text scale put the
+          // pair past the card's edge. Wrapping to a second line costs
+          // nothing here and cannot overflow.
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  profile.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Nunito',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  profile.displayAge,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Nunito',
-                  ),
-                ),
-              ),
+              _HeaderPill(text: profile.name, bold: true),
+              _HeaderPill(text: profile.ageSummary),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// One of the translucent pills under the visit heading.
+class _HeaderPill extends StatelessWidget {
+  const _HeaderPill({required this.text, this.bold = false});
+
+  final String text;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+          fontFamily: 'Nunito',
+        ),
       ),
     );
   }
@@ -677,12 +678,18 @@ class _MilestoneSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Based on milestones up to $ageInMonths months',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                      ),
+                // The caption is a full sentence and the percentage sits
+                // beside it, so on a 360px phone the caption has to be the
+                // part that gives way.
+                Expanded(
+                  child: Text(
+                    'Based on milestones up to $ageInMonths months',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12,
+                        ),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '${(progress * 100).round()}%',
                   style: TextStyle(

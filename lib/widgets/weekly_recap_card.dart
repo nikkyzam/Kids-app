@@ -42,9 +42,14 @@ class WeeklyRecapCard extends StatelessWidget {
                       const Icon(Icons.calendar_view_week_rounded,
                           size: 18, color: AppTheme.primary),
                       const SizedBox(width: 8),
-                      Text('This Week',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const Spacer(),
+                      // Expanded rather than Spacer, so a raised text scale
+                      // cannot push the day count off the card.
+                      Expanded(
+                        child: Text('This Week',
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium),
+                      ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 9, vertical: 3),

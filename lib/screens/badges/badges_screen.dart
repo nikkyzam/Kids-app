@@ -126,26 +126,34 @@ class _BadgeTile extends StatelessWidget {
               child: Text(badge.emoji, style: const TextStyle(fontSize: 36)),
             ),
             const SizedBox(height: 8),
-            Text(
-              badge.title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isUnlocked ? badge.color : AppTheme.textMuted,
-                  ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            // Flexible, not fixed: the tile is a fixed-ratio grid cell, so at
+            // a larger text scale on a narrow phone the emoji and two labels
+            // together are taller than the cell. Letting the labels give up
+            // lines keeps the badge legible instead of striping it yellow.
+            Flexible(
+              child: Text(
+                badge.title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isUnlocked ? badge.color : AppTheme.textMuted,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(height: 3),
-            Text(
-              badge.description,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textMuted,
-                    fontSize: 10,
-                  ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Flexible(
+              child: Text(
+                badge.description,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.textMuted,
+                      fontSize: 10,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             if (isUnlocked)
               Padding(

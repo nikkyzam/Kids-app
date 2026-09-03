@@ -376,18 +376,27 @@ class _DayTile extends StatelessWidget {
           padding: const EdgeInsets.only(top: 4),
           child: Row(
             children: [
-              _SkillChip(
-                label: activity.skillCategory.label,
-                color: skillColor,
+              // "Social & Emotional" plus a duration is wider than a ListTile
+              // subtitle on a 360px phone, so both halves must be able to
+              // shrink.
+              Flexible(
+                child: _SkillChip(
+                  label: activity.skillCategory.label,
+                  color: skillColor,
+                ),
               ),
               const SizedBox(width: 8),
-              Text(
-                '${activity.durationMins} min',
-                style: const TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textMuted,
+              Flexible(
+                child: Text(
+                  '${activity.durationMins} min',
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                  style: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textMuted,
+                  ),
                 ),
               ),
             ],
@@ -487,13 +496,17 @@ class _WhyThisPlanCard extends StatelessWidget {
               Icon(Icons.lightbulb_outline_rounded,
                   size: 16, color: AppTheme.secondary),
               SizedBox(width: 6),
-              Text(
-                'Why this plan?',
-                style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textDark,
+              // Expanded so the heading wraps at a larger text scale rather
+              // than running past the card's border.
+              Expanded(
+                child: Text(
+                  'Why this plan?',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textDark,
+                  ),
                 ),
               ),
             ],

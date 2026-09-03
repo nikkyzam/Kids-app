@@ -259,9 +259,15 @@ class _ActivityLibraryTile extends StatelessWidget {
                     const Icon(Icons.timer_outlined,
                         size: 12, color: AppTheme.textMuted),
                     const SizedBox(width: 3),
-                    Text('${activity.durationMins} min',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textMuted)),
+                    // The duration is short but not free: at a larger text
+                    // scale it and the category pill together overran the row.
+                    Flexible(
+                      child: Text('${activity.durationMins} min',
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: const TextStyle(
+                              fontSize: 11, color: AppTheme.textMuted)),
+                    ),
                     const SizedBox(width: 10),
                     // Longer category labels pushed this pill past the card
                     // edge next to the "Unlock" button.

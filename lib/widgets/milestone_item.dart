@@ -95,13 +95,17 @@ class _MilestoneItemState extends State<MilestoneItem> {
                                   const Icon(Icons.check_circle_rounded,
                                       size: 12, color: AppTheme.success),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    DateFormat('MMM d, yyyy')
-                                        .format(achievement.achievedDate),
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppTheme.success,
-                                        fontWeight: FontWeight.w600),
+                                  Flexible(
+                                    child: Text(
+                                      DateFormat('MMM d, yyyy')
+                                          .format(achievement.achievedDate),
+                                      overflow: TextOverflow.ellipsis,
+                                      softWrap: false,
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppTheme.success,
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ),
                                   if (achievement.notes?.isNotEmpty ==
                                       true) ...[

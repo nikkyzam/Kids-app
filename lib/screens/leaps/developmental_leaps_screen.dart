@@ -462,56 +462,63 @@ class _TimelineLeapRow extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: 28,
-              child: Column(
-                children: [
-                  const SizedBox(height: 18),
-                  Container(
-                    width: dotSize,
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      color: _dotColor,
-                      shape: BoxShape.circle,
-                      boxShadow: _isHighlighted
-                          ? [
-                              BoxShadow(
-                                color: _dotColor.withValues(alpha: 0.35),
-                                blurRadius: 6,
-                                spreadRadius: 1,
-                              )
-                            ]
-                          : null,
+      // A Stack, not IntrinsicHeight: the connector needs to run the full
+      // height of the card, and IntrinsicHeight measures its children as if
+      // they had unbounded width. On a narrow phone the leap's title wraps to
+      // a second line that the measurement never saw, so the row was sized
+      // short and then stretched the tile to it — overflowing the tile's own
+      // content by the height of that extra line. A positioned connector
+      // takes its height from the laid-out card instead of predicting it.
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 28,
+            child: Column(
+              children: [
+                const SizedBox(height: 18),
+                Container(
+                  width: dotSize,
+                  height: dotSize,
+                  decoration: BoxDecoration(
+                    color: _dotColor,
+                    shape: BoxShape.circle,
+                    boxShadow: _isHighlighted
+                        ? [
+                            BoxShadow(
+                              color: _dotColor.withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            )
+                          ]
+                        : null,
+                  ),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: _dotColor.withValues(alpha: 0.25),
                     ),
                   ),
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        color: _dotColor.withValues(alpha: 0.25),
-                      ),
-                    ),
-                ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 38),
+            child: Opacity(
+              opacity: cardOpacity,
+              child: _LeapExpansionCard(
+                leap: leap,
+                status: status,
+                isCurrent: _isCurrent,
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Opacity(
-                opacity: cardOpacity,
-                child: _LeapExpansionCard(
-                  leap: leap,
-                  status: status,
-                  isCurrent: _isCurrent,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -636,20 +643,28 @@ class _LeapExpansionCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryLight,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '~${leap.leapWeek} wks',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.primary,
-                            fontFamily: 'Nunito',
+                      // Flexible as well as the Expanded title: on a 320px
+                      // phone the tile's own padding and chevron leave less
+                      // room than the pill's natural width, and a pill that
+                      // cannot shrink overflows however small the title gets.
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryLight,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '~${leap.leapWeek} wks',
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.primary,
+                              fontFamily: 'Nunito',
+                            ),
                           ),
                         ),
                       ),

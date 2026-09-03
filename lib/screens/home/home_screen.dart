@@ -334,9 +334,15 @@ class _ActivityTab extends StatelessWidget {
                         const Icon(Icons.checklist_rounded,
                             color: AppTheme.primary, size: 20),
                         const SizedBox(width: 8),
-                        Text('Milestones',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const Spacer(),
+                        // Expanded rather than Spacer: a raised text scale
+                        // made the heading wide enough to push the count pill
+                        // off the card.
+                        Expanded(
+                          child: Text('Milestones',
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
@@ -419,17 +425,23 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
           children: [
             const Text('⭐', style: TextStyle(fontSize: 14)),
             const SizedBox(width: 6),
-            const Text(
-              'Premium Plus',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFFF5A623),
-                letterSpacing: 1.2,
+            // Expanded rather than a bare Text plus Spacer: at a larger text
+            // scale the heading and the "See all" tap target together ran off
+            // the row.
+            const Expanded(
+              child: Text(
+                'Premium Plus',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFF5A623),
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
             if (!isPremiumPlus) ...[
-              const Spacer(),
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),

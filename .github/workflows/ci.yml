@@ -39,6 +39,12 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      # Already covered by the run above; called out as its own step so a
+      # layout regression reads as one in the CI log instead of being one
+      # failure among five hundred.
+      - name: Check the layout at the smallest supported screens
+        run: flutter test test/screens/small_screen_layout_test.dart
+
       # CI runners are UTC, which has no daylight-saving transitions, so
       # date-arithmetic bugs around DST cannot surface there. Re-run the suite
       # in a DST timezone to catch them.
