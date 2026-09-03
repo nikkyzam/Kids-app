@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-PlaySteps is a baby and toddler development tracker for parents of children from birth through 36 months. It delivers daily age-appropriate play activities and a CDC-aligned milestone ledger — on-device by default, with no ads, no tracking, and no subscription required for the core experience; accounts and cloud sync exist only for optional family sharing. The freemium model offers full access for birth–4 weeks at no cost; a single one-time purchase unlocks all content through 36 months. Because all data lives in a local SQLite database, parents retain full ownership of their child's developmental records.
+PlaySteps is a baby and toddler development tracker for parents of children from birth through 36 months. It delivers daily age-appropriate play activities, a CDC-aligned milestone ledger with plain-language context for each entry, growth charts against the WHO standards, and a baby book that gathers photos, milestones and measurements into one chronological story — on-device by default, with no ads, no tracking, and no subscription required for the core experience; accounts and cloud sync exist only for optional family sharing. Everything is unlocked for a 14-day trial; afterwards a single one-time purchase unlocks all content through 36 months, and the app falls back to a free tier rather than locking anything a parent has already recorded. Babies born early are tracked by their adjusted age. Because all data lives in a local SQLite database, parents retain full ownership of their child's developmental records — including the ability to delete every trace of them in one action.
 
 ---
 
@@ -240,6 +240,25 @@ open coverage/html/index.html   # macOS
 
 The test suite uses `sqflite_common_ffi` to run SQLite queries against an in-memory database without a connected device, and `mocktail` for mock objects. No device or emulator is required to run the tests.
 
+Two suites are worth knowing about by name:
+
+```bash
+# Every screen at 320x568 and 360x640, with real content and at a 1.3 text
+# scale — fails on any layout overflow.
+flutter test test/screens/small_screen_layout_test.dart
+
+# Builds an older database schema by hand, seeds it, and upgrades it through
+# the app — so migrations are tested against the schema users actually have.
+flutter test test/data/migration_test.dart
+```
+
+`test/support/harness.dart` sets up the provider graph, an in-memory database
+and a frozen clock. Note `Harness.settleAsync`: `testWidgets` runs in a
+fake-async zone where real I/O only completes while `runAsync` turns the real
+event loop, but the continuation lands on the fake queue and needs a `pump` —
+so a chain of awaits started by a tap needs the two interleaved, one pair per
+await.
+
 ---
 
 ## Before You Can Ship
@@ -426,6 +445,10 @@ Runs on `ubuntu-latest` against `main`/`master`:
 2. `dart format --set-exit-if-changed` — fails the build on unformatted code
 3. `flutter analyze`
 4. `flutter test --coverage` (uploads `coverage/lcov.info` as an artifact)
+5. The small-screen layout suite, as its own step so a layout regression is
+   legible in the log
+6. The whole suite again under `TZ=America/New_York` — CI runners are UTC and
+   cannot otherwise catch daylight-saving bugs
 
 Run the same checks locally before pushing:
 
@@ -533,15 +556,21 @@ lib/
 │   ├── database_helper.dart   # SQLite schema, migrations, and query helpers (sqflite)
 │   ├── activities_data.dart   # Hardcoded age-banded activity definitions
 │   ├── milestones_data.dart   # CDC-aligned milestone definitions by domain
+│   ├── milestone_context_data.dart # "What to look for" per milestone
+│   ├── red_flags_data.dart    # CDC "Learn the Signs, Act Early" thresholds
+│   ├── who_growth_standards_data.dart # WHO LMS tables (generated; see header)
 │   ├── badges_data.dart       # Achievement badge definitions and unlock criteria
 │   └── tips_data.dart         # Daily parenting tips by age range
 │
 ├── models/                    # Plain Dart data classes
-│   ├── child_profile.dart
+│   ├── child_profile.dart     # Chronological and adjusted age; optional sex
 │   ├── activity.dart
 │   ├── activity_completion.dart
+│   ├── activity_skip.dart     # An activity set aside, and why
 │   ├── milestone.dart
 │   ├── milestone_achievement.dart
+│   ├── growth_measurement.dart
+│   ├── photo_memory.dart
 │   └── badge_definition.dart
 │
 ├── providers/                 # State management (provider package)
@@ -557,12 +586,20 @@ lib/
 │   ├── library/               # Browsable activity library with filters
 │   ├── badges/                # Earned and locked achievement badges
 │   ├── onboarding/            # First-launch child profile creation
+│   ├── memories/              # Baby book and photo grid
+│   ├── growth/                # Growth charts with WHO percentile curves
 │   ├── paywall/               # Premium upgrade screen
-│   └── settings/              # Notifications, backup/restore, parental gate
+│   └── settings/              # Notifications, backup/restore, delete all data
 │
 ├── services/                  # Business logic that crosses screen boundaries
 │   ├── notification_service.dart  # flutter_local_notifications scheduling
 │   ├── backup_service.dart        # JSON export/import via file_picker
+│   ├── data_reset_service.dart    # "Delete all data" — rows, files, prefs
+│   ├── photo_storage.dart         # Photo files the app owns, with disk guards
+│   ├── photo_memory_service.dart  # Capture end to end, shared by both callers
+│   ├── baby_book.dart             # Photos + milestones + growth, in order
+│   ├── trial_service.dart         # The 14-day trial clock
+│   ├── who_growth_standards.dart  # LMS maths: z-scores, percentiles, curves
 │   └── pdf_export_service.dart    # Weekly recap and milestone PDF generation
 │
 ├── theme/
@@ -579,6 +616,8 @@ lib/
     ├── streak_milestone_dialog.dart
     ├── confetti_overlay.dart
     ├── parental_gate_dialog.dart
+    ├── trial_banner.dart
+    ├── red_flag_banner.dart
     └── child_profile_dropdown.dart
 ```
 
@@ -587,6 +626,16 @@ lib/
 ## Contributing
 
 Fork the repository and create a feature branch from `main` (e.g., `feature/weekly-recap-chart`). Before opening a pull request, run `flutter analyze` to catch static issues and `flutter test` to confirm the full test suite passes. Keep pull requests focused — one feature or fix per PR makes review faster. For significant changes, open an issue first to discuss the approach. All contributions are expected to maintain offline-first behavior: no network calls, no third-party analytics SDKs.
+
+Two further expectations, both enforced by tests rather than review:
+
+- **Nothing tells a parent their child is behind.** Milestone notes and growth
+  summaries are checked against a list of grading and alarming words on every
+  build. If you are adding parent-facing copy about a child's development, read
+  §1 of `REQUIREMENTS.md` first.
+- **Every screen fits a 320×568 phone**, with real content and at a 1.3 text
+  scale. A heading sized to its own text next to something else that also is
+  will fail; use `Expanded` or `Flexible`, not a `Spacer`.
 
 ---
 
