@@ -1,8 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:provider/provider.dart';
+
 import '../../data/database_helper.dart';
+import '../../models/child_profile.dart';
 import '../../models/growth_measurement.dart';
+import '../../providers/profile_provider.dart';
+import '../../services/who_growth_standards.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/clock.dart';
 
@@ -169,6 +174,11 @@ class _GrowthTrackerScreenState extends State<GrowthTrackerScreen>
                   unit: _unit(metric),
                   color: _metricColor(metric),
                   onDelete: _deleteMeasurement,
+                  profile: context
+                      .watch<ProfileProvider>()
+                      .profiles
+                      .where((p) => p.id == widget.profileId)
+                      .firstOrNull,
                 );
         }).toList(),
       ),
@@ -190,6 +200,7 @@ class _MetricTabBody extends StatelessWidget {
   final String unit;
   final Color color;
   final Future<void> Function(GrowthMeasurement) onDelete;
+  final ChildProfile? profile;
 
   const _MetricTabBody({
     required this.measurements,
@@ -199,6 +210,7 @@ class _MetricTabBody extends StatelessWidget {
     required this.unit,
     required this.color,
     required this.onDelete,
+    required this.profile,
   });
 
   @override
@@ -214,7 +226,15 @@ class _MetricTabBody extends StatelessWidget {
           measurements: sorted,
           useImperial: useImperial,
           color: color,
+          metric: metric,
+          profile: profile,
         ),
+        if (sorted.isNotEmpty)
+          _PercentileNote(
+            metric: metric,
+            profile: profile,
+            latest: sorted.last,
+          ),
         if (measurements.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 40),
@@ -303,12 +323,51 @@ class _GrowthChart extends StatelessWidget {
   final List<GrowthMeasurement> measurements;
   final bool useImperial;
   final Color color;
+  final GrowthMetric metric;
+  final ChildProfile? profile;
 
   const _GrowthChart({
     required this.measurements,
     required this.useImperial,
     required this.color,
+    required this.metric,
+    required this.profile,
   });
+
+  /// The WHO percentile curves across the span the chart covers.
+  ///
+  /// Sampled rather than drawn from the monthly table directly: the chart's x
+  /// axis is dates, not months, so each sample converts a date to the child's
+  /// age and reads the curve there. Returns an empty list when there is no
+  /// honest curve to draw — no sex recorded, or an age past the tables.
+  List<_PercentileCurve> _curves(List<DateTime> span) {
+    final child = profile;
+    final sex = child?.sex;
+    if (child == null || sex == null || span.length < 2) return const [];
+
+    const samples = 48;
+    final from = span.first.millisecondsSinceEpoch;
+    final to = span.last.millisecondsSinceEpoch;
+
+    final curves = <_PercentileCurve>[];
+    for (final percentile in WhoGrowthStandards.curvePercentiles) {
+      final z = WhoGrowthStandards.zForPercentile(percentile);
+      final points = <MapEntry<DateTime, double>>[];
+      for (int i = 0; i <= samples; i++) {
+        final at = DateTime.fromMillisecondsSinceEpoch(
+            from + ((to - from) * i / samples).round());
+        final months = WhoGrowthStandards.ageMonthsAt(child, at);
+        final value = WhoGrowthStandards.valueAtZ(metric, sex, months, z);
+        if (value != null) points.add(MapEntry(at, value));
+      }
+      // A curve that only covers part of the span would read as the child's
+      // data falling off it, so a partial curve is not drawn at all.
+      if (points.length == samples + 1) {
+        curves.add(_PercentileCurve(percentile, points));
+      }
+    }
+    return curves;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -337,6 +396,7 @@ class _GrowthChart extends StatelessWidget {
             measurements: measurements,
             useImperial: useImperial,
             color: color,
+            curves: _curves(measurements.map((m) => m.measuredOnDate).toList()),
           ),
           child: const SizedBox.expand(),
         ),
@@ -345,15 +405,25 @@ class _GrowthChart extends StatelessWidget {
   }
 }
 
+/// One WHO percentile line across the span the chart covers.
+class _PercentileCurve {
+  final int percentile;
+  final List<MapEntry<DateTime, double>> points;
+
+  const _PercentileCurve(this.percentile, this.points);
+}
+
 class _ChartPainter extends CustomPainter {
   final List<GrowthMeasurement> measurements;
   final bool useImperial;
   final Color color;
+  final List<_PercentileCurve> curves;
 
   _ChartPainter({
     required this.measurements,
     required this.useImperial,
     required this.color,
+    this.curves = const [],
   });
 
   double _toDisplay(double v, GrowthMetric m) {
@@ -364,7 +434,9 @@ class _ChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     const leftPad = 48.0;
-    const rightPad = 16.0;
+    // Wider when the percentile curves are drawn, so their labels have
+    // somewhere to sit that is not on top of the plot.
+    final rightPad = curves.isEmpty ? 16.0 : 26.0;
     const topPad = 12.0;
     const bottomPad = 28.0;
 
@@ -373,8 +445,15 @@ class _ChartPainter extends CustomPainter {
 
     final values =
         measurements.map((m) => _toDisplay(m.value, m.metric)).toList();
-    final minVal = values.reduce(min);
-    final maxVal = values.reduce(max);
+    // The percentile curves are inside the range on purpose: a chart scaled
+    // only to the child's own numbers would put their line down the middle
+    // whatever it was doing, which is the opposite of the point.
+    final metric = measurements.first.metric;
+    final curveValues = curves
+        .expand((c) => c.points.map((p) => _toDisplay(p.value, metric)))
+        .toList();
+    final minVal = [...values, ...curveValues].reduce(min);
+    final maxVal = [...values, ...curveValues].reduce(max);
     final valRange = (maxVal - minVal) == 0 ? 1.0 : maxVal - minVal;
     final paddedMin = minVal - valRange * 0.1;
     final paddedMax = maxVal + valRange * 0.1;
@@ -429,6 +508,9 @@ class _ChartPainter extends CustomPainter {
       final x = xFor(d);
       tp.paint(canvas, Offset(x - tp.width / 2, topPad + chartH + 6));
     }
+
+    // Drawn before the child's line so the child's is the one in front.
+    _paintCurves(canvas, metric, xFor, yFor, leftPad + chartW);
 
     final points = <Offset>[];
     for (int i = 0; i < measurements.length; i++) {
@@ -498,11 +580,62 @@ class _ChartPainter extends CustomPainter {
     return result;
   }
 
+  void _paintCurves(
+    Canvas canvas,
+    GrowthMetric metric,
+    double Function(DateTime) xFor,
+    double Function(double) yFor,
+    double rightEdge,
+  ) {
+    for (final curve in curves) {
+      final isMedian = curve.percentile == 50;
+      final paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isMedian ? 1.4 : 1.0
+        ..color = AppTheme.textMuted.withValues(alpha: isMedian ? 0.45 : 0.22);
+
+      final path = Path();
+      for (int i = 0; i < curve.points.length; i++) {
+        final point = curve.points[i];
+        final offset =
+            Offset(xFor(point.key), yFor(_toDisplay(point.value, metric)));
+        if (i == 0) {
+          path.moveTo(offset.dx, offset.dy);
+        } else {
+          path.lineTo(offset.dx, offset.dy);
+        }
+      }
+      canvas.drawPath(path, paint);
+
+      // A small label at the right edge, so the lines are readable as
+      // percentiles rather than as decoration.
+      final last = curve.points.last;
+      final tp = TextPainter(
+        text: TextSpan(
+          text: '${curve.percentile}',
+          style: TextStyle(
+            fontSize: 9,
+            fontFamily: 'Nunito',
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textMuted.withValues(alpha: isMedian ? 0.75 : 0.45),
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(
+        canvas,
+        Offset(rightEdge + 2,
+            yFor(_toDisplay(last.value, metric)) - tp.height / 2),
+      );
+    }
+  }
+
   @override
   bool shouldRepaint(_ChartPainter old) =>
       old.measurements != measurements ||
       old.useImperial != useImperial ||
-      old.color != color;
+      old.color != color ||
+      old.curves != curves;
 }
 
 class _AddMeasurementSheet extends StatefulWidget {
@@ -709,6 +842,108 @@ class _AddMeasurementSheetState extends State<_AddMeasurementSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Where the most recent measurement sits against the WHO curves — and, when
+/// it cannot say, why not.
+class _PercentileNote extends StatelessWidget {
+  final GrowthMetric metric;
+  final ChildProfile? profile;
+  final GrowthMeasurement latest;
+
+  const _PercentileNote({
+    required this.metric,
+    required this.profile,
+    required this.latest,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final child = profile;
+    if (child == null) return const SizedBox.shrink();
+
+    if (child.sex == null) {
+      return _Note(
+        icon: Icons.show_chart_rounded,
+        text: "Add whether ${child.name} is a girl or a boy in Settings to "
+            'see the WHO growth curves — they are different for each.',
+      );
+    }
+
+    final summary = WhoGrowthStandards.summaryFor(
+      profile: child,
+      metric: metric,
+      value: latest.value,
+      measuredOn: latest.measuredOnDate,
+    );
+    if (summary == null) {
+      return const _Note(
+        icon: Icons.show_chart_rounded,
+        text: 'The WHO growth standards cover birth to three years, so there '
+            'is no curve to compare this against.',
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _Note(icon: Icons.show_chart_rounded, text: summary),
+        // Said every time, next to the number, because this is the number most
+        // likely to be read as a verdict.
+        const _Note(
+          icon: Icons.info_outline_rounded,
+          muted: true,
+          text: 'Shown for context only. Children grow along their own curves, '
+              'and a percentile on its own says very little — your '
+              'pediatrician is the person who can read it properly.',
+        ),
+        if (child.usesAdjustedAge)
+          _Note(
+            icon: Icons.event_rounded,
+            muted: true,
+            text: 'Plotted against ${child.name}\'s adjusted age, which is how '
+                'these curves are read for a baby born early.',
+          ),
+      ],
+    );
+  }
+}
+
+class _Note extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final bool muted;
+
+  const _Note({required this.icon, required this.text, this.muted = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon,
+              size: 14,
+              color: muted
+                  ? AppTheme.textMuted.withValues(alpha: 0.7)
+                  : AppTheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: muted ? 11.5 : 13,
+                height: 1.45,
+                color: muted ? AppTheme.textMuted : AppTheme.textDark,
+                fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

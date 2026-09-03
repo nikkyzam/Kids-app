@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/child_profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -17,6 +18,7 @@ import '../onboarding/onboarding_screen.dart';
 import '../paywall/paywall_screen.dart';
 import '../badges/badges_screen.dart';
 import '../paywall/premium_plus_screen.dart';
+import 'edit_child_sheet.dart';
 import 'family_sharing_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -162,6 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ...profileProvider.profiles.map((p) => _ProfileTile(
                   profile: p,
                   isActive: p.id == profileProvider.activeProfile?.id,
+                  onEdit: () => _editProfile(profileProvider, p),
                   onDelete: profileProvider.profiles.length > 1
                       ? () => _confirmDeleteProfile(p)
                       : null,
@@ -475,6 +478,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         .scheduleDailyAt(picked, profile?.name ?? 'your child');
   }
 
+  Future<void> _editProfile(ProfileProvider profiles, ChildProfile p) async {
+    final edited = await EditChildSheet.show(context, p);
+    if (edited == null || !mounted) return;
+    await profiles.updateProfile(edited);
+  }
+
   Future<void> _addProfile() async {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -528,12 +537,17 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _ProfileTile extends StatelessWidget {
-  final dynamic profile;
+  final ChildProfile profile;
   final bool isActive;
+  final VoidCallback onEdit;
   final VoidCallback? onDelete;
 
-  const _ProfileTile(
-      {required this.profile, required this.isActive, this.onDelete});
+  const _ProfileTile({
+    required this.profile,
+    required this.isActive,
+    required this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -549,13 +563,24 @@ class _ProfileTile extends StatelessWidget {
       ),
       title: Text(profile.name),
       subtitle: Text(profile.ageSummary),
-      trailing: onDelete != null
-          ? IconButton(
+      onTap: onEdit,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined,
+                color: AppTheme.textMuted, size: 20),
+            tooltip: 'Edit details',
+            onPressed: onEdit,
+          ),
+          if (onDelete != null)
+            IconButton(
               icon: const Icon(Icons.delete_outline_rounded,
                   color: AppTheme.error, size: 20),
               onPressed: onDelete,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 }
