@@ -127,9 +127,10 @@ void main() {
         const Scaffold(body: Center(child: ParentalGateDialog())),
       );
 
-      // Spelled out deliberately so a child who can read digits cannot pass.
-      expect(find.textContaining('times'), findsOneWidget);
+      // Spelled out deliberately so a child who can read digits cannot pass,
+      // and so the question cannot be pasted into a calculator.
       expect(find.textContaining('What is'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'[0-9]')), findsNothing);
       expect(find.text('Cancel'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -141,8 +142,8 @@ void main() {
         const Scaffold(body: Center(child: ParentalGateDialog())),
       );
 
-      // Every option is a digit button; tapping them all guarantees at least
-      // one wrong answer, which must show the retry message rather than pass.
+      // Tapping an option must either pass the gate or report the miss —
+      // never silently swap the question.
       final options = find.byType(InkWell);
       expect(options, findsWidgets);
 

@@ -102,16 +102,16 @@ void main() {
   });
 
   group('ParentalGateDialog', () {
-    testWidgets('renders a multiplication question', (tester) async {
+    testWidgets('renders an arithmetic question with six options',
+        (tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(body: ParentalGateDialog()),
       ));
 
       expect(find.text('Parent Check'), findsOneWidget);
-      // Should show "times" somewhere in the question
-      expect(find.textContaining('times'), findsOneWidget);
-      // Should render 4 answer buttons (2x2 grid)
-      expect(find.byType(OutlinedButton), findsNWidgets(4));
+      expect(find.textContaining('What is'), findsOneWidget);
+      expect(find.byType(OutlinedButton),
+          findsNWidgets(ParentalGateChallenge.optionCount));
     });
 
     testWidgets('shows cancel button', (tester) async {
