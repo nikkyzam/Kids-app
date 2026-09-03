@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../data/database_helper.dart';
+import '../data/milestone_context_data.dart';
 import '../models/milestone.dart';
 import '../models/photo_memory.dart';
 import '../providers/milestone_provider.dart';
@@ -126,7 +127,22 @@ class _MilestoneItemState extends State<MilestoneItem> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      if (MilestoneContext.forMilestone(widget.milestone) !=
+                          null)
+                        IconButton(
+                          // Its own control rather than part of the row: the
+                          // row toggles the milestone, and a parent reading up
+                          // on what to look for must not tick it by accident.
+                          icon: const Icon(Icons.info_outline_rounded,
+                              size: 18, color: AppTheme.textMuted),
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints:
+                              const BoxConstraints(minWidth: 32, minHeight: 32),
+                          tooltip: 'What to look for',
+                          onPressed: () => _showContext(context, domainColor),
+                        ),
+                      const SizedBox(width: 4),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.easeOut,
@@ -183,6 +199,67 @@ class _MilestoneItemState extends State<MilestoneItem> {
       decoration: BoxDecoration(
         color: isAchieved ? color : color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  void _showContext(BuildContext context, Color domainColor) {
+    final ctx = MilestoneContext.forMilestone(widget.milestone);
+    if (ctx == null) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.milestone.domain.label.toUpperCase(),
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: domainColor,
+                    letterSpacing: 1.1),
+              ),
+              const SizedBox(height: 6),
+              Text(widget.milestone.description,
+                  style: Theme.of(sheetContext).textTheme.titleMedium),
+              const SizedBox(height: 20),
+              _ContextBlock(
+                icon: Icons.visibility_outlined,
+                color: domainColor,
+                title: 'What to look for',
+                body: ctx.whatToLookFor,
+              ),
+              const SizedBox(height: 16),
+              _ContextBlock(
+                icon: Icons.chat_bubble_outline_rounded,
+                color: AppTheme.textMuted,
+                title: 'When to talk to your pediatrician',
+                body: ctx.whenToTalk,
+              ),
+              const SizedBox(height: 20),
+              // Said plainly and every time, because the previous line is the
+              // one most likely to be read as a diagnosis.
+              Text(
+                'PlaySteps is a place to keep notes, not a medical opinion. '
+                'Children reach these at very different times, and your '
+                'pediatrician is the person who can actually tell you '
+                'anything about your child.',
+                style: Theme.of(sheetContext)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppTheme.textMuted, height: 1.5),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -277,5 +354,48 @@ class _MilestoneItemState extends State<MilestoneItem> {
       case MilestoneDomain.socialEmotional:
         return AppTheme.socialEmotionalColor;
     }
+  }
+}
+
+class _ContextBlock extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String body;
+
+  const _ContextBlock({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.body,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textMuted,
+                    letterSpacing: 1.1),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(body,
+            style:
+                Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.55)),
+      ],
+    );
   }
 }
