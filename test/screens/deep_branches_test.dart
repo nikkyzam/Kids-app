@@ -11,37 +11,7 @@ import 'package:playsteps/screens/settings/family_sharing_screen.dart';
 import 'package:playsteps/screens/settings/settings_screen.dart';
 
 import '../support/harness.dart';
-
-const _words = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-  'ten',
-];
-
-/// Walks the parental gate so the settings list underneath can be exercised.
-Future<void> _unlockSettings(WidgetTester tester) async {
-  await tester.tap(find.text('Unlock Settings'));
-  await tester.pump(const Duration(milliseconds: 400));
-
-  final question = tester
-      .widgetList<Text>(find.byType(Text))
-      .map((t) => t.data ?? '')
-      .firstWhere((s) => s.startsWith('What is'), orElse: () => '');
-  final parts =
-      question.replaceAll('What is ', '').replaceAll('?', '').split(' times ');
-  final answer = _words.indexOf(parts[0]) * _words.indexOf(parts[1]);
-
-  await tester.tap(find.text('$answer').first);
-  await tester.pump(const Duration(milliseconds: 400));
-}
+import '../support/parental_gate.dart';
 
 void main() {
   Harness.initOnce();
@@ -53,7 +23,7 @@ void main() {
   group('SettingsScreen once unlocked', () {
     testWidgets('lists every section', (tester) async {
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       // Section headers are rendered uppercase.
       expect(find.text('CHILDREN'), findsOneWidget);
@@ -65,7 +35,7 @@ void main() {
 
     testWidgets('shows the active child and an add slot', (tester) async {
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.text('Emma'), findsWidgets);
       expect(find.text('Add Child Profile'), findsOneWidget);
@@ -73,7 +43,7 @@ void main() {
 
     testWidgets('offers the paywall rows when not premium', (tester) async {
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.textContaining('Unlock Premium'), findsOneWidget);
       expect(find.textContaining('Premium Plus'), findsWidgets);
@@ -82,7 +52,7 @@ void main() {
     testWidgets('shows the owned state when premium', (tester) async {
       await Harness.resetInTest(tester, premium: true, premiumPlus: true);
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.text('PlaySteps Premium'), findsOneWidget);
       expect(find.text('Premium Plus — Active'), findsOneWidget);
@@ -91,7 +61,7 @@ void main() {
     testWidgets('restore reports that the store is unavailable',
         (tester) async {
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       await tester.tap(find.text('Restore Purchases'));
       await tester.pump(const Duration(milliseconds: 400));
@@ -101,7 +71,7 @@ void main() {
 
     testWidgets('toggling the reminder switch does not throw', (tester) async {
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       final toggle = find.byType(SwitchListTile);
       expect(toggle, findsOneWidget);
@@ -114,7 +84,7 @@ void main() {
     testWidgets('lays out on a 360px phone', (tester) async {
       await Harness.pump(tester, const SettingsScreen(),
           size: const Size(360, 2000));
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(tester.takeException(), isNull);
     });
@@ -128,7 +98,7 @@ void main() {
         ));
       });
       await Harness.pump(tester, const SettingsScreen());
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.text('Noah'), findsWidgets);
     });

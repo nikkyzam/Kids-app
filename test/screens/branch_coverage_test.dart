@@ -13,36 +13,7 @@ import 'package:playsteps/screens/settings/settings_screen.dart';
 import 'package:playsteps/widgets/activity_card.dart';
 
 import '../support/harness.dart';
-
-const _words = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-  'ten',
-];
-
-Future<void> _unlockSettings(WidgetTester tester) async {
-  await tester.tap(find.text('Unlock Settings'));
-  await tester.pump(const Duration(milliseconds: 400));
-
-  final question = tester
-      .widgetList<Text>(find.byType(Text))
-      .map((t) => t.data ?? '')
-      .firstWhere((s) => s.startsWith('What is'), orElse: () => '');
-  final parts =
-      question.replaceAll('What is ', '').replaceAll('?', '').split(' times ');
-  final answer = _words.indexOf(parts[0]) * _words.indexOf(parts[1]);
-
-  await tester.tap(find.text('$answer').first);
-  await tester.pump(const Duration(milliseconds: 400));
-}
+import '../support/parental_gate.dart';
 
 void main() {
   Harness.initOnce();
@@ -194,7 +165,7 @@ void main() {
       });
       await Harness.pump(tester, const SettingsScreen(),
           size: const Size(420, 2400));
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       final before = Harness.profiles.profiles.length;
       final delete = find.byIcon(Icons.delete_outline_rounded);
@@ -211,7 +182,7 @@ void main() {
     testWidgets('the about section renders', (tester) async {
       await Harness.pump(tester, const SettingsScreen(),
           size: const Size(420, 2400));
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.text('ABOUT'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -220,7 +191,7 @@ void main() {
     testWidgets('the badges row is present', (tester) async {
       await Harness.pump(tester, const SettingsScreen(),
           size: const Size(420, 2400));
-      await _unlockSettings(tester);
+      await unlockSettings(tester);
 
       expect(find.text('Achievements'), findsWidgets);
     });

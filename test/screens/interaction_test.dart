@@ -13,7 +13,10 @@ import 'package:playsteps/widgets/streak_milestone_dialog.dart';
 import 'package:playsteps/data/badges_data.dart';
 import 'package:playsteps/data/milestones_data.dart';
 
+import 'package:playsteps/utils/number_words.dart';
+
 import '../support/harness.dart';
+import '../support/parental_gate.dart';
 
 /// Drives the flows a parent actually performs, rather than only asserting
 /// that screens render.
@@ -110,33 +113,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
 
       // Read the question and work out the answer the way a parent would.
-      final question = tester
-          .widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? '')
-          .firstWhere((s) => s.startsWith('What is'), orElse: () => '');
-      expect(question, isNotEmpty);
-
-      const words = [
-        'zero',
-        'one',
-        'two',
-        'three',
-        'four',
-        'five',
-        'six',
-        'seven',
-        'eight',
-        'nine',
-        'ten',
-      ];
-      final parts = question
-          .replaceAll('What is ', '')
-          .replaceAll('?', '')
-          .split(' times ');
-      final answer = words.indexOf(parts[0]) * words.indexOf(parts[1]);
-
-      await tester.tap(find.text('$answer').first);
-      await tester.pump(const Duration(milliseconds: 400));
+      await solveParentalGate(tester);
 
       // The gate is passed, so the settings list is now on screen.
       expect(find.text('Parent Zone'), findsNothing);
@@ -149,34 +126,13 @@ void main() {
       await tester.tap(find.text('Unlock Settings'));
       await tester.pump(const Duration(milliseconds: 400));
 
-      final question = tester
-          .widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? '')
-          .firstWhere((s) => s.startsWith('What is'), orElse: () => '');
-      const words = [
-        'zero',
-        'one',
-        'two',
-        'three',
-        'four',
-        'five',
-        'six',
-        'seven',
-        'eight',
-        'nine',
-        'ten',
-      ];
-      final parts = question
-          .replaceAll('What is ', '')
-          .replaceAll('?', '')
-          .split(' times ');
-      final answer = words.indexOf(parts[0]) * words.indexOf(parts[1]);
+      final answerWord = NumberWords.of(parentalGateAnswer(tester));
 
       // Tap an option button whose label is not the answer.
       final wrong = find.byWidgetPredicate((w) =>
           w is OutlinedButton &&
-          w.child is Text &&
-          (w.child as Text).data != '$answer');
+          w.child is FittedBox &&
+          ((w.child as FittedBox).child as Text).data != answerWord);
       expect(wrong, findsWidgets);
       await tester.tap(wrong.first);
       await tester.pump(const Duration(milliseconds: 400));
