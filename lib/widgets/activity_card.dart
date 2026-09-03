@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../data/database_helper.dart';
 import '../models/activity.dart';
+import '../models/activity_skip.dart';
 import '../models/photo_memory.dart';
 import '../providers/activity_provider.dart';
 import '../providers/badge_provider.dart';
@@ -93,6 +94,10 @@ class _ActivityCardState extends State<ActivityCard> {
                         .join('\n')),
                 const SizedBox(height: 20),
                 _buildCompleteButton(context, ap, isCompleted, categoryColor),
+                if (!isCompleted) ...[
+                  const SizedBox(height: 4),
+                  _buildDismissButton(context, ap),
+                ],
               ],
             ),
           ),
@@ -265,6 +270,44 @@ class _ActivityCardState extends State<ActivityCard> {
     );
   }
 
+  Widget _buildDismissButton(BuildContext context, ActivityProvider ap) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () => _dismissActivity(context, ap),
+        style: TextButton.styleFrom(foregroundColor: AppTheme.textMuted),
+        child: const Text('Not for us today',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  Future<void> _dismissActivity(
+      BuildContext context, ActivityProvider ap) async {
+    final reason = await showModalBottomSheet<_DismissChoice>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => const _DismissReasonSheet(),
+    );
+    if (reason == null || !context.mounted) return;
+
+    final swapped =
+        await ap.dismissTodayActivity(widget.profileId, reason.reason);
+    if (!context.mounted || !swapped) return;
+
+    final replacement = ap.todayActivity;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(replacement == null
+            ? "We'll skip that one from now on."
+            : 'Try this instead: ${replacement.title}'),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   Widget _buildLockedCard(BuildContext context, PlayActivity activity) {
     return Card(
       child: Padding(
@@ -429,6 +472,57 @@ class _CardShimmer extends StatelessWidget {
             Container(height: 14, width: 200, color: Colors.grey.shade100),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The parent's answer to "not for us" — a reason, or none at all. Wrapped in
+/// a small class so the sheet can distinguish "closed without choosing"
+/// (null) from "skipped without saying why".
+class _DismissChoice {
+  final SkipReason? reason;
+  const _DismissChoice(this.reason);
+}
+
+class _DismissReasonSheet extends StatelessWidget {
+  const _DismissReasonSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text('No problem',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ),
+          const SizedBox(height: 4),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(
+              "We'll find another one. Telling us why helps us pick better — "
+              'it stays on this device.',
+              style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+            ),
+          ),
+          for (final reason in SkipReason.values)
+            ListTile(
+              title: Text(reason.label),
+              onTap: () => Navigator.pop(context, _DismissChoice(reason)),
+            ),
+          const Divider(height: 1),
+          ListTile(
+            title: const Text('Just show me another',
+                style: TextStyle(color: AppTheme.textMuted)),
+            onTap: () => Navigator.pop(context, const _DismissChoice(null)),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

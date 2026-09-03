@@ -107,6 +107,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (passed == true && mounted) setState(() => _gateUnlocked = true);
   }
 
+  Future<void> _restoreDismissedActivities(
+      ActivityProvider activityProvider, ProfileProvider profiles) async {
+    final profile = profiles.activeProfile;
+    if (profile == null) return;
+    await activityProvider.restoreAllActivities(profile.id!);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Those activities are back in rotation.')),
+    );
+  }
+
   Widget _buildSettings() {
     return Consumer2<ProfileProvider, ActivityProvider>(
       builder: (context, profileProvider, activityProvider, _) {
@@ -223,6 +234,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const Divider(height: 1),
               const _SectionHeader(title: 'Account & Sync'),
               _buildAccountSection(context),
+            ],
+            if (activityProvider.skips.isNotEmpty) ...[
+              const Divider(height: 1),
+              const _SectionHeader(title: 'Activities'),
+              ListTile(
+                leading: const Icon(Icons.playlist_add_check_rounded,
+                    color: AppTheme.primary),
+                title: Text('${activityProvider.skips.length} set aside'),
+                subtitle: const Text(
+                    'Activities you marked "not for us" stay out of the '
+                    'rotation'),
+                trailing: TextButton(
+                  onPressed: () => _restoreDismissedActivities(
+                      activityProvider, profileProvider),
+                  child: const Text('Bring back'),
+                ),
+              ),
             ],
             const Divider(height: 1),
             const _SectionHeader(title: 'Data'),

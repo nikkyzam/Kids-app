@@ -812,10 +812,49 @@ class ActivitiesData {
         .toList();
   }
 
-  static PlayActivity? todayActivity(int ageInWeeks) {
+  /// The activity for a given calendar day.
+  ///
+  /// Selection is a pure function of the date and the age band, so the same
+  /// day always yields the same activity — which is what makes it possible to
+  /// look back at a day the parent never opened the app and still see what was
+  /// waiting for them.
+  ///
+  /// [dismissed] are activities the parent has set aside for this child. They
+  /// drop out of the rotation entirely rather than being replaced only on the
+  /// day they were dismissed: an activity that does not suit a child should not
+  /// come back around next week. If every activity in the band has been
+  /// dismissed the band is used unfiltered — showing nothing at all would be a
+  /// worse answer than showing something already declined.
+  static PlayActivity? activityForDate(
+    DateTime date,
+    int ageInWeeks, {
+    Set<String> dismissed = const {},
+  }) {
     final band = forAgeBandWeeks(ageInWeeks);
     if (band.isEmpty) return null;
-    final dayOfYear = Clock.now().difference(DateTime(Clock.now().year)).inDays;
-    return band[dayOfYear % band.length];
+    final pool = band.where((a) => !dismissed.contains(a.id)).toList();
+    final from = pool.isEmpty ? band : pool;
+    return from[dayOfYear(date) % from.length];
   }
+
+  /// The 0-based ordinal day of the year.
+  ///
+  /// Counted from the calendar rather than as a Duration from 1 January: a
+  /// Duration is exactly 24 hours, so in a timezone that has moved on or off
+  /// daylight saving since New Year the elapsed hours are one short of a whole
+  /// number of days and `inDays` truncates to the wrong day — which would slide
+  /// the whole rotation by one for half the world, twice a year.
+  static int dayOfYear(DateTime date) {
+    const cumulative = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    final isLeap =
+        date.year % 4 == 0 && (date.year % 100 != 0 || date.year % 400 == 0);
+    final leapDay = (isLeap && date.month > 2) ? 1 : 0;
+    return cumulative[date.month - 1] + leapDay + date.day - 1;
+  }
+
+  static PlayActivity? todayActivity(
+    int ageInWeeks, {
+    Set<String> dismissed = const {},
+  }) =>
+      activityForDate(Clock.now(), ageInWeeks, dismissed: dismissed);
 }

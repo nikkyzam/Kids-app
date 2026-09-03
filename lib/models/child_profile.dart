@@ -136,6 +136,25 @@ class ChildProfile {
   /// The age in whole weeks used for content matching, uncapped.
   int get contentAgeInWeeks => adjustedAgeInWeeks;
 
+  /// The age in whole weeks used for content matching, as it was on [day].
+  /// Looking back at a past day has to use the age the child was then, or a
+  /// three-month-old's history would be re-rendered as newborn content.
+  int contentAgeInWeeksOn(DateTime day) {
+    final from = usesAdjustedAgeOn(day) ? dueDate! : dateOfBirth;
+    final days = DateTime(day.year, day.month, day.day)
+        .difference(DateTime(from.year, from.month, from.day))
+        .inDays;
+    return days < 0 ? 0 : days ~/ 7;
+  }
+
+  bool usesAdjustedAgeOn(DateTime day) {
+    if (!wasBornEarly) return false;
+    int months =
+        (day.year - dateOfBirth.year) * 12 + day.month - dateOfBirth.month;
+    if (day.day < dateOfBirth.day) months--;
+    return months < adjustmentEndsAtMonths;
+  }
+
   /// The age in whole months used for content matching — the milestone ledger
   /// and the red-flag prompts. The CDC's own guidance is to use corrected age
   /// for a baby born early, so a preemie is never told they are behind on a

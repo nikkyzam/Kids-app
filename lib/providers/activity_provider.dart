@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../models/activity.dart';
 import '../models/activity_completion.dart';
+import '../models/activity_skip.dart';
+import '../models/child_profile.dart';
 import '../data/database_helper.dart';
 import '../data/activities_data.dart';
 import '../services/purchase_service.dart';
@@ -15,6 +17,8 @@ class ActivityProvider extends ChangeNotifier {
   PlayActivity? _todayActivity;
   ActivityCompletion? _todayCompletion;
   List<ActivityCompletion> _allCompletions = [];
+  List<ActivitySkip> _skips = [];
+  int _contentAgeInWeeks = 0;
   bool _isPremium = false;
   bool _isPremiumPlus = false;
   bool _isLoading = false;
@@ -33,6 +37,10 @@ class ActivityProvider extends ChangeNotifier {
   bool get isPremiumPlus => _isPremiumPlus;
   bool get isLoading => _isLoading;
   int get totalCompletions => _allCompletions.length;
+
+  List<ActivitySkip> get skips => List.unmodifiable(_skips);
+  Set<String> get dismissedActivityIds =>
+      _skips.map((s) => s.activityId).toSet();
 
   String get todayKey => DateFormat('yyyy-MM-dd').format(Clock.now());
 
@@ -119,13 +127,76 @@ class ActivityProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    _todayActivity = ActivitiesData.todayActivity(ageInWeeks);
+    _contentAgeInWeeks = ageInWeeks;
+    _skips = await DatabaseHelper.instance.getSkips(profileId);
+    _todayActivity = ActivitiesData.todayActivity(ageInWeeks,
+        dismissed: dismissedActivityIds);
     _allCompletions = await DatabaseHelper.instance.getCompletions(profileId);
     _todayCompletion =
         _allCompletions.where((c) => c.dateKey == todayKey).firstOrNull;
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Sets today's activity aside for this child and swaps in a replacement.
+  ///
+  /// Returns false when there was nothing to dismiss, or when the activity is
+  /// already done — undoing a completion is the parent's own decision to make
+  /// first, and silently discarding one they had recorded would lose a day of
+  /// their streak without asking.
+  Future<bool> dismissTodayActivity(int profileId, SkipReason? reason) async {
+    final activity = _todayActivity;
+    if (activity == null || isCompleted) return false;
+
+    final skip = ActivitySkip(
+      profileId: profileId,
+      activityId: activity.id,
+      reason: reason,
+      skippedAt: Clock.now(),
+    );
+    await DatabaseHelper.instance.saveSkip(skip);
+    _skips = [skip, ..._skips.where((s) => s.activityId != activity.id)];
+    _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
+        dismissed: dismissedActivityIds);
+    notifyListeners();
+    return true;
+  }
+
+  /// Puts a dismissed activity back into the rotation.
+  Future<void> restoreActivity(int profileId, String activityId) async {
+    await DatabaseHelper.instance.deleteSkip(profileId, activityId);
+    _skips = _skips.where((s) => s.activityId != activityId).toList();
+    _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
+        dismissed: dismissedActivityIds);
+    notifyListeners();
+  }
+
+  Future<void> restoreAllActivities(int profileId) async {
+    await DatabaseHelper.instance.clearSkips(profileId);
+    _skips = [];
+    _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
+        dismissed: dismissedActivityIds);
+    notifyListeners();
+  }
+
+  /// The activity that was — or would have been — offered on [day].
+  ///
+  /// A day the parent actually completed reports the activity they really did,
+  /// read back from the completion row. Any other day is recomputed, using the
+  /// age the child was on that day rather than the age they are now.
+  PlayActivity? activityForDay(ChildProfile profile, DateTime day) {
+    final completion =
+        _allCompletions.where((c) => c.dateKey == _keyFor(day)).firstOrNull;
+    if (completion != null) {
+      final recorded = activityForCompletion(completion);
+      if (recorded != null) return recorded;
+    }
+    return ActivitiesData.activityForDate(
+      day,
+      profile.contentAgeInWeeksOn(day),
+      dismissed: dismissedActivityIds,
+    );
   }
 
   Future<void> toggleCompletion(int profileId) async {

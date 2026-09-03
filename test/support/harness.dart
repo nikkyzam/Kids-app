@@ -69,7 +69,7 @@ class Harness {
     auth = AuthProvider();
 
     await profiles.loadProfiles();
-    await activities.loadForProfile(child.id!, child.ageBandWeeks);
+    await activities.loadForProfile(child.id!, child.contentAgeBandWeeks);
     await milestones.loadForProfile(child.id!);
     await badges.loadBadges(child.id!);
 
@@ -79,7 +79,7 @@ class Harness {
   /// Reloads every provider after seeding data directly into the database.
   static Future<void> reload(ChildProfile child) async {
     await profiles.loadProfiles();
-    await activities.loadForProfile(child.id!, child.ageBandWeeks);
+    await activities.loadForProfile(child.id!, child.contentAgeBandWeeks);
     await milestones.loadForProfile(child.id!);
     await badges.loadBadges(child.id!);
   }

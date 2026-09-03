@@ -113,10 +113,23 @@ void main() {
   });
 
   group('ActivityHistoryScreen', () {
-    testWidgets('shows the empty state with no history', (tester) async {
+    testWidgets('opens on the day browser', (tester) async {
       await Harness.pump(tester, const ActivityHistoryScreen());
 
       expect(find.text('Activity History'), findsOneWidget);
+      // Every day is browsable, including today, whether or not anything has
+      // been completed — so the screen is never empty.
+      expect(find.text('Today'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the completed tab shows the empty state with no history',
+        (tester) async {
+      await Harness.pump(tester, const ActivityHistoryScreen());
+
+      await tester.tap(find.text('Completed'));
+      await tester.pumpAndSettle();
+
       expect(find.text('No activities completed yet'), findsOneWidget);
     });
 
@@ -126,6 +139,8 @@ void main() {
         await Harness.reload(child);
       });
       await Harness.pump(tester, const ActivityHistoryScreen());
+      await tester.tap(find.text('Completed'));
+      await tester.pumpAndSettle();
 
       expect(find.text('No activities completed yet'), findsNothing);
       expect(find.textContaining('May'), findsWidgets);
@@ -138,6 +153,8 @@ void main() {
         await Harness.reload(child);
       });
       await Harness.pump(tester, const ActivityHistoryScreen());
+      await tester.tap(find.text('Completed'));
+      await tester.pumpAndSettle();
 
       // 2 May back three days crosses into April, so the list must render two
       // month groups rather than collapsing them.
