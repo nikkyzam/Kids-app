@@ -139,13 +139,10 @@ class Harness {
 
     // Most screens kick off a database read in initState. `testWidgets` runs
     // in a fake-async zone where that real I/O never completes, so the screen
-    // would stay on its loading spinner forever. runAsync steps outside the
-    // fake zone just long enough for those futures to finish, then the pumps
-    // rebuild with the loaded data.
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 60)),
-    );
-    await tester.pump();
+    // would stay on its loading spinner forever. [settleAsync] steps outside
+    // the fake zone and back, once per awaited step, so a screen that reads
+    // several tables before it can render still gets there.
+    await settleAsync(tester, cycles: 8);
     await tester.pump(const Duration(milliseconds: 350));
   }
 

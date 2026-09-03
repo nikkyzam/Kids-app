@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+
 import '../../data/database_helper.dart';
-import '../../services/photo_storage.dart';
 import '../../models/photo_memory.dart';
+import '../../services/baby_book.dart';
+import '../../services/photo_memory_service.dart';
+import '../../services/photo_storage.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/local_image.dart';
 
@@ -17,6 +21,7 @@ class MemoriesTimelineScreen extends StatefulWidget {
 
 class _MemoriesTimelineScreenState extends State<MemoriesTimelineScreen> {
   List<PhotoMemory> _photos = [];
+  List<BabyBookEntry> _story = [];
   bool _loading = true;
 
   @override
@@ -28,12 +33,58 @@ class _MemoriesTimelineScreenState extends State<MemoriesTimelineScreen> {
   Future<void> _loadPhotos() async {
     final photos = await DatabaseHelper.instance.getPhotos(widget.profileId);
     photos.sort((a, b) => b.capturedAtDate.compareTo(a.capturedAtDate));
+    final story = await BabyBook.load(widget.profileId);
     if (mounted) {
       setState(() {
         _photos = photos;
+        _story = story;
         _loading = false;
       });
     }
+  }
+
+  /// A memory that belongs to nothing in particular — a first smile, a nap in
+  /// a sunbeam. Everything else in the book hangs off an activity or a
+  /// milestone, and plenty of what a parent wants to keep does neither.
+  Future<void> _addStandaloneMemory() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Choose from library'),
+              onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !mounted) return;
+
+    final saved = await PhotoMemoryService.capture(
+      context,
+      profileId: widget.profileId,
+      referenceType: BabyBook.standaloneReference,
+      // The moment is its own occasion, so the date it happened is all the
+      // reference it needs.
+      referenceId: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      source: source,
+    );
+    if (saved == null || !mounted) return;
+    await _loadPhotos();
   }
 
   Future<void> _deletePhoto(PhotoMemory photo) async {
@@ -58,21 +109,202 @@ class _MemoriesTimelineScreenState extends State<MemoriesTimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Photo Memories')),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _photos.isEmpty
-              ? _EmptyState()
-              : _TimelineBody(
-                  grouped: _groupedByMonth,
-                  onDelete: _deletePhoto,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Memories'),
+          bottom: const TabBar(
+            tabs: [Tab(text: 'Baby book'), Tab(text: 'Photos')],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _loading ? null : _addStandaloneMemory,
+          icon: const Icon(Icons.add_a_photo_rounded),
+          label: const Text('Add a memory'),
+        ),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(
+                children: [
+                  _story.isEmpty
+                      ? const _EmptyState(
+                          icon: Icons.auto_stories_rounded,
+                          title: 'The story starts here',
+                          body: 'Tick a milestone, record a measurement or add '
+                              'a photo, and it will all gather here in order.',
+                        )
+                      : _StoryBody(entries: _story),
+                  _photos.isEmpty
+                      ? const _EmptyState(
+                          icon: Icons.camera_alt_rounded,
+                          title: 'No photos yet',
+                          body: 'Add a memory below, or tap the camera icon on '
+                              'any completed activity or milestone.',
+                        )
+                      : _TimelineBody(
+                          grouped: _groupedByMonth,
+                          onDelete: _deletePhoto,
+                        ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+/// The baby book: photos, milestones and measurements in one column, newest
+/// first, grouped by month.
+class _StoryBody extends StatelessWidget {
+  final List<BabyBookEntry> entries;
+
+  const _StoryBody({required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    final grouped = <String, List<BabyBookEntry>>{};
+    for (final entry in entries) {
+      grouped
+          .putIfAbsent(DateFormat('MMMM yyyy').format(entry.date), () => [])
+          .add(entry);
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 96),
+      children: [
+        for (final month in grouped.keys) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+            child: Text(
+              month.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textMuted,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          ...grouped[month]!.map((e) => _StoryTile(entry: e)),
+        ],
+      ],
+    );
+  }
+}
+
+class _StoryTile extends StatelessWidget {
+  final BabyBookEntry entry;
+
+  const _StoryTile({required this.entry});
+
+  static const _icons = {
+    BabyBookEntryKind.photo: Icons.photo_rounded,
+    BabyBookEntryKind.milestone: Icons.emoji_events_rounded,
+    BabyBookEntryKind.growth: Icons.straighten_rounded,
+  };
+
+  static const _colors = {
+    BabyBookEntryKind.photo: AppTheme.primary,
+    BabyBookEntryKind.milestone: AppTheme.success,
+    BabyBookEntryKind.growth: AppTheme.secondary,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colors[entry.kind]!;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(_icons[entry.kind], size: 17, color: color),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DateFormat('EEE, d MMM').format(entry.date),
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textMuted,
+                              letterSpacing: 0.5),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(entry.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (entry.note?.isNotEmpty == true) ...[
+                const SizedBox(height: 10),
+                Text(entry.note!,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(height: 1.5)),
+              ],
+              if (entry.imagePath != null) ...[
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: Image(
+                      image: localImageProvider(entry.imagePath!),
+                      fit: BoxFit.cover,
+                      // A file the OS purged, or one lost with a restored
+                      // backup, explains itself rather than throwing.
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppTheme.textMuted.withValues(alpha: 0.08),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'This photo is no longer on this device',
+                          style: TextStyle(
+                              fontSize: 12, color: AppTheme.textMuted),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 class _EmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String body;
+
+  const _EmptyState(
+      {required this.icon, required this.title, required this.body});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -81,20 +313,15 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.camera_alt_rounded,
-                size: 56, color: AppTheme.textMuted),
+            Icon(icon, size: 56, color: AppTheme.textMuted),
             const SizedBox(height: 16),
-            Text(
-              'No memories yet',
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
+            Text(title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center),
             const SizedBox(height: 8),
-            Text(
-              'Tap the camera icon on any completed activity or milestone to add a photo memory',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
+            Text(body,
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center),
           ],
         ),
       ),

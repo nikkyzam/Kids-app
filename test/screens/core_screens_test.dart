@@ -186,8 +186,8 @@ void main() {
     testWidgets('shows the empty state', (tester) async {
       await Harness.pump(tester, MemoriesTimelineScreen(profileId: child.id!));
 
-      expect(find.text('Photo Memories'), findsOneWidget);
-      expect(find.text('No memories yet'), findsWidgets);
+      expect(find.text('Memories'), findsOneWidget);
+      expect(find.text('The story starts here'), findsOneWidget);
     });
 
     testWidgets('lists saved memories', (tester) async {
@@ -196,7 +196,10 @@ void main() {
       });
       await Harness.pump(tester, MemoriesTimelineScreen(profileId: child.id!));
 
-      expect(find.text('No memories yet'), findsNothing);
+      await tester.tap(find.text('Photos'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No photos yet'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
