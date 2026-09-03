@@ -57,7 +57,7 @@ class PediatricianPrepScreen extends StatelessWidget {
 
     return Consumer<MilestoneProvider>(
       builder: (context, mp, _) {
-        final ageInMonths = profile.ageInMonths;
+        final ageInMonths = profile.contentAgeInMonths;
         final nextAge = _nextVisitAge(ageInMonths);
         final lastAge = _lastVisitAge(ageInMonths);
         final checkAge = nextAge ?? lastAge;

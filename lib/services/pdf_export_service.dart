@@ -109,7 +109,7 @@ class PdfExportService {
                       fontSize: 16, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
-                  profile.displayAge,
+                  profile.ageSummary,
                   style: const pw.TextStyle(
                       fontSize: 11, color: PdfColors.grey700),
                 ),

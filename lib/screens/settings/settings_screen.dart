@@ -465,7 +465,7 @@ class _ProfileTile extends StatelessWidget {
         ),
       ),
       title: Text(profile.name),
-      subtitle: Text(profile.displayAge),
+      subtitle: Text(profile.ageSummary),
       trailing: onDelete != null
           ? IconButton(
               icon: const Icon(Icons.delete_outline_rounded,

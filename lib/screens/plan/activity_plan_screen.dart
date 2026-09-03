@@ -41,7 +41,7 @@ class _ActivityPlanScreenState extends State<ActivityPlanScreen>
     final profile = context.read<ProfileProvider>().activeProfile;
     if (profile == null) return;
 
-    final ageInWeeks = profile.ageInWeeks;
+    final ageInWeeks = profile.contentAgeInWeeks;
     final coverage = ap.skillCoverage;
 
     const allCategories = SkillCategory.values;

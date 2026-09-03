@@ -81,7 +81,7 @@ class ChildProfileDropdown extends StatelessWidget {
                     ),
                   ),
                   title: Text(p.name),
-                  subtitle: Text(p.displayAge),
+                  subtitle: Text(p.ageSummary),
                   trailing: p.id == activeProfile.id
                       ? const Icon(Icons.check_rounded, color: AppTheme.primary)
                       : null,

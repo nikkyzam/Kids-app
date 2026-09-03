@@ -20,7 +20,8 @@ class RedFlagBanner extends StatelessWidget {
 
         final achievedIds = mp.achievements.map((a) => a.milestoneId).toSet();
 
-        final flags = RedFlagsData.activeFor(profile.ageInMonths, achievedIds);
+        final flags =
+            RedFlagsData.activeFor(profile.contentAgeInMonths, achievedIds);
         if (flags.isEmpty) return const SizedBox.shrink();
 
         return Container(

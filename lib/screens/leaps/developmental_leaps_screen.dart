@@ -37,7 +37,10 @@ class DevelopmentalLeapsScreen extends StatelessWidget {
       );
     }
 
-    final ageInWeeks = profile.ageInWeeks;
+    // Leaps are counted from the due date, not the birth date — that is how
+    // the underlying research defines them, and it is also what a parent of a
+    // baby born early needs to see.
+    final ageInWeeks = profile.contentAgeInWeeks;
     final current = DevelopmentalLeapsData.currentLeap(ageInWeeks);
     final next = DevelopmentalLeapsData.nextLeap(ageInWeeks);
     const allLeaps = DevelopmentalLeapsData.all;

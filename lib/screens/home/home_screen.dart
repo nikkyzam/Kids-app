@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (profile == null) return;
     context
         .read<ActivityProvider>()
-        .loadForProfile(profile.id!, profile.ageBandWeeks);
+        .loadForProfile(profile.id!, profile.contentAgeBandWeeks);
     context.read<MilestoneProvider>().loadForProfile(profile.id!);
     context.read<BadgeProvider>().loadBadges(profile.id!);
   }
@@ -166,7 +166,7 @@ class _ActivityTab extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: _buildGreeting(
-              context, profile.name, profile.displayAge, ap.currentStreak),
+              context, profile.name, profile.ageSummary, ap.currentStreak),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         const SliverToBoxAdapter(child: StreakBanner()),

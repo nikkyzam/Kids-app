@@ -23,7 +23,8 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().activeProfile!;
     final ap = context.watch<ActivityProvider>();
-    final allForAge = ActivitiesData.forAgeBandWeeks(profile.ageBandWeeks);
+    final allForAge =
+        ActivitiesData.forAgeBandWeeks(profile.contentAgeBandWeeks);
     final todayId = ap.todayActivity?.id;
 
     final filtered = _filter == null
@@ -37,7 +38,7 @@ class _ActivityLibraryScreenState extends State<ActivityLibraryScreen> {
           children: [
             const Text('Activity Library'),
             Text(
-              '${allForAge.length} activities for ${profile.displayAge}',
+              '${allForAge.length} activities for ${profile.adjustedDisplayAge}',
               style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,

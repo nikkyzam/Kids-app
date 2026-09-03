@@ -19,6 +19,9 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _nameController = TextEditingController();
   DateTime? _selectedDob;
+  bool _bornEarly = false;
+  DateTime? _selectedDueDate;
+  ChildSex? _sex;
   bool _isSaving = false;
 
   @override
@@ -29,9 +32,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _pickDate() async {
     final now = Clock.now();
-    DateTime? picked;
+    final picked = await _showDatePicker(
+      initial: _selectedDob ?? now.subtract(const Duration(days: 90)),
+      first: now.subtract(const Duration(days: 365 * 4)),
+      last: now,
+      helpText: 'Select Date of Birth',
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedDob = picked;
+        // A due date that no longer sits after the birth date would silently
+        // stop correcting the age, so drop it and ask again.
+        if (_selectedDueDate != null && !_selectedDueDate!.isAfter(picked)) {
+          _selectedDueDate = null;
+        }
+      });
+    }
+  }
 
+  Future<void> _pickDueDate() async {
+    final dob = _selectedDob;
+    if (dob == null) return;
+    // A due date can only ever be after the birth date, and at most 17 weeks
+    // after it — the picker enforces the same window the model clamps to.
+    final picked = await _showDatePicker(
+      initial: _selectedDueDate ?? dob.add(const Duration(days: 42)),
+      first: dob.add(const Duration(days: 1)),
+      last: dob.add(const Duration(days: 119)),
+      helpText: 'Select Original Due Date',
+    );
+    if (picked != null && mounted) setState(() => _selectedDueDate = picked);
+  }
+
+  Future<DateTime?> _showDatePicker({
+    required DateTime initial,
+    required DateTime first,
+    required DateTime last,
+    required String helpText,
+  }) async {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
+      DateTime? picked;
       await showCupertinoModalPopup<void>(
         context: context,
         builder: (_) => Container(
@@ -39,25 +79,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           color: Colors.white,
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.date,
-            maximumDate: now,
-            minimumDate: now.subtract(const Duration(days: 365 * 4)),
-            initialDateTime:
-                _selectedDob ?? now.subtract(const Duration(days: 90)),
+            maximumDate: last,
+            minimumDate: first,
+            initialDateTime: initial,
             onDateTimeChanged: (dt) => picked = dt,
           ),
         ),
       );
-      if (picked != null && mounted) setState(() => _selectedDob = picked);
-    } else {
-      final result = await showDatePicker(
-        context: context,
-        initialDate: _selectedDob ?? now.subtract(const Duration(days: 90)),
-        firstDate: now.subtract(const Duration(days: 365 * 4)),
-        lastDate: now,
-        helpText: 'Select Date of Birth',
-      );
-      if (result != null && mounted) setState(() => _selectedDob = result);
+      return picked;
     }
+    return showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: first,
+      lastDate: last,
+      helpText: helpText,
+    );
   }
 
   Future<void> _saveProfile() async {
@@ -69,6 +106,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       final profile = ChildProfile(
         name: name,
         dateOfBirth: _selectedDob!,
+        dueDate: _bornEarly ? _selectedDueDate : null,
+        sex: _sex,
         createdAt: Clock.now(),
       );
       await context.read<ProfileProvider>().addProfile(profile);
@@ -84,7 +123,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   bool get _canSave =>
-      _nameController.text.trim().isNotEmpty && _selectedDob != null;
+      _nameController.text.trim().isNotEmpty &&
+      _selectedDob != null &&
+      // "Born early" without a due date would produce no correction at all,
+      // so the parent would have answered a question that changed nothing.
+      (!_bornEarly || _selectedDueDate != null);
 
   @override
   Widget build(BuildContext context) {
@@ -191,57 +234,86 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 8),
         // Mirrors inputDecorationTheme (radius, fill, padding) so the date
         // field and the name field read as the same control.
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: _pickDate,
-            borderRadius: BorderRadius.circular(16),
-            child: Ink(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F6FB),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _selectedDob == null
-                      ? const Color(0xFFEDF0F7)
-                      : AppTheme.primary.withValues(alpha: 0.35),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _selectedDob == null
-                          ? 'Tap to select date of birth'
-                          : DateFormat('MMMM d, yyyy').format(_selectedDob!),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: _selectedDob == null
-                            ? FontWeight.w400
-                            : FontWeight.w600,
-                        color: _selectedDob == null
-                            ? AppTheme.textMuted
-                            : AppTheme.textDark,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    color: _selectedDob == null
-                        ? AppTheme.textMuted
-                        : AppTheme.primary,
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-          ),
+        _FieldButton(
+          label: _selectedDob == null
+              ? 'Tap to select date of birth'
+              : DateFormat('MMMM d, yyyy').format(_selectedDob!),
+          filled: _selectedDob != null,
+          icon: Icons.calendar_today_rounded,
+          onTap: _pickDate,
         ),
         if (_selectedDob != null) ...[
           const SizedBox(height: 12),
           _buildAgeBadge(),
+          const SizedBox(height: 20),
+          _buildPrematureSection(),
         ],
+        const SizedBox(height: 24),
+        _buildSexSection(),
+      ],
+    );
+  }
+
+  Widget _buildPrematureSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Deliberately phrased as a fact about the birth, not as a problem to
+        // declare. Parents of preemies hear enough clinical language already.
+        SwitchListTile.adaptive(
+          value: _bornEarly,
+          onChanged: (v) => setState(() {
+            _bornEarly = v;
+            if (!v) _selectedDueDate = null;
+          }),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Arrived early',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          subtitle: const Text(
+            "We'll match activities to their adjusted age until they turn two.",
+            style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+          ),
+        ),
+        if (_bornEarly) ...[
+          const SizedBox(height: 8),
+          _FieldButton(
+            label: _selectedDueDate == null
+                ? 'Tap to select original due date'
+                : DateFormat('MMMM d, yyyy').format(_selectedDueDate!),
+            filled: _selectedDueDate != null,
+            icon: Icons.event_rounded,
+            onTap: _pickDueDate,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSexSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Sex (optional)', style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 4),
+        const Text(
+          'Only used to draw the right WHO growth curves. You can skip it.',
+          style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final option in ChildSex.values)
+              ChoiceChip(
+                label: Text(option.label),
+                selected: _sex == option,
+                // Tapping the selected chip clears it, so a parent who
+                // answered by accident is not stuck with the answer.
+                onSelected: (selected) =>
+                    setState(() => _sex = selected ? option : null),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -314,6 +386,63 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: CircularProgressIndicator(
                     color: Colors.white, strokeWidth: 2))
             : const Text('Get Started'),
+      ),
+    );
+  }
+}
+
+/// A tappable field that mirrors `inputDecorationTheme` so the date pickers
+/// read as the same control as the name field beside them.
+class _FieldButton extends StatelessWidget {
+  final String label;
+  final bool filled;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _FieldButton({
+    required this.label,
+    required this.filled,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F6FB),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: filled
+                  ? AppTheme.primary.withValues(alpha: 0.35)
+                  : const Color(0xFFEDF0F7),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: filled ? FontWeight.w600 : FontWeight.w400,
+                    color: filled ? AppTheme.textDark : AppTheme.textMuted,
+                  ),
+                ),
+              ),
+              Icon(icon,
+                  color: filled ? AppTheme.primary : AppTheme.textMuted,
+                  size: 18),
+            ],
+          ),
+        ),
       ),
     );
   }

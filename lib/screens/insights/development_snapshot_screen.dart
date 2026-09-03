@@ -48,7 +48,7 @@ class _DevelopmentSnapshotScreenState extends State<DevelopmentSnapshotScreen> {
           );
         }
 
-        final ageInMonths = profile.ageInMonths;
+        final ageInMonths = profile.contentAgeInMonths;
         final childName = profile.name;
 
         // ── Compute overall status ─────────────────────────────────────────

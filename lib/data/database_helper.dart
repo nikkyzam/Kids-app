@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/child_profile.dart';
 import '../models/activity_completion.dart';
+import '../models/activity_skip.dart';
 import '../models/milestone_achievement.dart';
 import '../models/photo_memory.dart';
 import '../models/growth_measurement.dart';
@@ -31,7 +32,7 @@ class DatabaseHelper {
         testDatabasePath ?? join(await getDatabasesPath(), 'playsteps.db');
     return openDatabase(
       path,
-      version: 5,
+      version: 7,
       onConfigure: _onConfigure,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
@@ -54,6 +55,8 @@ class DatabaseHelper {
         uuid TEXT,
         name TEXT NOT NULL,
         date_of_birth TEXT NOT NULL,
+        due_date TEXT,
+        sex TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT
       )
@@ -123,7 +126,25 @@ class DatabaseHelper {
         FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute(_createActivitySkipsSql);
   }
+
+  /// One row per activity a parent has dismissed for a child. Kept per child
+  /// rather than per day: an activity that does not suit this child should not
+  /// come back around tomorrow.
+  static const String _createActivitySkipsSql = '''
+    CREATE TABLE IF NOT EXISTS activity_skips (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      profile_id INTEGER NOT NULL,
+      activity_id TEXT NOT NULL,
+      reason TEXT,
+      skipped_at TEXT NOT NULL,
+      updated_at TEXT,
+      FOREIGN KEY (profile_id) REFERENCES child_profiles(id) ON DELETE CASCADE,
+      UNIQUE(profile_id, activity_id)
+    )
+  ''';
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
@@ -199,6 +220,16 @@ class DatabaseHelper {
           .execute('UPDATE growth_measurements SET updated_at = measured_on');
       await db.execute('ALTER TABLE photo_memories ADD COLUMN updated_at TEXT');
       await db.execute('UPDATE photo_memories SET updated_at = captured_at');
+    }
+    if (oldVersion < 6) {
+      // Optional due date (babies born early) and sex (WHO percentile curves
+      // are sex-specific). Both stay NULL for every existing profile, so the
+      // app behaves exactly as before until a parent fills them in.
+      await db.execute('ALTER TABLE child_profiles ADD COLUMN due_date TEXT');
+      await db.execute('ALTER TABLE child_profiles ADD COLUMN sex TEXT');
+    }
+    if (oldVersion < 7) {
+      await db.execute(_createActivitySkipsSql);
     }
   }
 
@@ -431,6 +462,69 @@ class DatabaseHelper {
       },
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
+  }
+
+  // ─── Activity Skips ───────────────────────────────────────────────────────
+
+  Future<List<ActivitySkip>> getSkips(int profileId) async {
+    final db = await database;
+    final rows = await db.query(
+      'activity_skips',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      orderBy: 'skipped_at DESC',
+    );
+    return rows.map(ActivitySkip.fromMap).toList();
+  }
+
+  Future<void> saveSkip(ActivitySkip skip) async {
+    final db = await database;
+    await db.insert(
+      'activity_skips',
+      {...skip.toMap()..remove('id'), 'updated_at': SyncTimestamp.now()},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> deleteSkip(int profileId, String activityId) async {
+    final db = await database;
+    await db.delete(
+      'activity_skips',
+      where: 'profile_id = ? AND activity_id = ?',
+      whereArgs: [profileId, activityId],
+    );
+  }
+
+  Future<void> clearSkips(int profileId) async {
+    final db = await database;
+    await db.delete('activity_skips',
+        where: 'profile_id = ?', whereArgs: [profileId]);
+  }
+
+  // ─── Wipe ─────────────────────────────────────────────────────────────────
+
+  /// Empties every table in one transaction.
+  ///
+  /// Deleting the child rows alone would cascade to the rest, but the delete is
+  /// spelled out per table so that a future table without a foreign key cannot
+  /// silently survive a "delete all my data". Photo *files* are not this
+  /// class's to remove — see `BackupService.deleteAllData`, which deletes them
+  /// and then calls this.
+  Future<void> wipeAllData() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      for (final table in const [
+        'activity_skips',
+        'photo_memories',
+        'growth_measurements',
+        'unlocked_badges',
+        'milestone_achievements',
+        'activity_completions',
+        'child_profiles',
+      ]) {
+        await txn.delete(table);
+      }
+    });
   }
 
   @visibleForTesting
