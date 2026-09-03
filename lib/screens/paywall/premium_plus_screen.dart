@@ -16,7 +16,10 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
   Widget build(BuildContext context) {
     final ap = context.watch<ActivityProvider>();
 
-    if (ap.isPremiumPlus) {
+    // The purchase, not the effective unlock: during the trial everything is
+    // on, and showing the "already active" screen then would leave a parent no
+    // way to actually subscribe.
+    if (ap.hasPurchasedPremiumPlus) {
       return _buildAlreadyActiveScreen(context);
     }
 

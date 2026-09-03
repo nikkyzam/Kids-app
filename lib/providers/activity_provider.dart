@@ -9,6 +9,7 @@ import '../models/child_profile.dart';
 import '../data/database_helper.dart';
 import '../data/activities_data.dart';
 import '../services/purchase_service.dart';
+import '../services/trial_service.dart';
 import '../utils/clock.dart';
 
 class ActivityProvider extends ChangeNotifier {
@@ -28,13 +29,38 @@ class ActivityProvider extends ChangeNotifier {
     _isPremiumPlus = _prefs.getBool('is_premium_plus') ?? false;
   }
 
+  /// Stamps the first launch so the trial clock starts. Called once at
+  /// start-up; harmless afterwards.
+  Future<void> startTrialClock() async {
+    await TrialService.recordFirstLaunch(_prefs);
+    notifyListeners();
+  }
+
   PlayActivity? get todayActivity => _todayActivity;
   ActivityCompletion? get todayCompletion => _todayCompletion;
   List<ActivityCompletion> get allCompletions =>
       List.unmodifiable(_allCompletions);
   bool get isCompleted => _todayCompletion != null;
-  bool get isPremium => _isPremium;
-  bool get isPremiumPlus => _isPremiumPlus;
+
+  /// Whether everything is unlocked right now — bought, or on trial.
+  ///
+  /// Read by the gates rather than [hasPurchasedPremium] so a single change
+  /// covers every locked surface; the paywall still needs the distinction, so
+  /// the purchase flags stay separately readable.
+  bool get isPremium => _isPremium || isTrialActive;
+  bool get isPremiumPlus => _isPremiumPlus || isTrialActive;
+
+  bool get hasPurchasedPremium => _isPremium;
+  bool get hasPurchasedPremiumPlus => _isPremiumPlus;
+
+  bool get isTrialActive => TrialService.isActive(_prefs);
+  bool get hasTrialLapsed => TrialService.hasLapsed(_prefs);
+  int get trialDaysRemaining => TrialService.daysRemaining(_prefs);
+
+  /// True only while the trial is what is unlocking things — so the UI can say
+  /// "3 days left" to a parent trying the app, and stay quiet for one who has
+  /// paid.
+  bool get isOnTrialOnly => isTrialActive && !_isPremium;
   bool get isLoading => _isLoading;
   int get totalCompletions => _allCompletions.length;
 
@@ -221,7 +247,7 @@ class ActivityProvider extends ChangeNotifier {
   }
 
   bool activityRequiresPremium(PlayActivity activity) =>
-      !activity.isInFreeTier && !_isPremium;
+      !activity.isInFreeTier && !isPremium;
 
   bool get todayRequiresPremium {
     if (_todayActivity == null) return false;

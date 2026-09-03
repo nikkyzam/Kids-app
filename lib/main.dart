@@ -50,6 +50,11 @@ void main() async {
 
   final activityProvider = ActivityProvider(prefs);
 
+  // Starts the free-trial clock on the very first launch. Done here rather
+  // than lazily on the first paywall so the fortnight begins when the parent
+  // begins, not when they first hit a lock.
+  await activityProvider.startTrialClock();
+
   // Route store-confirmed entitlements into the provider. Wired before init()
   // so purchases that completed while the app was closed are picked up by the
   // first purchaseStream event.

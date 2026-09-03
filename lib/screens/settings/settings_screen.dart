@@ -177,7 +177,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             const Divider(height: 1),
             const _SectionHeader(title: 'Premium'),
-            if (activityProvider.isPremium)
+            if (activityProvider.isOnTrialOnly)
+              ListTile(
+                leading: const Icon(Icons.lock_open_rounded,
+                    color: AppTheme.success),
+                title: Text(
+                    'Free trial — ${activityProvider.trialDaysRemaining} '
+                    'day${activityProvider.trialDaysRemaining == 1 ? '' : 's'} left'),
+                subtitle: const Text(
+                    'Everything is unlocked. Nothing you record is lost when '
+                    'it ends.'),
+              ),
+            if (activityProvider.hasPurchasedPremium)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: AppTheme.secondary),
                 title: Text('PlaySteps Premium'),
@@ -194,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const PaywallScreen())),
               ),
-            if (activityProvider.isPremiumPlus)
+            if (activityProvider.hasPurchasedPremiumPlus)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: Color(0xFFF5A623)),
                 title: Text('Premium Plus — Active'),

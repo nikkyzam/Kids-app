@@ -15,6 +15,7 @@ import 'package:playsteps/providers/auth_provider.dart';
 import 'package:playsteps/providers/badge_provider.dart';
 import 'package:playsteps/providers/milestone_provider.dart';
 import 'package:playsteps/providers/profile_provider.dart';
+import 'package:playsteps/services/trial_service.dart';
 import 'package:playsteps/theme/app_theme.dart';
 import 'package:playsteps/utils/clock.dart';
 
@@ -45,11 +46,16 @@ class Harness {
     DateTime? now,
     bool premium = false,
     bool premiumPlus = false,
+    DateTime? trialStartedAt,
   }) async {
     Clock.freeze(now ?? DateTime(2026, 5, 20, 10, 0));
     SharedPreferences.setMockInitialValues({
       if (premium) 'is_premium': true,
       if (premiumPlus) 'is_premium_plus': true,
+      // Absent by default, so tests see the post-trial free tier — the state
+      // the paywall and lock screens exist for.
+      if (trialStartedAt != null)
+        TrialService.firstLaunchKey: trialStartedAt.toIso8601String(),
     });
     await DatabaseHelper.instance.resetForTesting();
 
@@ -151,10 +157,15 @@ class Harness {
     DateTime? now,
     bool premium = false,
     bool premiumPlus = false,
+    DateTime? trialStartedAt,
   }) async {
     late ChildProfile child;
     await tester.runAsync(() async {
-      child = await reset(now: now, premium: premium, premiumPlus: premiumPlus);
+      child = await reset(
+          now: now,
+          premium: premium,
+          premiumPlus: premiumPlus,
+          trialStartedAt: trialStartedAt);
     });
     return child;
   }

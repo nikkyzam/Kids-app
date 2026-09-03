@@ -17,10 +17,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The store confirms purchases asynchronously, so dismiss the paywall
-    // whenever the entitlement lands — whether from a purchase or a restore.
-    final isPremium = context.watch<ActivityProvider>().isPremium;
-    if (isPremium) {
+    // Watches the *purchase*, not the effective unlock: during the free trial
+    // everything is unlocked, and dismissing on that would make the paywall
+    // impossible to open for the fortnight a parent is deciding.
+    final ap = context.watch<ActivityProvider>();
+    if (ap.hasPurchasedPremium) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final navigator = Navigator.of(context);
@@ -65,7 +66,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
       child: Column(
         children: [
           _buildHero(),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
+          _buildTrialStatus(),
+          const SizedBox(height: 12),
           _buildFeatureList(),
           const SizedBox(height: 32),
           _buildPurchaseButton(),
@@ -113,6 +116,31 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
+  /// Where the parent stands: mid-trial, lapsed, or neither. Stated plainly
+  /// rather than left to be discovered by hitting a lock.
+  Widget _buildTrialStatus() {
+    final ap = context.watch<ActivityProvider>();
+
+    if (ap.isOnTrialOnly) {
+      final days = ap.trialDaysRemaining;
+      return _StatusBanner(
+        icon: Icons.lock_open_rounded,
+        color: AppTheme.success,
+        text: 'Your free trial has $days day${days == 1 ? '' : 's'} left — '
+            'everything is unlocked until then.',
+      );
+    }
+    if (ap.hasTrialLapsed) {
+      return const _StatusBanner(
+        icon: Icons.schedule_rounded,
+        color: AppTheme.secondary,
+        text: 'Your free trial has ended. Everything you recorded is still '
+            'here, and the first four weeks of activities stay free.',
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
   Widget _buildFeatureList() {
     final features = [
       // Describes the library as it actually is. The daily activity is drawn
@@ -135,6 +163,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
       // "Zero cloud, always" stopped being true when family sharing shipped.
       // Private-by-default is the accurate claim: nothing leaves the device
       // unless the parent turns sharing on.
+      const _Feature(
+          Icons.card_giftcard_rounded,
+          AppTheme.languageColor,
+          'Every Future Activity Pack',
+          'New activities and content updates are included — no second '
+              'purchase, ever'),
       const _Feature(
           Icons.lock_outline_rounded,
           AppTheme.grossMotorColor,
@@ -263,6 +297,45 @@ class _FeatureTile extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A one-line status strip on the paywall.
+class _StatusBanner extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  const _StatusBanner({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: color,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),

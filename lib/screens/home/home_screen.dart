@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/child_profile_dropdown.dart';
 import '../../widgets/activity_card.dart';
 import '../../widgets/streak_banner.dart';
+import '../../widgets/trial_banner.dart';
 import '../../widgets/daily_tip_card.dart';
 import '../../widgets/skill_coverage_card.dart';
 import '../milestones/milestones_screen.dart';
@@ -169,6 +170,7 @@ class _ActivityTab extends StatelessWidget {
               context, profile.name, profile.ageSummary, ap.currentStreak),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        const SliverToBoxAdapter(child: TrialBanner()),
         const SliverToBoxAdapter(child: StreakBanner()),
         SliverToBoxAdapter(child: _buildLibraryButton(context)),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
