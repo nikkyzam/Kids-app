@@ -6,6 +6,7 @@ import '../../providers/activity_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/backup_service.dart';
+import '../../services/data_reset_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/sync_service.dart';
 import '../../services/purchase_service.dart';
@@ -115,6 +116,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Those activities are back in rotation.')),
+    );
+  }
+
+  Future<void> _confirmDeleteAllData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _DeleteAllDataDialog(),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final photosDeleted = await DataResetService.deleteEverything();
+    if (!mounted) return;
+
+    if (!photosDeleted) {
+      // Said out loud rather than swallowed: a parent who asked for everything
+      // to go deserves to know that some image files did not.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Your records are deleted. Some photo files could '
+              'not be removed from this device.'),
+          backgroundColor: AppTheme.error,
+          duration: Duration(seconds: 5),
+        ),
+      );
+    }
+
+    // Straight back to onboarding: with no profiles left there is nothing for
+    // any other screen to show, and leaving the parent on a settings list
+    // built from data that no longer exists would look like a crash.
+    await context.read<ProfileProvider>().loadProfiles();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      (_) => false,
     );
   }
 
@@ -288,6 +323,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 }
               },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever_rounded,
+                  color: AppTheme.error),
+              title: const Text('Delete All Data',
+                  style: TextStyle(color: AppTheme.error)),
+              subtitle: const Text(
+                  'Erase every child, photo and record from this device'),
+              onTap: _confirmDeleteAllData,
             ),
             const Divider(height: 1),
             const _SectionHeader(title: 'About'),
@@ -501,6 +545,74 @@ class _ProfileTile extends StatelessWidget {
               onPressed: onDelete,
             )
           : null,
+    );
+  }
+}
+
+/// The typed confirmation for "Delete All Data".
+///
+/// A widget of its own so it owns its text controller: disposing a controller
+/// from the caller as soon as `showDialog` returns tears it out from under a
+/// field that is still on screen for the closing animation.
+class _DeleteAllDataDialog extends StatefulWidget {
+  const _DeleteAllDataDialog();
+
+  @override
+  State<_DeleteAllDataDialog> createState() => _DeleteAllDataDialogState();
+}
+
+class _DeleteAllDataDialogState extends State<_DeleteAllDataDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete all data?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'This erases every child profile, completed activity, milestone, '
+            'growth record, badge and photo on this device. It cannot be '
+            'undone, and a backup taken beforehand is the only way back.',
+          ),
+          const SizedBox(height: 16),
+          const Text('Type DELETE to confirm.',
+              style: TextStyle(fontSize: 13, color: AppTheme.textMuted)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(hintText: 'DELETE'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep my data')),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (_, value, __) => FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
+            // Typed confirmation rather than a second "are you sure": this is
+            // the one action in the app that cannot be undone. Case-insensitive
+            // and trimmed, because the keyboard should not be another obstacle.
+            onPressed: value.text.trim().toUpperCase() == 'DELETE'
+                ? () => Navigator.pop(context, true)
+                : null,
+            child: const Text('Delete everything'),
+          ),
+        ),
+      ],
     );
   }
 }

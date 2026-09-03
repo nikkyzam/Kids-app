@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:image_picker/image_picker.dart';
-
-import '../data/database_helper.dart';
 import '../models/activity.dart';
 import '../models/activity_skip.dart';
-import '../models/photo_memory.dart';
 import '../providers/activity_provider.dart';
 import '../providers/badge_provider.dart';
 import '../providers/milestone_provider.dart';
@@ -15,6 +11,7 @@ import 'badge_unlocked_dialog.dart';
 import 'confetti_overlay.dart';
 import 'streak_milestone_dialog.dart';
 import '../screens/paywall/paywall_screen.dart';
+import '../services/photo_memory_service.dart';
 import '../services/purchase_service.dart';
 import '../utils/clock.dart';
 
@@ -259,7 +256,7 @@ class _ActivityCardState extends State<ActivityCard> {
                     }
                   }
                   if (context.mounted) {
-                    _offerPhotoMemory(context, ap, widget.profileId);
+                    _offerPhotoMemory(ap, widget.profileId);
                   }
                 },
                 icon: const Icon(Icons.check_rounded, size: 18),
@@ -380,13 +377,14 @@ class _ActivityCardState extends State<ActivityCard> {
     );
   }
 
-  Future<void> _offerPhotoMemory(
-      BuildContext context, ActivityProvider ap, int profileId) async {
+  /// Takes no context parameter on purpose: every gap here is awaited, and a
+  /// `State.mounted` check is only meaningful against `State.context`.
+  Future<void> _offerPhotoMemory(ActivityProvider ap, int profileId) async {
     if (ap.todayActivity == null || !ap.isCompleted) return;
     final dateKey = Clock.now().toIso8601String().split('T').first;
 
     await Future.delayed(const Duration(milliseconds: 400));
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     final add = await showDialog<bool>(
       context: context,
@@ -406,20 +404,14 @@ class _ActivityCardState extends State<ActivityCard> {
     );
     if (add != true || !mounted) return;
 
-    final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
-    if (picked == null || !mounted) return;
-
-    await DatabaseHelper.instance.savePhoto(PhotoMemory(
+    final saved = await PhotoMemoryService.capture(
+      context,
       profileId: profileId,
       referenceType: 'activity',
       referenceId: dateKey,
-      imagePath: picked.path,
-      capturedAt: Clock.now().toIso8601String(),
-    ));
+    );
 
-    if (context.mounted) {
+    if (saved != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Photo memory saved!'),

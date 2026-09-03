@@ -2,17 +2,14 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../data/database_helper.dart';
 import '../data/milestone_context_data.dart';
 import '../models/milestone.dart';
-import '../models/photo_memory.dart';
 import '../providers/milestone_provider.dart';
+import '../services/photo_memory_service.dart';
 import '../theme/app_theme.dart';
-import '../utils/clock.dart';
 
 class MilestoneItem extends StatefulWidget {
   final Milestone milestone;
@@ -63,7 +60,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
                       widget.profileId, widget.milestone.id);
                   if (!wasAchieved && context.mounted) {
                     _confetti.play();
-                    _promptAddPhoto(context);
+                    _promptAddPhoto();
                   }
                 },
                 onLongPress: isAchieved
@@ -264,9 +261,11 @@ class _MilestoneItemState extends State<MilestoneItem> {
     );
   }
 
-  Future<void> _promptAddPhoto(BuildContext context) async {
+  /// Takes no context parameter on purpose: every gap here is awaited, and a
+  /// `State.mounted` check is only meaningful against `State.context`.
+  Future<void> _promptAddPhoto() async {
     await Future.delayed(const Duration(milliseconds: 600));
-    if (!context.mounted) return;
+    if (!mounted) return;
     final add = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -285,20 +284,14 @@ class _MilestoneItemState extends State<MilestoneItem> {
     );
     if (add != true || !mounted) return;
 
-    final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
-    if (picked == null || !mounted) return;
-
-    await DatabaseHelper.instance.savePhoto(PhotoMemory(
+    final saved = await PhotoMemoryService.capture(
+      context,
       profileId: widget.profileId,
       referenceType: 'milestone',
       referenceId: widget.milestone.id,
-      imagePath: picked.path,
-      capturedAt: Clock.now().toIso8601String(),
-    ));
+    );
 
-    if (context.mounted) {
+    if (saved != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Photo memory saved!'),

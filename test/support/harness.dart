@@ -86,6 +86,23 @@ class Harness {
 
   static void tearDownClock() => Clock.reset();
 
+  /// Lets a chain of awaited database and preference writes — started by a tap
+  /// rather than by `initState` — actually run to completion.
+  ///
+  /// `testWidgets` runs in a fake-async zone. Real I/O completes only while
+  /// [WidgetTester.runAsync] turns the real event loop, but the continuation it
+  /// schedules lands on the fake zone's queue and runs only on the next
+  /// [WidgetTester.pump]. One of each therefore advances one `await`, so a
+  /// multi-step operation needs them interleaved.
+  static Future<void> settleAsync(WidgetTester tester,
+      {int cycles = 30}) async {
+    for (int i = 0; i < cycles; i++) {
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)));
+      await tester.pump();
+    }
+  }
+
   /// Wraps [child] in the provider graph and the real app theme.
   static Widget wrap(Widget child) {
     return MultiProvider(

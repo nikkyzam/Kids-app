@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../data/database_helper.dart';
+import '../../services/photo_storage.dart';
 import '../../models/photo_memory.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/local_image.dart';
@@ -38,6 +39,11 @@ class _MemoriesTimelineScreenState extends State<MemoriesTimelineScreen> {
   Future<void> _deletePhoto(PhotoMemory photo) async {
     if (photo.id == null) return;
     await DatabaseHelper.instance.deletePhoto(photo.id!);
+    // The file goes too, or deleting a memory would only hide it while it kept
+    // taking up the parent's storage. PhotoStorage refuses paths outside its
+    // own directory, so a row left over from an older build cannot reach into
+    // the picker's cache or the user's library.
+    await PhotoStorage.delete(photo.imagePath);
     await _loadPhotos();
   }
 
