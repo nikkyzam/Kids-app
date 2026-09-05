@@ -61,6 +61,30 @@ jobs:
           path: coverage/lcov.info
           if-no-files-found: ignore
 
+  verify-purchase-function:
+    name: Receipt verifier (Deno)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # The edge function decides whether a parent keeps what they paid for,
+      # and it is the one piece of this repo that never runs under
+      # `flutter test`.
+      - name: Type-check
+        run: deno check supabase/functions/verify-purchase/*.ts
+
+      - name: Test
+        run: deno test --allow-env supabase/functions/verify-purchase/
+
+      - name: Verify formatting
+        run: deno fmt --check supabase/functions/verify-purchase/
+
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest

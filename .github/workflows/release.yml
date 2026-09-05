@@ -10,6 +10,12 @@ jobs:
   android:
     name: Android (AAB)
     runs-on: ubuntu-latest
+    # Job level, not step level: a step's own `env:` block is not in scope for
+    # that step's `if:`, so the publish step's condition below was always
+    # comparing an empty string against an empty string and skipping — even
+    # with every secret set.
+    env:
+      PLAY_SA_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,11 +59,28 @@ jobs:
           storeFile=release.keystore
           EOF
 
+      # Without these the shipped artifact has family sharing and receipt
+      # verification switched off: SupabaseConfig.isConfigured is false, so
+      # HttpReceiptVerifier finds no endpoint and the app falls back to the
+      # local check. Absent secrets still build — that degradation is by
+      # design — but a release build should not get it by accident.
       - name: Build App Bundle
-        run: flutter build appbundle --release
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build appbundle --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Build APK
-        run: flutter build apk --release
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -70,8 +93,6 @@ jobs:
 
       - name: Publish to Google Play (internal track)
         if: ${{ env.PLAY_SA_JSON != '' }}
-        env:
-          PLAY_SA_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
