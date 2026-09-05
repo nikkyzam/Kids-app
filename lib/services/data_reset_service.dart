@@ -18,10 +18,22 @@ class DataResetService {
   /// store is the source of truth and re-confirms on launch, but keeping the
   /// cached flags means a paying parent who wipes their data on a plane is not
   /// locked out of what they bought until they are back online.
+  /// Prefixes kept alongside them: the receipt that proves an entitlement is
+  /// part of the entitlement. Wiping it while keeping the flag would leave a
+  /// purchase that can never be re-checked and so can never be revoked when it
+  /// is refunded or lapses.
+  static const Set<String> keptPreferencePrefixes = {
+    'receipt_',
+  };
+
   static const Set<String> keptPreferences = {
     'is_premium',
     'is_premium_plus',
   };
+
+  static bool _isKept(String key) =>
+      keptPreferences.contains(key) ||
+      keptPreferencePrefixes.any(key.startsWith);
 
   /// Returns true when the photo files went too.
   ///
@@ -42,7 +54,7 @@ class DataResetService {
 
     final prefs = await SharedPreferences.getInstance();
     for (final key in prefs.getKeys().toSet()) {
-      if (keptPreferences.contains(key)) continue;
+      if (_isKept(key)) continue;
       await prefs.remove(key);
     }
     return photosDeleted;

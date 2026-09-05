@@ -307,10 +307,19 @@ Cloud project and create a service account with the *Financial data* / *Manage
 orders and subscriptions* permission. Download its JSON key; you need
 `client_email` and `private_key`.
 
-**2. App Store.** App Store Connect → your app → App Information → *App-Specific
-Shared Secret*. (The function uses the `verifyReceipt` endpoint, which matches
-the receipt `in_app_purchase` hands back. Apple has deprecated it in favour of
-the App Store Server API — worth migrating when you move to StoreKit 2.)
+**2. App Store.** App Store Connect → Users and Access → Integrations → *App
+Store Connect API*, and create an **In-App Purchase** key. You need the issuer
+ID, the key ID, and the downloaded `AuthKey_XXXX.p8`.
+
+The function uses the App Store Server API, not the older `verifyReceipt`.
+That is not a preference: `in_app_purchase_storekit` defaults to StoreKit 2,
+where `serverVerificationData` is a JWS signed transaction rather than a base64
+app receipt, and `verifyReceipt` rejects a JWS outright. The function reads the
+transaction id out of the JWS *without trusting it* and asks Apple about that
+id directly — the same shape as the Play path, where the client's token is a
+claim and the store's answer is the fact. A forged JWS names a transaction
+Apple has never issued, or one belonging to another app; both are rejected
+against Apple's own copy.
 
 **3. Deploy.**
 
@@ -320,8 +329,15 @@ supabase secrets set \
   ANDROID_PACKAGE_NAME=com.nikkyzam.playsteps.app \
   GOOGLE_SERVICE_ACCOUNT_EMAIL='...@....iam.gserviceaccount.com' \
   GOOGLE_SERVICE_ACCOUNT_KEY="$(cat service-account-key.pem)" \
-  APPLE_SHARED_SECRET='...'
+  APPLE_BUNDLE_ID=com.nikkyzam.playsteps.app \
+  APPLE_ISSUER_ID='...' \
+  APPLE_KEY_ID='...' \
+  APPLE_PRIVATE_KEY="$(cat AuthKey_XXXX.p8)"
 ```
+
+A missing or mistyped secret makes the function answer 503 ("could not ask"),
+never a rejection — so a half-finished deploy leaves purchases working rather
+than revoking everyone who has paid.
 
 The function lives in the same Supabase project as family sharing and needs no
 extra configuration in the app: it is found automatically whenever

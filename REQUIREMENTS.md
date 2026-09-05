@@ -252,7 +252,19 @@ and three hundred identical lines would bury the first steps.
   re-checked later. Collapsing "could not ask" into "no" would take a real
   purchase away every time the backend had a bad day
 - Confirmed entitlements are re-checked weekly, or as soon as a known
-  subscription expiry passes
+  subscription expiry passes. An outage on a receipt already confirmed leaves
+  that confirmation standing, so a restore with no signal cannot turn the
+  weekly check into one on every launch
+- **Only the store may produce a rejection.** A missing secret, a throttled or
+  unauthorised API call, or a store's own 5xx must all reach the client as
+  "could not ask". The classification lives in one place on the server, because
+  every path that gets it wrong revokes a real purchase
+- A rejection revokes wherever it arrives — the launch re-check and the
+  purchase stream share one code path, since the store re-delivers purchases
+  and that is how a refund reaches an entitlement the app already holds
+- A revoked or reset entitlement keeps its receipt: wiping the evidence while
+  keeping the flag leaves a purchase that can never be re-checked, and so can
+  never be revoked when it lapses
 - An entitlement with no stored receipt — granted before validation existed, or
   by a build with no backend — is left alone. Absence of evidence is not
   grounds to take away what someone bought

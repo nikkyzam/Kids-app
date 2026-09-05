@@ -203,10 +203,7 @@ class PurchaseService {
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
           if (await _isValid(purchase)) {
-            final entitlement = purchase.productID == premiumProductId
-                ? Entitlement.premium
-                : Entitlement.premiumPlus;
-            onEntitlement?.call(entitlement);
+            onEntitlement?.call(_entitlementFor(purchase.productID));
           } else {
             onError?.call('That purchase could not be verified.');
           }
@@ -237,15 +234,46 @@ class PurchaseService {
       final receipt = ledger.receiptFor(entitlement);
       if (receipt == null) continue;
 
-      final verdict = await verifier.verify(receipt);
-      if (verdict.isInvalid) {
-        await ledger.clear(entitlement);
-        onEntitlementRevoked?.call(entitlement);
-      } else if (verdict.isValid) {
-        await ledger.record(entitlement, receipt, verdict);
-      }
-      // Unavailable: leave everything alone and try again next launch.
+      await _applyVerdict(
+        ledger,
+        entitlement,
+        receipt,
+        await verifier.verify(receipt),
+      );
     }
+  }
+
+  @visibleForTesting
+  Future<bool> applyVerdictForTesting(
+    Entitlement entitlement,
+    PurchaseReceipt receipt,
+    ReceiptVerdict verdict,
+  ) async =>
+      _applyVerdict(await _ledgerInstance(), entitlement, receipt, verdict);
+
+  /// The single place a verdict turns into a decision.
+  ///
+  /// Both callers — the purchase stream and the launch re-check — route
+  /// through here, because they had drifted: one revoked on a rejection and
+  /// the other only deleted the receipt, which left a refunded purchase
+  /// working forever with nothing left to re-check it against. Returns whether
+  /// the entitlement should be considered held.
+  Future<bool> _applyVerdict(
+    EntitlementLedger ledger,
+    Entitlement entitlement,
+    PurchaseReceipt receipt,
+    ReceiptVerdict verdict,
+  ) async {
+    if (verdict.isInvalid) {
+      await ledger.clear(entitlement);
+      onEntitlementRevoked?.call(entitlement);
+      return false;
+    }
+    // Valid, or unavailable: record the receipt either way so the next launch
+    // has something to ask about. The ledger decides what an unconfirmed
+    // verdict does to the re-check schedule.
+    await ledger.record(entitlement, receipt, verdict);
+    return true;
   }
 
   static Entitlement _entitlementFor(String productId) =>
@@ -267,7 +295,8 @@ class PurchaseService {
         platform: platform ?? _platformName,
         productId: purchase.productID,
         token: purchase.verificationData.serverVerificationData,
-        isSubscription: purchase.productID == premiumPlusProductId,
+        isSubscription:
+            _entitlementFor(purchase.productID) == Entitlement.premiumPlus,
       );
 
   /// Validates a purchase before granting the entitlement.
@@ -282,6 +311,10 @@ class PurchaseService {
   /// Premium; the receipt is recorded unverified and re-checked on a later
   /// launch. That leaves a window in which a forged purchase works, which is
   /// the price of the offline promise and is deliberate.
+  ///
+  /// A rejection here also revokes, not just refuses: the store re-delivers
+  /// purchases, so this is the path a refund arrives on for an entitlement the
+  /// app is already holding.
   Future<bool> _isValid(PurchaseDetails purchase) async {
     if (!_productIds.contains(purchase.productID)) return false;
     final receipt = receiptFrom(purchase);
@@ -289,15 +322,11 @@ class PurchaseService {
 
     if (!verifier.isConfigured) return true;
 
-    final verdict = await verifier.verify(receipt);
-    if (verdict.isInvalid) {
-      await (await _ledgerInstance())
-          .clear(_entitlementFor(purchase.productID));
-      return false;
-    }
-
-    await (await _ledgerInstance())
-        .record(_entitlementFor(purchase.productID), receipt, verdict);
-    return true;
+    return _applyVerdict(
+      await _ledgerInstance(),
+      _entitlementFor(purchase.productID),
+      receipt,
+      await verifier.verify(receipt),
+    );
   }
 }

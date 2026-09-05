@@ -59,15 +59,26 @@ class EntitlementLedger {
     PurchaseReceipt receipt,
     ReceiptVerdict verdict,
   ) async {
+    // Read before writing: the comparison below is against what we knew a
+    // moment ago, and storing the receipt first would make it compare the new
+    // receipt with itself and never fire.
+    final previous = receiptFor(entitlement);
+
     await _prefs.setString(
         _receiptKey(entitlement), jsonEncode(receipt.toJson()));
 
     if (verdict.isValid) {
       await _prefs.setString(
           _verifiedKey(entitlement), Clock.now().toIso8601String());
-    } else {
-      // An unverified grant keeps no timestamp, so it is first in line to be
-      // checked rather than trusted for a week on the strength of an outage.
+    } else if (previous != receipt) {
+      // A receipt we have not seen before and could not confirm keeps no
+      // timestamp, so it is first in line to be checked rather than trusted
+      // for a week on the strength of an outage.
+      //
+      // An outage on a receipt we *have* confirmed leaves that confirmation
+      // alone. Otherwise a parent tapping Restore on a plane would throw away
+      // yesterday's verification and turn the weekly re-check into one on
+      // every launch.
       await _prefs.remove(_verifiedKey(entitlement));
     }
 

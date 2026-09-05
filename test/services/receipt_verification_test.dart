@@ -6,6 +6,7 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:playsteps/providers/activity_provider.dart';
+import 'package:playsteps/services/data_reset_service.dart';
 import 'package:playsteps/services/entitlement_ledger.dart';
 import 'package:playsteps/services/purchase_service.dart';
 import 'package:playsteps/services/receipt_verifier.dart';
@@ -185,6 +186,42 @@ void main() {
       expect(ledger.isDueForCheck(Entitlement.premium), isTrue);
     });
 
+    test('an outage does not discard a confirmation already held', () async {
+      final ledger = await ledgerWith({});
+      await ledger.record(
+          Entitlement.premium, receipt, const ReceiptVerdict.valid());
+
+      // What Restore-on-a-plane looks like: the same receipt comes back round
+      // and the server cannot be reached. Yesterday's confirmation stands, or
+      // the weekly re-check becomes one on every launch.
+      Clock.freeze(now.add(const Duration(days: 1)));
+      await ledger.record(Entitlement.premium, receipt,
+          const ReceiptVerdict.unavailable('offline'));
+
+      expect(ledger.lastVerifiedAt(Entitlement.premium), now);
+      expect(ledger.isDueForCheck(Entitlement.premium), isFalse);
+    });
+
+    test('an outage on a new receipt does not inherit the old stamp', () async {
+      final ledger = await ledgerWith({});
+      await ledger.record(
+          Entitlement.premium, receipt, const ReceiptVerdict.valid());
+
+      // A different token — a resubscribe, say — has never been confirmed,
+      // whatever we knew about the one before it.
+      const replacement = PurchaseReceipt(
+        platform: 'android',
+        productId: PurchaseService.premiumProductId,
+        token: 'token-456',
+        isSubscription: false,
+      );
+      await ledger.record(Entitlement.premium, replacement,
+          const ReceiptVerdict.unavailable('offline'));
+
+      expect(ledger.lastVerifiedAt(Entitlement.premium), isNull);
+      expect(ledger.isDueForCheck(Entitlement.premium), isTrue);
+    });
+
     test('comes due again after a week', () async {
       final ledger = await ledgerWith({});
       await ledger.record(
@@ -337,6 +374,85 @@ void main() {
 
       expect(verifier.asked, isEmpty);
       expect(revoked, isEmpty);
+    });
+  });
+
+  group('a rejection from the purchase stream', () {
+    late List<Entitlement> revoked;
+
+    setUp(() {
+      revoked = [];
+      PurchaseService.instance.onEntitlementRevoked = revoked.add;
+    });
+
+    tearDown(() {
+      PurchaseService.instance.onEntitlementRevoked = null;
+      PurchaseService.instance.verifier = const NullReceiptVerifier();
+      PurchaseService.instance.ledgerForTesting = null;
+    });
+
+    test('revokes, rather than only deleting the evidence', () async {
+      // The path a refund arrives on for an entitlement the app already holds:
+      // the store re-delivers the purchase, the server says no. Clearing the
+      // ledger without revoking would leave the entitlement working forever
+      // with nothing left to re-check it against.
+      final ledger = await ledgerWith({});
+      await ledger.record(
+          Entitlement.premium, receipt, const ReceiptVerdict.valid());
+      PurchaseService.instance.ledgerForTesting = ledger;
+      PurchaseService.instance.verifier =
+          FakeVerifier(const ReceiptVerdict.invalid('refunded'));
+
+      final held = await PurchaseService.instance.applyVerdictForTesting(
+          Entitlement.premium,
+          receipt,
+          const ReceiptVerdict.invalid('refunded'));
+
+      expect(held, isFalse);
+      expect(revoked, [Entitlement.premium]);
+      expect(ledger.receiptFor(Entitlement.premium), isNull);
+    });
+
+    test('keeps the entitlement when the server cannot be reached', () async {
+      final ledger = await ledgerWith({});
+      PurchaseService.instance.ledgerForTesting = ledger;
+
+      final held = await PurchaseService.instance.applyVerdictForTesting(
+          Entitlement.premium,
+          receipt,
+          const ReceiptVerdict.unavailable('offline'));
+
+      expect(held, isTrue);
+      expect(revoked, isEmpty);
+      expect(ledger.receiptFor(Entitlement.premium), receipt);
+    });
+  });
+
+  group('deleting all data', () {
+    test('keeps the receipt alongside the entitlement it proves', () async {
+      // Wiping the receipt while keeping the flag would leave a purchase that
+      // can never be re-checked, and so can never be revoked when it lapses.
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final ledger = EntitlementLedger(prefs);
+      await ledger.record(Entitlement.premiumPlus, receipt,
+          ReceiptVerdict.valid(expiresAt: now.add(const Duration(days: 30))));
+      await prefs.setBool('is_premium_plus', true);
+      await prefs.setInt('active_profile_id', 3);
+
+      for (final key in prefs.getKeys().toSet()) {
+        if (DataResetService.keptPreferences.contains(key)) continue;
+        if (DataResetService.keptPreferencePrefixes.any(key.startsWith)) {
+          continue;
+        }
+        await prefs.remove(key);
+      }
+
+      expect(prefs.getBool('is_premium_plus'), isTrue);
+      expect(ledger.receiptFor(Entitlement.premiumPlus), receipt);
+      expect(ledger.lastVerifiedAt(Entitlement.premiumPlus), now);
+      // The parent's own data still goes.
+      expect(prefs.getInt('active_profile_id'), isNull);
     });
   });
 

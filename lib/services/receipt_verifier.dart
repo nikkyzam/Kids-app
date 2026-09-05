@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -187,7 +186,12 @@ class HttpReceiptVerifier implements ReceiptVerifier {
             : null,
       );
     }
+    // Typed by inspection rather than a cast: this method must never throw.
+    // A `reason` that is not a string is a malformed response, and a
+    // TypeError escaping here would abort _onPurchaseUpdate before
+    // completePurchase, leaving the store to re-deliver forever.
+    final reason = body['reason'];
     return ReceiptVerdict.invalid(
-        body['reason'] as String? ?? 'rejected by the store');
+        reason is String ? reason : 'rejected by the store');
   }
 }
