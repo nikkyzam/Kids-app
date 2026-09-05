@@ -17,6 +17,7 @@ import 'data/database_platform_stub.dart'
     if (dart.library.html) 'data/database_platform_web.dart';
 import 'services/notification_service.dart';
 import 'services/purchase_service.dart';
+import 'services/receipt_verifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,11 @@ void main() async {
   // so purchases that completed while the app was closed are picked up by the
   // first purchaseStream event.
   PurchaseService.instance.onEntitlement = activityProvider.grantEntitlement;
+  PurchaseService.instance.onEntitlementRevoked =
+      activityProvider.revokeEntitlement;
+  // Only present when a backend is configured. Without one the local check
+  // decides, exactly as before, and nothing is ever revoked.
+  PurchaseService.instance.verifier = HttpReceiptVerifier();
   PurchaseService.instance.onError =
       (message) => debugPrint('Purchase error: $message');
   await PurchaseService.instance.init();

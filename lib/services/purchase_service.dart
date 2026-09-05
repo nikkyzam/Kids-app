@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'entitlement_ledger.dart';
+import 'receipt_verifier.dart';
 
 /// Thrown when a store operation cannot be completed.
 class PurchaseUnavailableException implements Exception {
@@ -61,8 +66,26 @@ class PurchaseService {
   /// purchases that complete while the app was closed.
   void Function(Entitlement entitlement)? onEntitlement;
 
+  /// Called when a receipt the app previously accepted is rejected by the
+  /// store — a refund, a chargeback, a lapsed subscription, or a purchase that
+  /// was never real.
+  void Function(Entitlement entitlement)? onEntitlementRevoked;
+
   /// Called when a purchase fails or is cancelled, so the UI can stop spinning.
   void Function(String message)? onError;
+
+  /// Asks a server whether a receipt is genuine. Left as the null verifier
+  /// when no backend is configured, in which case the local check decides and
+  /// nothing is ever revoked — the behaviour before validation existed.
+  ReceiptVerifier verifier = const NullReceiptVerifier();
+
+  EntitlementLedger? _ledger;
+
+  @visibleForTesting
+  set ledgerForTesting(EntitlementLedger? ledger) => _ledger = ledger;
+
+  Future<EntitlementLedger> _ledgerInstance() async =>
+      _ledger ??= EntitlementLedger(await SharedPreferences.getInstance());
 
   /// Connects to the store and begins listening for purchase updates.
   ///
@@ -83,6 +106,10 @@ class PurchaseService {
       _onPurchaseUpdate,
       onError: (Object e) => onError?.call('Store connection lost: $e'),
     );
+
+    // Before anything else the store might say: re-check what we already
+    // granted. A refund or a lapsed subscription arrives no other way.
+    unawaited(reverifyStoredEntitlements());
 
     final response = await _iap.queryProductDetails(_productIds);
     _products = response.productDetails;
@@ -194,15 +221,83 @@ class PurchaseService {
     }
   }
 
+  /// Re-checks every entitlement whose receipt is due, revoking any the store
+  /// now rejects.
+  ///
+  /// Only an explicit rejection revokes. An unreachable server, a 503, or a
+  /// build with no verifier configured all leave the entitlement exactly as it
+  /// was — the parent keeps what they paid for, and the check happens again
+  /// next launch.
+  Future<void> reverifyStoredEntitlements() async {
+    if (!verifier.isConfigured) return;
+
+    final ledger = await _ledgerInstance();
+    for (final entitlement in Entitlement.values) {
+      if (!ledger.isDueForCheck(entitlement)) continue;
+      final receipt = ledger.receiptFor(entitlement);
+      if (receipt == null) continue;
+
+      final verdict = await verifier.verify(receipt);
+      if (verdict.isInvalid) {
+        await ledger.clear(entitlement);
+        onEntitlementRevoked?.call(entitlement);
+      } else if (verdict.isValid) {
+        await ledger.record(entitlement, receipt, verdict);
+      }
+      // Unavailable: leave everything alone and try again next launch.
+    }
+  }
+
+  static Entitlement _entitlementFor(String productId) =>
+      productId == premiumProductId
+          ? Entitlement.premium
+          : Entitlement.premiumPlus;
+
+  /// The platform name the verifier expects. Web never reaches this — [init]
+  /// returns early there — but a default keeps the call total.
+  static String get _platformName {
+    if (kIsWeb) return 'web';
+    return Platform.isIOS || Platform.isMacOS ? 'ios' : 'android';
+  }
+
+  @visibleForTesting
+  static PurchaseReceipt receiptFrom(PurchaseDetails purchase,
+          {String? platform}) =>
+      PurchaseReceipt(
+        platform: platform ?? _platformName,
+        productId: purchase.productID,
+        token: purchase.verificationData.serverVerificationData,
+        isSubscription: purchase.productID == premiumPlusProductId,
+      );
+
   /// Validates a purchase before granting the entitlement.
   ///
-  /// This performs local checks only. Local validation is defeatable on a
-  /// rooted or jailbroken device: to harden it, post
-  /// `purchase.verificationData.serverVerificationData` to a backend that calls
-  /// Apple's `verifyReceipt` / Google's `purchases.products.get`, and grant the
-  /// entitlement only on that server's response.
+  /// The local check is first and cheap: an unknown product or an empty token
+  /// is refused without troubling anyone. It is also defeatable on a rooted or
+  /// jailbroken device, so where a verifier is configured the store itself is
+  /// asked — and a rejection there is final.
+  ///
+  /// A server that cannot be reached grants anyway. The app promises to work
+  /// with no connectivity, and a parent who buys Premium on a plane should get
+  /// Premium; the receipt is recorded unverified and re-checked on a later
+  /// launch. That leaves a window in which a forged purchase works, which is
+  /// the price of the offline promise and is deliberate.
   Future<bool> _isValid(PurchaseDetails purchase) async {
     if (!_productIds.contains(purchase.productID)) return false;
-    return purchase.verificationData.serverVerificationData.isNotEmpty;
+    final receipt = receiptFrom(purchase);
+    if (receipt.token.isEmpty) return false;
+
+    if (!verifier.isConfigured) return true;
+
+    final verdict = await verifier.verify(receipt);
+    if (verdict.isInvalid) {
+      await (await _ledgerInstance())
+          .clear(_entitlementFor(purchase.productID));
+      return false;
+    }
+
+    await (await _ledgerInstance())
+        .record(_entitlementFor(purchase.productID), receipt, verdict);
+    return true;
   }
 }

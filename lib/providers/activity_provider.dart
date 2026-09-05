@@ -274,6 +274,27 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Withdraws an entitlement the store has since rejected — a refund, a
+  /// chargeback, or a lapsed subscription.
+  ///
+  /// Only [PurchaseService] calls this, and only on an explicit rejection: a
+  /// server that could not be reached must never cost a parent what they paid
+  /// for. Nothing they recorded is touched; the app falls back to the free
+  /// tier the same way an ended trial does.
+  Future<void> revokeEntitlement(Entitlement entitlement) async {
+    switch (entitlement) {
+      case Entitlement.premium:
+        if (!_isPremium) return;
+        _isPremium = false;
+        await _prefs.remove('is_premium');
+      case Entitlement.premiumPlus:
+        if (!_isPremiumPlus) return;
+        _isPremiumPlus = false;
+        await _prefs.remove('is_premium_plus');
+    }
+    notifyListeners();
+  }
+
   /// Asks the store to replay past purchases.
   ///
   /// Entitlements arrive asynchronously through [grantEntitlement]; this only

@@ -244,6 +244,20 @@ and three hundred identical lines would bury the first steps.
 - Paid: `playsteps_premium_lifetime` (one-time),
   `playsteps_premium_plus_yearly` (subscription)
 - **Entitlements may only be granted by the store**, never locally
+- **Receipts are verified server-side** where a backend is configured
+  (`supabase/functions/verify-purchase`). A rejection is final and revokes the
+  entitlement on the next launch — this is how refunds, chargebacks and lapsed
+  subscriptions arrive. A server that cannot be *reached* must never revoke
+  anything: the purchase stands, the receipt is stored unverified, and it is
+  re-checked later. Collapsing "could not ask" into "no" would take a real
+  purchase away every time the backend had a bad day
+- Confirmed entitlements are re-checked weekly, or as soon as a known
+  subscription expiry passes
+- An entitlement with no stored receipt — granted before validation existed, or
+  by a build with no backend — is left alone. Absence of evidence is not
+  grounds to take away what someone bought
+- A revoked entitlement drops the app to the free tier and touches nothing the
+  parent recorded
 - Prices must be read from the store, never hard-coded — a hard-coded figure is
   wrong in every non-USD currency
 - With no store available, purchasing must be **disabled**, never bypassed
@@ -357,7 +371,8 @@ See `PLAY_LISTING.md` for the filled-in answers.
 |---|---|---|
 | Release signing key | ❌ no `key.properties`; builds are debug-signed | you |
 | Store products created | ❌ paywall shows "Store unavailable" until then | you |
-| Server-side receipt validation | ❌ `PurchaseService._isValid` is local-only and defeatable on a rooted device | needs a backend |
+| Server-side receipt validation deployed | ⚠️ function, client, revocation and tests are written; nobody has deployed it or supplied the Google service account and Apple shared secret, so builds still fall back to the local check | you |
+| Receipt validation tested against a real store | ❌ verified by unit tests against a fake transport only — no sandbox purchase has been round-tripped through it | you |
 | Privacy policy published | ❌ `PRIVACY.md` is a draft pending legal review | lawyer |
 | Activity content reviewed | ❌ 70 of 120 activities drafted by an AI, unreviewed | paediatric OT / health visitor |
 | Milestone context reviewed | ❌ 99 "what to look for" notes drafted by an AI, unreviewed | paediatric OT / health visitor |

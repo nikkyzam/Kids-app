@@ -286,13 +286,57 @@ there is no price hard-coded in the app.
 Purchases cannot be tested in the simulator or on web. Use a real device with a
 sandbox tester (iOS) or an internal-testing track (Android).
 
-### 2. Add server-side receipt validation
+### 2. Deploy server-side receipt validation
 
-`PurchaseService._isValid()` currently performs **local checks only**, which are
-defeatable on a rooted or jailbroken device. Before launch, post
-`purchase.verificationData.serverVerificationData` to a backend that calls
-Apple's `verifyReceipt` or Google's `purchases.products.get`, and grant the
-entitlement only on that server's response.
+The code is written — `supabase/functions/verify-purchase/index.ts`, with
+`lib/services/receipt_verifier.dart` calling it — but it does nothing until you
+deploy it and give it credentials. Until then the app falls back to the local
+check, which is defeatable on a rooted or jailbroken device.
+
+**How it behaves.** A receipt the store *rejects* is refused, and an entitlement
+already granted is revoked on the next launch — that is how a refund, a
+chargeback or a lapsed subscription reaches the app. A server that cannot be
+*reached* changes nothing: the purchase is granted, the receipt is stored
+unverified, and it is re-checked later. That keeps the offline promise in §3 of
+`REQUIREMENTS.md` intact, at the cost of a window in which a forged purchase
+works. Confirmed entitlements are re-checked weekly, or as soon as a known
+subscription expiry passes.
+
+**1. Google Play.** In the Play Console → Setup → API access, link a Google
+Cloud project and create a service account with the *Financial data* / *Manage
+orders and subscriptions* permission. Download its JSON key; you need
+`client_email` and `private_key`.
+
+**2. App Store.** App Store Connect → your app → App Information → *App-Specific
+Shared Secret*. (The function uses the `verifyReceipt` endpoint, which matches
+the receipt `in_app_purchase` hands back. Apple has deprecated it in favour of
+the App Store Server API — worth migrating when you move to StoreKit 2.)
+
+**3. Deploy.**
+
+```bash
+supabase functions deploy verify-purchase
+supabase secrets set \
+  ANDROID_PACKAGE_NAME=com.nikkyzam.playsteps.app \
+  GOOGLE_SERVICE_ACCOUNT_EMAIL='...@....iam.gserviceaccount.com' \
+  GOOGLE_SERVICE_ACCOUNT_KEY="$(cat service-account-key.pem)" \
+  APPLE_SHARED_SECRET='...'
+```
+
+The function lives in the same Supabase project as family sharing and needs no
+extra configuration in the app: it is found automatically whenever
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are supplied at build time. A build
+without them runs with validation switched off.
+
+It grants nothing and stores nothing — it answers one question about one
+receipt. No purchase history reaches this server, and an outage degrades to
+"unverified" rather than to a locked-out parent.
+
+**Check it works** with a sandbox purchase on a real device, then:
+
+```bash
+supabase functions logs verify-purchase
+```
 
 ### 3. Publish a privacy policy
 
