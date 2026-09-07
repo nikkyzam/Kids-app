@@ -120,16 +120,28 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Catches missing launcher icons, manifest errors, and Gradle
-      # misconfiguration that analyze/test cannot see.
-      - name: Build debug APK
-        run: flutter build apk --debug
+      # Release, not debug. Debug catches missing launcher icons, manifest
+      # errors and Gradle misconfiguration — but it never runs R8, and
+      # `minifyEnabled true` means every real build does. Shrinking is where a
+      # reflection-heavy plugin (sqflite, in_app_purchase,
+      # flutter_local_notifications) gets stripped and the app crashes on a
+      # path no test covers. Finding that here costs five minutes; finding it
+      # in a tagged release costs a rejected upload.
+      #
+      # Unsigned in the sense that matters: no key.properties exists here, so
+      # build.gradle falls back to debug signing. Google Play rejects that.
+      - name: Build release APK
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          # Named for what it is. The previous name read like a shippable
+          # artifact, and it was uploaded to Play, which rejected it for being
+          # signed in debug mode. A Play-ready bundle comes from release.yml,
+          # which has the keystore.
+          name: android-smoke-test-apk-not-for-play
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
   build-ios:
