@@ -107,7 +107,11 @@ jobs:
 
   ios:
     name: iOS (build validation)
-    runs-on: macos-14
+    # Not a pinned macos-14: its Xcode predates the StoreKit 2 APIs
+    # in_app_purchase_storekit compiles against (winBackOffers,
+    # eligibleWinBackOfferIDs), so the job failed on the plugin's own source
+    # while ci.yml — which uses macos-latest — built the same commit fine.
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -136,8 +136,9 @@ Add `android/key.properties` and `android/app/release.keystore` to `.gitignore`.
 
 1. Open `ios/Runner.xcworkspace` in Xcode (not the `.xcodeproj`).
 2. Select the **Runner** target → **General** tab:
-   - Set **Bundle Identifier** to your reverse-domain ID (e.g., `com.yourcompany.playsteps`).
-   - Set **Deployment Target** to **iOS 12.0**.
+   - **Bundle Identifier** is `com.nikkyzam.playsteps.app`, matching the Android
+     application ID and the `APPLE_BUNDLE_ID` the receipt verifier checks against.
+   - **Deployment Target** is **iOS 13.0**.
 3. Under **Signing & Capabilities**, select your development team and enable automatic signing.
 4. Add the following capabilities via **+ Capability**:
    - **Push Notifications**
@@ -506,7 +507,8 @@ Two GitHub Actions workflows live in `.github/workflows/`:
 
 ### `ci.yml` — on every push & pull request
 
-Runs on `ubuntu-latest` against `main`/`master`:
+Runs on every branch — there is no branch filter, so a push anywhere is checked.
+The default branch is `development`:
 
 1. `flutter pub get`
 2. `dart format --set-exit-if-changed` — fails the build on unformatted code
@@ -700,7 +702,8 @@ lib/
 
 ## Contributing
 
-Fork the repository and create a feature branch from `main` (e.g., `feature/weekly-recap-chart`). Before opening a pull request, run `flutter analyze` to catch static issues and `flutter test` to confirm the full test suite passes. Keep pull requests focused — one feature or fix per PR makes review faster. For significant changes, open an issue first to discuss the approach. All contributions are expected to maintain offline-first behavior: no network calls, no third-party analytics SDKs.
+Branch from `development` — the default branch — naming it for what it does:
+`feature/weekly-recap-chart`, `fix/streak-across-dst`. Before opening a pull request, run `flutter analyze` to catch static issues and `flutter test` to confirm the full test suite passes. Keep pull requests focused — one feature or fix per PR makes review faster. For significant changes, open an issue first to discuss the approach. All contributions are expected to maintain offline-first behavior: no network calls, no third-party analytics SDKs.
 
 Two further expectations, both enforced by tests rather than review:
 
