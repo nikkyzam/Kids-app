@@ -68,6 +68,36 @@ class ActivityProvider extends ChangeNotifier {
   Set<String> get dismissedActivityIds =>
       _skips.map((s) => s.activityId).toSet();
 
+  /// Dismissals made on or before the end of [day], oldest first — the order
+  /// [ActivitiesData.activityForDate] forgives them in when a band runs dry.
+  ///
+  /// Bounded by day so that looking back at last month shows what was offered
+  /// last month. Applying today's dismissals to a past day rewrote history
+  /// every time the parent declined something, which contradicted the whole
+  /// point of a deterministic rotation.
+  List<String> _dismissalsAsOf(DateTime day) {
+    final cutoff = DateTime(day.year, day.month, day.day + 1);
+    // [_skips] is newest first, so reversing it puts the oldest at the front.
+    // That order is the tiebreak for the sort below: two dismissals recorded
+    // in the same millisecond — which is what happens when a parent taps
+    // through several in a row — would otherwise land in an arbitrary order,
+    // and the fallback in [ActivitiesData.activityForDate] forgives from the
+    // front, so an arbitrary order can hand back the one just declined.
+    final ordered =
+        _skips.reversed.where((s) => s.skippedAt.isBefore(cutoff)).toList();
+    final position = Map<ActivitySkip, int>.identity();
+    for (var i = 0; i < ordered.length; i++) {
+      position[ordered[i]] = i;
+    }
+    ordered.sort((a, b) {
+      final byTime = a.skippedAt.compareTo(b.skippedAt);
+      return byTime != 0 ? byTime : position[a]!.compareTo(position[b]!);
+    });
+    return ordered.map((s) => s.activityId).toList();
+  }
+
+  List<String> get _dismissalsToday => _dismissalsAsOf(Clock.today());
+
   String get todayKey => DateFormat('yyyy-MM-dd').format(Clock.now());
 
   String _keyFor(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
@@ -155,8 +185,8 @@ class ActivityProvider extends ChangeNotifier {
 
     _contentAgeInWeeks = ageInWeeks;
     _skips = await DatabaseHelper.instance.getSkips(profileId);
-    _todayActivity = ActivitiesData.todayActivity(ageInWeeks,
-        dismissed: dismissedActivityIds);
+    _todayActivity =
+        ActivitiesData.todayActivity(ageInWeeks, dismissed: _dismissalsToday);
     _allCompletions = await DatabaseHelper.instance.getCompletions(profileId);
     _todayCompletion =
         _allCompletions.where((c) => c.dateKey == todayKey).firstOrNull;
@@ -184,7 +214,7 @@ class ActivityProvider extends ChangeNotifier {
     await DatabaseHelper.instance.saveSkip(skip);
     _skips = [skip, ..._skips.where((s) => s.activityId != activity.id)];
     _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
-        dismissed: dismissedActivityIds);
+        dismissed: _dismissalsToday);
     notifyListeners();
     return true;
   }
@@ -194,7 +224,7 @@ class ActivityProvider extends ChangeNotifier {
     await DatabaseHelper.instance.deleteSkip(profileId, activityId);
     _skips = _skips.where((s) => s.activityId != activityId).toList();
     _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
-        dismissed: dismissedActivityIds);
+        dismissed: _dismissalsToday);
     notifyListeners();
   }
 
@@ -202,7 +232,7 @@ class ActivityProvider extends ChangeNotifier {
     await DatabaseHelper.instance.clearSkips(profileId);
     _skips = [];
     _todayActivity = ActivitiesData.todayActivity(_contentAgeInWeeks,
-        dismissed: dismissedActivityIds);
+        dismissed: _dismissalsToday);
     notifyListeners();
   }
 
@@ -221,7 +251,7 @@ class ActivityProvider extends ChangeNotifier {
     return ActivitiesData.activityForDate(
       day,
       profile.contentAgeInWeeksOn(day),
-      dismissed: dismissedActivityIds,
+      dismissed: _dismissalsAsOf(day),
     );
   }
 

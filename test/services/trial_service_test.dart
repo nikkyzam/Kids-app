@@ -81,6 +81,28 @@ void main() {
       expect(TrialService.daysRemaining(prefs), 1);
     });
 
+    test('still reads as a day left in the final minutes', () async {
+      final prefs = await startedOn(launchDay);
+
+      Clock.freeze(
+          launchDay.add(TrialService.length - const Duration(minutes: 30)));
+
+      // `inHours` truncated first, so the last hour of an unlocked trial used
+      // to announce "0 days left" while everything still worked.
+      expect(TrialService.isActive(prefs), isTrue);
+      expect(TrialService.daysRemaining(prefs), 1);
+    });
+
+    test('never reports more days than the trial is long', () async {
+      final prefs = await startedOn(launchDay);
+
+      // A device whose clock is behind the one that started the trial.
+      Clock.freeze(launchDay.subtract(const Duration(days: 3)));
+
+      expect(TrialService.daysRemaining(prefs),
+          lessThanOrEqualTo(TrialService.length.inDays));
+    });
+
     test('lapses exactly a fortnight in', () async {
       final prefs = await startedOn(launchDay);
 

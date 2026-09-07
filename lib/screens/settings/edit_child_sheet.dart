@@ -61,12 +61,25 @@ class _EditChildSheetState extends State<EditChildSheet> {
 
   bool get _canSave => _name.text.trim().isNotEmpty;
 
+  /// showDatePicker asserts that initialDate lies within [firstDate,
+  /// lastDate]. The initial date here is whatever is already stored, which
+  /// onboarding did not constrain the same way — so the range must contain
+  /// it, or editing an older child crashes the sheet.
+  static DateTime _clamp(DateTime value, DateTime first, DateTime last) {
+    if (value.isBefore(first)) return first;
+    if (value.isAfter(last)) return last;
+    return value;
+  }
+
   Future<void> _pickDateOfBirth() async {
     final now = Clock.now();
+    // Wide enough for any child this app could hold, not just the ones it
+    // would onboard today.
+    final first = now.subtract(const Duration(days: 365 * 10));
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dateOfBirth,
-      firstDate: now.subtract(const Duration(days: 365 * 5)),
+      initialDate: _clamp(_dateOfBirth, first, now),
+      firstDate: first,
       lastDate: now,
       helpText: 'Date of birth',
     );
@@ -80,12 +93,15 @@ class _EditChildSheetState extends State<EditChildSheet> {
   }
 
   Future<void> _pickDueDate() async {
+    final first = _dateOfBirth.add(const Duration(days: 1));
+    // The same 17-week window the model clamps to.
+    final last = _dateOfBirth.add(const Duration(days: 119));
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dueDate ?? _dateOfBirth.add(const Duration(days: 42)),
-      firstDate: _dateOfBirth.add(const Duration(days: 1)),
-      // The same 17-week window the model clamps to.
-      lastDate: _dateOfBirth.add(const Duration(days: 119)),
+      initialDate: _clamp(
+          _dueDate ?? _dateOfBirth.add(const Duration(days: 42)), first, last),
+      firstDate: first,
+      lastDate: last,
       helpText: 'Original due date',
     );
     if (picked != null && mounted) setState(() => _dueDate = picked);

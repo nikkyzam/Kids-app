@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../data/who_growth_standards_data.dart';
 import '../models/child_profile.dart';
 import '../models/growth_measurement.dart';
+import '../utils/calendar.dart';
 
 /// Where a measurement sits against the WHO Child Growth Standards.
 ///
@@ -141,11 +142,9 @@ class WhoGrowthStandards {
   /// growing child near the bottom of every chart.
   static double ageMonthsAt(ChildProfile profile, DateTime date) {
     final from = profile.usesAdjustedAgeOn(date)
-        ? profile.dueDate!
+        ? profile.effectiveDueDate!
         : profile.dateOfBirth;
-    final days = DateTime(date.year, date.month, date.day)
-        .difference(DateTime(from.year, from.month, from.day))
-        .inDays;
+    final days = calendarDaysBetween(from, date);
     if (days <= 0) return 0;
     return days / _daysPerMonth;
   }

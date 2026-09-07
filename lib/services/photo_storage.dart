@@ -26,8 +26,10 @@ class PhotoStorage {
   /// Whether a write of roughly [bytes] would succeed right now.
   static Future<bool> hasRoomFor(int bytes) => io.hasRoomFor(bytes);
 
-  /// A generous allowance for one camera photo, used as the pre-flight check.
-  static const int photoBudgetBytes = 8 * 1024 * 1024;
+  /// The pre-flight probe. Two megabytes is enough to tell a full disk from
+  /// one with room — a device that cannot take 2MB cannot take a photo — while
+  /// being cheap to write before every capture.
+  static const int photoBudgetBytes = 2 * 1024 * 1024;
 
   /// Points photo storage at a throwaway directory in tests, where
   /// `path_provider` has no platform implementation.

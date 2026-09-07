@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playsteps/models/child_profile.dart';
+import 'package:playsteps/services/who_growth_standards.dart';
 import 'package:playsteps/utils/clock.dart';
 
 /// Corrected age for a baby born early.
@@ -107,6 +108,45 @@ void main() {
       final p = born(DateTime(2026, 5, 15), due: DateTime(2027, 5, 15));
       expect(p.prematureDays, 119);
       expect(p.adjustedAgeInDays, 0);
+    });
+
+    test('every age calculation applies the same cap', () {
+      // The cap used to live in [prematureDays] alone while three other
+      // calculations read the raw due date, so one corrupt row gave the home
+      // screen, the milestone ledger and the growth chart three different
+      // ages for the same child. They all read [effectiveDueDate] now.
+      final dob = DateTime(2025, 5, 15);
+      final corrupt = born(dob, due: DateTime(2027, 5, 15));
+      final capped = born(dob, due: DateTime(2025, 9, 11)); // dob + 119 days
+
+      expect(corrupt.effectiveDueDate, capped.effectiveDueDate);
+      expect(corrupt.effectiveDueDate, DateTime(2025, 9, 11));
+
+      expect(corrupt.adjustedAgeInDays, capped.adjustedAgeInDays);
+      expect(corrupt.adjustedAgeInWeeks, capped.adjustedAgeInWeeks);
+      expect(corrupt.adjustedAgeInMonths, capped.adjustedAgeInMonths);
+
+      for (final day in [
+        DateTime(2025, 10, 1),
+        DateTime(2026, 1, 1),
+        today,
+      ]) {
+        expect(
+            corrupt.contentAgeInWeeksOn(day), capped.contentAgeInWeeksOn(day),
+            reason: 'content age diverged on $day');
+        expect(WhoGrowthStandards.ageMonthsAt(corrupt, day),
+            WhoGrowthStandards.ageMonthsAt(capped, day),
+            reason: 'growth-chart age diverged on $day');
+      }
+    });
+
+    test('effectiveDueDate is null for a term birth', () {
+      expect(born(DateTime(2026, 5, 15)).effectiveDueDate, isNull);
+      expect(
+        born(DateTime(2026, 5, 15), due: DateTime(2026, 5, 1)).effectiveDueDate,
+        isNull,
+        reason: 'a baby born late has no correction to apply',
+      );
     });
   });
 

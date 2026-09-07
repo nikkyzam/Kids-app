@@ -1,3 +1,4 @@
+import '../utils/calendar.dart';
 import '../utils/clock.dart';
 
 /// Biological sex, recorded only because the WHO growth standards are
@@ -66,6 +67,19 @@ class ChildProfile {
 
   bool get wasBornEarly => prematureDays > 0;
 
+  /// The due date every age calculation actually uses: the birth date plus
+  /// the *capped* prematurity, or null for a term birth.
+  ///
+  /// [prematureDays] clamps a nonsense gap to 17 weeks, but three other
+  /// calculations were reading the raw [dueDate] and so were not clamped —
+  /// which meant a corrupt synced due date gave the home screen one age and
+  /// the milestone ledger another. Everything reads this instead.
+  DateTime? get effectiveDueDate {
+    if (!wasBornEarly) return null;
+    final d = dateOfBirth;
+    return DateTime(d.year, d.month, d.day + prematureDays);
+  }
+
   /// Correction is conventionally dropped once a child reaches two years, by
   /// which point the difference has washed out.
   static const int adjustmentEndsAtMonths = 24;
@@ -85,7 +99,7 @@ class ChildProfile {
     final now = Clock.now();
     // Walk the calendar from the due date rather than subtracting days, so a
     // "month" stays a calendar month.
-    final from = dueDate!;
+    final from = effectiveDueDate!;
     int months = (now.year - from.year) * 12 + now.month - from.month;
     if (now.day < from.day) months--;
     return months.clamp(0, 999);
@@ -140,10 +154,8 @@ class ChildProfile {
   /// Looking back at a past day has to use the age the child was then, or a
   /// three-month-old's history would be re-rendered as newborn content.
   int contentAgeInWeeksOn(DateTime day) {
-    final from = usesAdjustedAgeOn(day) ? dueDate! : dateOfBirth;
-    final days = DateTime(day.year, day.month, day.day)
-        .difference(DateTime(from.year, from.month, from.day))
-        .inDays;
+    final from = usesAdjustedAgeOn(day) ? effectiveDueDate! : dateOfBirth;
+    final days = calendarDaysBetween(from, day);
     return days < 0 ? 0 : days ~/ 7;
   }
 

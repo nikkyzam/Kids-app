@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -29,10 +30,13 @@ Future<String> photoStorageDirectory() async => (await _photoDir()).path;
 Future<String> persistPhotoFile(String sourcePath, String filename) async {
   final dir = await _photoDir();
   final source = File(sourcePath);
-  final expected = await source.length();
   final target = File('${dir.path}/$filename');
 
   try {
+    // Inside the guard: a picked file that cannot be read (revoked access,
+    // already purged) must surface as a PhotoStorageException the caller
+    // handles, not a raw FileSystemException that nothing catches.
+    final expected = await source.length();
     await source.copy(target.path);
     final written = await target.length();
     if (written != expected) {
@@ -89,7 +93,10 @@ Future<bool> hasRoomFor(int bytes) async {
   final dir = await _photoDir();
   final probe = File('${dir.path}/.space_probe');
   try {
-    await probe.writeAsBytes(List<int>.filled(bytes, 0), flush: true);
+    // Uint8List, not List<int>: the latter is a list of boxed values, so an
+    // 8MB probe became ~64MB of heap on exactly the low-end phones this guard
+    // exists for. Uint8List is one byte per byte.
+    await probe.writeAsBytes(Uint8List(bytes), flush: true);
     final ok = await probe.length() == bytes;
     return ok;
   } on FileSystemException {

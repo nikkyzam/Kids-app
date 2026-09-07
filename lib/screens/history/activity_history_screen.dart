@@ -8,6 +8,7 @@ import '../../models/activity.dart';
 import '../../models/activity_completion.dart';
 import '../../models/child_profile.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/calendar.dart';
 import '../../utils/clock.dart';
 
 class ActivityHistoryScreen extends StatelessWidget {
@@ -55,7 +56,7 @@ class _EveryDayTab extends StatelessWidget {
             profile.dateOfBirth.month, profile.dateOfBirth.day);
         // At least today, even for a profile whose date of birth is somehow in
         // the future.
-        final dayCount = today.difference(dob).inDays + 1;
+        final dayCount = calendarDaysBetween(dob, today) + 1;
         final days = dayCount < 1 ? 1 : dayCount;
 
         return ListView.builder(

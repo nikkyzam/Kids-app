@@ -828,14 +828,30 @@ class ActivitiesData {
   static PlayActivity? activityForDate(
     DateTime date,
     int ageInWeeks, {
-    Set<String> dismissed = const {},
+    Iterable<String> dismissed = const [],
   }) {
     final band = forAgeBandWeeks(ageInWeeks);
     if (band.isEmpty) return null;
-    final pool = band.where((a) => !dismissed.contains(a.id)).toList();
-    final from = pool.isEmpty ? band : pool;
-    return from[dayOfYear(date) % from.length];
+
+    // [dismissed] is ordered oldest first. If every activity in the band has
+    // been set aside, dismissals are forgiven from the oldest end until
+    // something is left — so the parent sees the one they declined longest
+    // ago, and never the one they declined a moment ago. The previous
+    // fallback used the whole band and could return exactly that.
+    final order = dismissed.toList();
+    var pool = band.where((a) => !order.contains(a.id)).toList();
+    while (pool.isEmpty && order.isNotEmpty) {
+      order.removeAt(0);
+      pool = band.where((a) => !order.contains(a.id)).toList();
+    }
+    return pool[dayOfYear(date) % pool.length];
   }
+
+  static PlayActivity? todayActivity(
+    int ageInWeeks, {
+    Iterable<String> dismissed = const [],
+  }) =>
+      activityForDate(Clock.now(), ageInWeeks, dismissed: dismissed);
 
   /// The 0-based ordinal day of the year.
   ///
@@ -851,10 +867,4 @@ class ActivitiesData {
     final leapDay = (isLeap && date.month > 2) ? 1 : 0;
     return cumulative[date.month - 1] + leapDay + date.day - 1;
   }
-
-  static PlayActivity? todayActivity(
-    int ageInWeeks, {
-    Set<String> dismissed = const {},
-  }) =>
-      activityForDate(Clock.now(), ageInWeeks, dismissed: dismissed);
 }

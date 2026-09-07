@@ -57,7 +57,9 @@ class TrialService {
     if (end == null) return 0;
     final remaining = end.difference(Clock.now());
     if (remaining.isNegative) return 0;
-    final days = remaining.inHours / 24;
+    // Minutes, not hours: `inHours` truncates first, so the last hour of the
+    // trial read as "0 days left" while everything was still unlocked.
+    final days = remaining.inMinutes / Duration.minutesPerDay;
     return days.ceil().clamp(0, length.inDays);
   }
 

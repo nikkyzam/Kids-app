@@ -146,6 +146,38 @@ void main() {
       }
       expect(provider.todayActivity, isNotNull);
     });
+
+    test('never hands back the activity just dismissed', () async {
+      // The fallback forgives dismissals from the oldest end. Offering the
+      // one the parent declined a second ago would read as the app ignoring
+      // them, which is the whole point of the button.
+      final band = ActivitiesData.forAgeBandWeeks(child.contentAgeBandWeeks);
+      for (int i = 0; i < band.length; i++) {
+        final dismissed = provider.todayActivity!;
+        final swapped = await provider.dismissTodayActivity(child.id!, null);
+        expect(swapped, isTrue);
+        expect(provider.todayActivity, isNotNull);
+        expect(provider.todayActivity!.id, isNot(dismissed.id),
+            reason: 'dismissal ${i + 1} of ${band.length} came straight back');
+      }
+    });
+
+    test('brings the longest-declined activity back first', () async {
+      final band = ActivitiesData.forAgeBandWeeks(child.contentAgeBandWeeks);
+      final order = <String>[];
+      for (int i = 0; i < band.length; i++) {
+        order.add(provider.todayActivity!.id);
+        // Each dismissal a minute later, so their recorded order is the order
+        // they were declined in.
+        Clock.freeze(DateTime(2026, 5, 20, 10, i));
+        await provider.dismissTodayActivity(child.id!, null);
+      }
+
+      expect(order, hasLength(band.length),
+          reason: 'every activity in the band should have been offered once');
+      expect(provider.todayActivity!.id, order.first,
+          reason: 'the one set aside longest ago is the one to re-offer');
+    });
   });
 
   group('browsing past days', () {
@@ -179,6 +211,43 @@ void main() {
       final first = provider.activityForDay(child, day);
       final second = provider.activityForDay(child, day);
       expect(first?.id, second?.id);
+    });
+
+    test('is not rewritten by a dismissal made after that day', () async {
+      // History is a record of what happened. Applying today's dismissals to
+      // it retroactively changed what a parent was shown last month, so a day
+      // they remembered doing stopped matching the app.
+      final day = DateTime(2026, 3, 3);
+      final before = provider.activityForDay(child, day);
+      expect(before, isNotNull);
+
+      // Dismiss exactly that activity, today.
+      await DatabaseHelper.instance.saveSkip(ActivitySkip(
+        profileId: child.id!,
+        activityId: before!.id,
+        reason: SkipReason.tooHard,
+        skippedAt: DateTime(2026, 5, 20, 10),
+      ));
+      await provider.loadForProfile(child.id!, child.contentAgeBandWeeks);
+
+      expect(provider.activityForDay(child, day)?.id, before.id);
+    });
+
+    test('does apply a dismissal that was already made on that day', () async {
+      // The mirror of the case above: a dismissal recorded before the day in
+      // question is part of what the parent saw then, so it still counts.
+      final day = DateTime(2026, 3, 3);
+      final shown = provider.activityForDay(child, day)!;
+
+      await DatabaseHelper.instance.saveSkip(ActivitySkip(
+        profileId: child.id!,
+        activityId: shown.id,
+        reason: SkipReason.tooHard,
+        skippedAt: DateTime(2026, 3, 1, 9),
+      ));
+      await provider.loadForProfile(child.id!, child.contentAgeBandWeeks);
+
+      expect(provider.activityForDay(child, day)?.id, isNot(shown.id));
     });
   });
 
