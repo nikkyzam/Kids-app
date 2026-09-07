@@ -91,15 +91,19 @@ function json(body: VerifyResponse, status = 200): Response {
 
 // ─── JOSE helpers ────────────────────────────────────────────────────────────
 
-function pemToDer(pem: string): Uint8Array {
+function pemToDer(pem: string): ArrayBuffer {
   const body = pem
     .replace(/-----BEGIN [A-Z ]+-----/, "")
     .replace(/-----END [A-Z ]+-----/, "")
     .replace(/\s+/g, "");
   const binary = atob(body);
-  const bytes = new Uint8Array(binary.length);
+  // An explicitly allocated ArrayBuffer, not a bare Uint8Array: newer
+  // TypeScript libs type the latter as Uint8Array<ArrayBufferLike>, which
+  // BufferSource no longer accepts, and importKey wants a BufferSource.
+  const buffer = new ArrayBuffer(binary.length);
+  const bytes = new Uint8Array(buffer);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  return buffer;
 }
 
 function base64Url(input: Uint8Array | string): string {
@@ -253,6 +257,12 @@ export async function verifyAndroid(
     const state = body.subscriptionState;
     const expiry = body.lineItems?.[0]?.expiryTime;
     const expiresAt = expiry ? Date.parse(expiry) : undefined;
+    // NaN fails every comparison below and would fall through to a 200
+    // valid:false — a rejection the client acts on. A timestamp we cannot
+    // parse is Google's answer being unreadable to us, which is an outage.
+    if (expiresAt !== undefined && Number.isNaN(expiresAt)) {
+      throw new Unavailable(`unreadable expiryTime: ${expiry}`);
+    }
     // Both must hold: a state that entitles, and time left on the clock.
     const entitled = ENTITLING_SUBSCRIPTION_STATES.has(state) &&
       (expiresAt === undefined || expiresAt > Date.now());

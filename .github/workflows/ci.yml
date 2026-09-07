@@ -71,7 +71,10 @@ jobs:
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          # Pinned. A floating v2.x resolved to a newer Deno whose TypeScript
+          # libs rejected code that passed locally, and turned CI red with no
+          # change to the code. Bump deliberately, alongside a local run.
+          deno-version: "2.9.6"
 
       # The edge function decides whether a parent keeps what they paid for,
       # and it is the one piece of this repo that never runs under

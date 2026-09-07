@@ -379,6 +379,50 @@ scenario("a cancelled subscription past its expiry is not valid", async () => {
   assertFalse(result.valid);
 });
 
+scenario("an unreadable expiry is an outage, not a rejection", async () => {
+  // NaN loses every comparison, so an expiry we cannot parse used to fall
+  // through to a 200 valid:false — and the client acts on a verdict. Not
+  // being able to read Google's answer is our problem, not evidence against
+  // the parent.
+  stubFetch([["androidpublisher", {
+    status: 200,
+    body: {
+      subscriptionState: "SUBSCRIPTION_STATE_ACTIVE",
+      lineItems: [{ expiryTime: "not-a-date" }],
+    },
+  }]]);
+
+  const result = await verify({
+    ...androidRequest,
+    productId: PREMIUM_PLUS,
+    subscription: true,
+  });
+
+  assertEquals(result.status, 503);
+  assertFalse(result.valid);
+});
+
+scenario(
+  "a subscription with no expiry at all is judged on its state",
+  async () => {
+    // An absent expiryTime is not an unreadable one: the state alone decides,
+    // and the client is told nothing about when to re-check.
+    stubFetch([["androidpublisher", {
+      status: 200,
+      body: { subscriptionState: "SUBSCRIPTION_STATE_ACTIVE", lineItems: [{}] },
+    }]]);
+
+    const result = await verify({
+      ...androidRequest,
+      productId: PREMIUM_PLUS,
+      subscription: true,
+    });
+
+    assert(result.valid);
+    assertEquals(result.expiresAt, undefined);
+  },
+);
+
 scenario("an expired subscription is not valid", async () => {
   stubFetch([["androidpublisher", {
     status: 200,
