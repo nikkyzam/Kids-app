@@ -395,4 +395,5 @@ See `PLAY_LISTING.md` for the filled-in answers.
 | iOS release build | ⚠️ compiles in CI; never signed, archived or run on a device | you |
 
 The first two are the only ones blocking an internal-testing upload. The rest
-block a public launch.
+block a public launch. [`docs/RELEASE.md`](docs/RELEASE.md) is the runbook for
+the ones marked "you", in the order they have to happen.

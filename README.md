@@ -266,6 +266,11 @@ await.
 The app builds and runs without any of the following, but each one must be done
 before a public release.
 
+**[`docs/RELEASE.md`](docs/RELEASE.md) is the runbook** — the owner-only steps
+in the order they have to happen, from generating the upload keystore to the
+smoke test on an internal build. The sections below explain *why* each piece
+exists; the runbook is what you work through.
+
 ### 1. Create the in-app purchase products
 
 Purchases go through StoreKit / Google Play Billing (`lib/services/purchase_service.dart`).
@@ -415,7 +420,7 @@ After the build completes, archive and export from Xcode:
 1. **Create a Google Play Developer account** at [play.google.com/console](https://play.google.com/console) ($25 one-time registration fee).
 
 2. **Create a new app** in the Play Console:
-   - Package name: `com.yourcompany.playsteps`
+   - Package name: `com.nikkyzam.playsteps.app`
    - Default language and app type (App / Free).
 
 3. **Set up an internal test track** first to validate the build end-to-end before promoting to production.
@@ -431,12 +436,13 @@ After the build completes, archive and export from Xcode:
 
 6. **Set content rating** via the rating questionnaire. PlaySteps should qualify as **Everyone**.
 
-7. **Configure In-App Products**:
-   - Navigate to **Monetize → Products → In-app products**.
-   - Add a one-time (Managed) product:
-     - Product ID: `premium_upgrade`
-     - Price: $4.99
-     - Status: Active
+7. **Configure In-App Products**: the identifiers are compiled into the app and
+   must match exactly (see §1 above).
+   - **Monetize → Products → In-app products** → one-time (Managed) product,
+     ID `playsteps_premium_lifetime`, status Active.
+   - **Monetize → Products → Subscriptions** → yearly subscription, ID
+     `playsteps_premium_plus_yearly`, status Active.
+   - Prices are read from the store at runtime; set them here, not in code.
 
 8. **Submit for review**. New apps typically take 1–3 business days. Monitor the Play Console for policy violations or metadata rejections.
 
@@ -472,13 +478,14 @@ After the build completes, archive and export from Xcode:
      --apiIssuer <issuer-id>
    ```
 
-7. **Configure In-App Purchase** in App Store Connect:
-   - Navigate to your app → **In-App Purchases → Manage**.
-   - Add a **Non-Consumable** IAP:
-     - Reference Name: Premium Upgrade
-     - Product ID: `premium_upgrade`
-     - Price: $4.99 (Tier 5)
-   - Add localized display name and description, then submit for review alongside the app or separately.
+7. **Configure In-App Purchase** in App Store Connect — the identifiers are
+   compiled into the app and must match exactly (see §1 above):
+   - **In-App Purchases → Manage** → Non-Consumable, product ID
+     `playsteps_premium_lifetime`.
+   - **Subscriptions** → a yearly auto-renewing subscription, product ID
+     `playsteps_premium_plus_yearly`.
+   - Add a localized display name and description for each, then submit for
+     review alongside the app or separately.
 
 8. **Set App Privacy details**:
    - PlaySteps collects no data — select **Data Not Collected** on the App Privacy page.
@@ -509,6 +516,12 @@ Runs on `ubuntu-latest` against `main`/`master`:
    legible in the log
 6. The whole suite again under `TZ=America/New_York` — CI runners are UTC and
    cannot otherwise catch daylight-saving bugs
+
+A second job type-checks, tests and format-checks the receipt verifier under
+Deno, since that function decides whether a parent keeps what they paid for and
+is the one piece of this repo `flutter test` never touches. Its Deno version is
+pinned deliberately — a floating one turned CI red on a toolchain bump with no
+change to the code.
 
 Run the same checks locally before pushing:
 
@@ -548,6 +561,8 @@ These variables are required for CI/CD pipelines (GitHub Actions, Bitrise, etc.)
 | `APPLE_ID` | Apple ID email used for App Store Connect |
 | `APP_STORE_CONNECT_API_KEY` | JSON key file for Fastlane App Store Connect API authentication |
 | `PLAY_STORE_SERVICE_ACCOUNT_JSON` | Google Play service-account JSON — enables automated AAB upload to the internal track (optional; the release job builds artifacts without it) |
+| `SUPABASE_URL` | Compiled in with `--dart-define`. Without it the shipped build has family sharing off and falls back to the local receipt check |
+| `SUPABASE_ANON_KEY` | As above — both are needed, and a release without them is not doing server-side validation |
 
 To encode the keystore for CI:
 
