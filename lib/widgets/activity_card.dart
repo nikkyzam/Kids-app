@@ -105,62 +105,76 @@ class _ActivityCardState extends State<ActivityCard> {
 
   Widget _buildCardHeader(BuildContext context, PlayActivity activity,
       Color categoryColor, bool isCompleted) {
+    // A category-coloured gradient header carries the card's identity; the
+    // completed state swaps to the success hue so the win reads at a glance.
+    final color = isCompleted ? AppTheme.success : categoryColor;
     return Container(
       decoration: BoxDecoration(
-        color: isCompleted
-            ? AppTheme.successLight
-            : categoryColor.withValues(alpha: 0.08),
+        gradient: AppTheme.shadeGradient(color),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppTheme.cardRadius),
         ),
       ),
       padding: const EdgeInsets.all(18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Positioned.fill(child: AppTheme.heroBubbles()),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isCompleted ? AppTheme.success : categoryColor,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isCompleted ? 'Completed!' : "Today's Challenge",
-                        style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700),
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.35)),
+                          ),
+                          child: Text(
+                            isCompleted ? 'Completed!' : "Today's Challenge",
+                            style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(activity.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.timer_outlined,
+                            size: 14, color: Colors.white70),
+                        const SizedBox(width: 4),
+                        Text(
+                            '${activity.durationMins} min${activity.durationMins == 1 ? '' : 's'}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.white70)),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(activity.title,
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.timer_outlined,
-                        size: 14, color: AppTheme.textMuted),
-                    const SizedBox(width: 4),
-                    Text(
-                        '${activity.durationMins} min${activity.durationMins == 1 ? '' : 's'}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              if (isCompleted)
+                const Icon(Icons.check_circle_rounded,
+                    color: Colors.white, size: 32),
+            ],
           ),
-          if (isCompleted)
-            const Icon(Icons.check_circle_rounded,
-                color: AppTheme.success, size: 32),
         ],
       ),
     );
@@ -235,33 +249,41 @@ class _ActivityCardState extends State<ActivityCard> {
                   side: const BorderSide(color: AppTheme.success),
                 ),
               )
-            : FilledButton.icon(
+            : Container(
                 key: const ValueKey('complete'),
-                onPressed: () async {
-                  await ap.toggleCompletion(widget.profileId);
-                  _confettiKey.currentState?.play();
-                  if (!context.mounted) return;
-                  StreakMilestoneDialog.showIfMilestone(
-                      context, ap.currentStreak);
-                  final mp = context.read<MilestoneProvider>();
-                  final bp = context.read<BadgeProvider>();
-                  final newBadges = await bp.checkAndUnlock(
-                    profileId: widget.profileId,
-                    ap: ap,
-                    mp: mp,
-                  );
-                  for (final badge in newBadges) {
-                    if (context.mounted) {
-                      await BadgeUnlockedDialog.show(context, badge);
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  // The day's one action gets the brand glow, so the eye lands
+                  // on it before anything else on the card.
+                  boxShadow: AppTheme.glow(categoryColor),
+                ),
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await ap.toggleCompletion(widget.profileId);
+                    _confettiKey.currentState?.play();
+                    if (!context.mounted) return;
+                    StreakMilestoneDialog.showIfMilestone(
+                        context, ap.currentStreak);
+                    final mp = context.read<MilestoneProvider>();
+                    final bp = context.read<BadgeProvider>();
+                    final newBadges = await bp.checkAndUnlock(
+                      profileId: widget.profileId,
+                      ap: ap,
+                      mp: mp,
+                    );
+                    for (final badge in newBadges) {
+                      if (context.mounted) {
+                        await BadgeUnlockedDialog.show(context, badge);
+                      }
                     }
-                  }
-                  if (context.mounted) {
-                    _offerPhotoMemory(ap, widget.profileId);
-                  }
-                },
-                icon: const Icon(Icons.check_rounded, size: 18),
-                label: const Text('Complete Challenge'),
-                style: FilledButton.styleFrom(backgroundColor: categoryColor),
+                    if (context.mounted) {
+                      _offerPhotoMemory(ap, widget.profileId);
+                    }
+                  },
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: const Text('Complete Challenge'),
+                  style: FilledButton.styleFrom(backgroundColor: categoryColor),
+                ),
               ),
       ),
     );

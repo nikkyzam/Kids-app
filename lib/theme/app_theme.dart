@@ -71,6 +71,38 @@ class AppTheme {
         ),
       ];
 
+  // --- Gradients -------------------------------------------------------------
+  // Flat brand fills read as sterile on large surfaces; a short gradient keeps
+  // the brand hue but gives headers and heroes a lit-from-above depth.
+
+  /// The brand gradient, used for heroes and celebratory surfaces.
+  static const LinearGradient brandGradient = LinearGradient(
+    colors: [Color(0xFF5B8DEF), Color(0xFF7B6FEF)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  /// A two-stop gradient anchored on [color], darkened slightly at the far
+  /// end so a large fill has depth without leaving the category's hue.
+  static LinearGradient shadeGradient(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    final dark = hsl
+        .withLightness((hsl.lightness - 0.14).clamp(0.0, 1.0))
+        .withSaturation((hsl.saturation + 0.05).clamp(0.0, 1.0))
+        .toColor();
+    return LinearGradient(
+      colors: [color, dark],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
+  /// Decorative translucent circles for hero surfaces. Painted, not imaged:
+  /// two circles cost nothing and scale to any width without asset work.
+  static Widget heroBubbles({Color color = Colors.white}) {
+    return CustomPaint(painter: _BubblePainter(color));
+  }
+
   static ThemeData get light => ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -378,4 +410,26 @@ class AppTheme {
           circularTrackColor: Color(0xFFE9EDF7),
         ),
       );
+}
+
+/// Soft translucent circles drifting across hero surfaces.
+class _BubblePainter extends CustomPainter {
+  final Color color;
+  const _BubblePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.10)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.88, size.height * 0.12),
+        size.shortestSide * 0.55, paint);
+    canvas.drawCircle(Offset(size.width * 0.08, size.height * 0.95),
+        size.shortestSide * 0.4, paint..color = color.withValues(alpha: 0.07));
+    canvas.drawCircle(Offset(size.width * 0.62, size.height * 0.85),
+        size.shortestSide * 0.22, paint..color = color.withValues(alpha: 0.08));
+  }
+
+  @override
+  bool shouldRepaint(_BubblePainter oldDelegate) => oldDelegate.color != color;
 }
