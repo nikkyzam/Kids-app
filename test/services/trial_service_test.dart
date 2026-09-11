@@ -165,6 +165,17 @@ void main() {
       expect(provider.hasPurchasedPremium, isTrue);
     });
 
+    test('stays quiet for a Premium Plus subscriber', () async {
+      Clock.freeze(launchDay);
+      final prefs = await prefsWith({'is_premium_plus': true});
+      final provider = ActivityProvider(prefs);
+      await provider.startTrialClock();
+
+      expect(provider.isPremium, isTrue);
+      expect(provider.isPremiumPlus, isTrue);
+      expect(provider.isOnTrialOnly, isFalse);
+    });
+
     test('a lapsed trial leaves a purchase untouched', () async {
       Clock.freeze(launchDay);
       final prefs = await prefsWith({'is_premium': true});

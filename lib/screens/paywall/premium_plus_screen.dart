@@ -58,7 +58,8 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('⭐', style: TextStyle(fontSize: 72)),
+                const Icon(Icons.workspace_premium_rounded,
+                    size: 64, color: Color(0xFFF5A623)),
                 const SizedBox(height: 24),
                 Text(
                   'Premium Plus Active',
@@ -67,7 +68,7 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'All features unlocked. Thank you for supporting PlaySteps!',
+                  'Your Premium Plus features are ready to use.',
                   style: Theme.of(context)
                       .textTheme
                       .bodyLarge
@@ -115,13 +116,21 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
             ),
-            child: const Text(
-              '⭐ Premium Plus',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.workspace_premium_rounded,
+                    color: Colors.white, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  'Premium Plus',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -163,13 +172,19 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
 
   Widget _buildFeatureList(BuildContext context) {
     final features = [
-      const _PlusFeature('📈', 'Growth Tracker',
+      const _PlusFeature(
+          Icons.workspace_premium_rounded,
+          'Everything in Premium',
+          'Full activity library, milestone tracking and pediatrician export'),
+      const _PlusFeature(Icons.show_chart_rounded, 'Growth Tracker',
           'Plot weight, height & head circumference over time'),
-      const _PlusFeature('🧠', 'Developmental Leap Calendar',
+      const _PlusFeature(
+          Icons.psychology_rounded,
+          'Developmental Leap Calendar',
           'Know when fussy periods are coming and why'),
-      const _PlusFeature('📅', 'Smart 4-Week Plan',
+      const _PlusFeature(Icons.calendar_month_rounded, 'Smart 4-Week Plan',
           'Personalised activity calendar targeting skill gaps'),
-      const _PlusFeature('📋', 'Weekly Family Report',
+      const _PlusFeature(Icons.summarize_rounded, 'Weekly Family Report',
           'Shareable weekly digest for grandparents & doctors'),
     ];
 
@@ -249,10 +264,10 @@ class _PremiumPlusScreenState extends State<PremiumPlusScreen> {
 }
 
 class _PlusFeature {
-  final String emoji;
+  final IconData icon;
   final String name;
   final String description;
-  const _PlusFeature(this.emoji, this.name, this.description);
+  const _PlusFeature(this.icon, this.name, this.description);
 }
 
 class _FeatureTile extends StatelessWidget {
@@ -266,7 +281,7 @@ class _FeatureTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(feature.emoji, style: const TextStyle(fontSize: 36)),
+          Icon(feature.icon, size: 32, color: AppTheme.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

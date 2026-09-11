@@ -54,8 +54,8 @@ class NotificationService {
     await _plugin.cancel(_notifId);
     await _plugin.zonedSchedule(
       _notifId,
-      'Time to play, $childName!',
-      "Today's activity is waiting — 10 fun minutes that make a real difference 🎉",
+      'Time to play, $childName',
+      "Today's activity is ready when you are.",
       _nextInstance(time.hour, time.minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(

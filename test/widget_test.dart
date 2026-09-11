@@ -39,7 +39,7 @@ void main() {
 
       expect(find.text('Welcome to\nPlaySteps'), findsOneWidget);
       expect(find.text('Get Started'), findsOneWidget);
-      expect(find.text("Baby's Name or Nickname"), findsOneWidget);
+      expect(find.text("Child's name"), findsOneWidget);
       expect(find.text('Date of Birth'), findsOneWidget);
     });
 

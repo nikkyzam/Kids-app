@@ -51,10 +51,9 @@ void main() async {
 
   final activityProvider = ActivityProvider(prefs);
 
-  // Starts the free-trial clock on the very first launch. Done here rather
-  // than lazily on the first paywall so the fortnight begins when the parent
-  // begins, not when they first hit a lock.
-  await activityProvider.startTrialClock();
+  // The trial starts after onboarding saves a child profile. Starting it here
+  // would charge a parent trial days before they have seen a personalized
+  // activity — for example if an install is interrupted by a newborn.
 
   // Route store-confirmed entitlements into the provider. Wired before init()
   // so purchases that completed while the app was closed are picked up by the

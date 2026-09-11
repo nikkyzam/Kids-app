@@ -298,9 +298,7 @@ class _StatusHeroCard extends StatelessWidget {
         return _StatusConfig(
           emoji: '✅',
           label: 'On Track',
-          description:
-              'Great news — $childName is hitting most milestones for their age. '
-              'Keep up the wonderful work!',
+          description: '$childName is meeting most milestones for their age.',
           bgColor: const Color(0xFFE8F8EF),
           textColor: const Color(0xFF2E7D52),
         );

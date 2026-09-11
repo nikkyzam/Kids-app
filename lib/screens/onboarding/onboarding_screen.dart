@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/child_profile.dart';
+import '../../providers/activity_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme/app_theme.dart';
 import '../home/home_screen.dart';
@@ -111,6 +112,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         createdAt: Clock.now(),
       );
       await context.read<ProfileProvider>().addProfile(profile);
+      if (!mounted) return;
+      // A parent has now supplied the information needed to see a genuinely
+      // useful, age-matched activity. This—not install time—is the fair start
+      // of their 14-day trial.
+      await context.read<ActivityProvider>().startTrialClock();
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -204,7 +210,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // The app has optional accounts and cloud sync for family sharing,
           // so the old "No accounts. No cloud." line was no longer true. What
           // is still true is that nothing leaves the device on its own.
-          'No ads. No tracking. Just play.',
+          'Private by default. Built for everyday play.',
           style: Theme.of(context)
               .textTheme
               .bodyLarge
@@ -218,15 +224,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Baby's Name or Nickname",
-            style: Theme.of(context).textTheme.labelLarge),
+        Text("Child's name", style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         TextField(
           controller: _nameController,
           textCapitalization: TextCapitalization.words,
           onChanged: (_) => setState(() {}),
           decoration: const InputDecoration(
-            hintText: 'e.g. Emma or Bug',
+            hintText: 'For example, Emma',
           ),
         ),
         const SizedBox(height: 24),
@@ -236,7 +241,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         // field and the name field read as the same control.
         _FieldButton(
           label: _selectedDob == null
-              ? 'Tap to select date of birth'
+              ? 'Select date of birth'
               : DateFormat('MMMM d, yyyy').format(_selectedDob!),
           filled: _selectedDob != null,
           icon: Icons.calendar_today_rounded,
@@ -296,7 +301,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         Text('Sex (optional)', style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 4),
         const Text(
-          'Only used to draw the right WHO growth curves. You can skip it.',
+          'Used only for WHO growth charts. You can skip this.',
           style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
         ),
         const SizedBox(height: 8),

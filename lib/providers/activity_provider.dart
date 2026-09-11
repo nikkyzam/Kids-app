@@ -42,16 +42,20 @@ class ActivityProvider extends ChangeNotifier {
       List.unmodifiable(_allCompletions);
   bool get isCompleted => _todayCompletion != null;
 
-  /// Whether everything is unlocked right now — bought, or on trial.
+  /// Whether the Premium activity library is unlocked right now.
   ///
-  /// Read by the gates rather than [hasPurchasedPremium] so a single change
-  /// covers every locked surface; the paywall still needs the distinction, so
-  /// the purchase flags stay separately readable.
-  bool get isPremium => _isPremium || isTrialActive;
+  /// Premium Plus deliberately includes Premium. Keeping that relationship in
+  /// this one gate prevents a Plus subscriber from losing the core library
+  /// when their trial ends.
+  bool get isPremium => _isPremium || _isPremiumPlus || isTrialActive;
   bool get isPremiumPlus => _isPremiumPlus || isTrialActive;
 
   bool get hasPurchasedPremium => _isPremium;
   bool get hasPurchasedPremiumPlus => _isPremiumPlus;
+
+  /// Whether the parent owns access to the Premium library, through either
+  /// purchase tier. Unlike [isPremium], this does not include a free trial.
+  bool get hasPurchasedPremiumAccess => _isPremium || _isPremiumPlus;
 
   bool get isTrialActive => TrialService.isActive(_prefs);
   bool get hasTrialLapsed => TrialService.hasLapsed(_prefs);
@@ -60,7 +64,7 @@ class ActivityProvider extends ChangeNotifier {
   /// True only while the trial is what is unlocking things — so the UI can say
   /// "3 days left" to a parent trying the app, and stay quiet for one who has
   /// paid.
-  bool get isOnTrialOnly => isTrialActive && !_isPremium;
+  bool get isOnTrialOnly => isTrialActive && !hasPurchasedPremiumAccess;
   bool get isLoading => _isLoading;
   int get totalCompletions => _allCompletions.length;
 

@@ -100,7 +100,20 @@ void main() {
       final provider = ActivityProvider(prefs);
       await provider.grantEntitlement(Entitlement.premiumPlus);
       expect(provider.isPremiumPlus, isTrue);
+      expect(provider.isPremium, isTrue,
+          reason: 'Premium Plus includes the Premium activity library');
+      expect(provider.hasPurchasedPremiumAccess, isTrue);
       expect(prefs.getBool('is_premium_plus'), isTrue);
+    });
+
+    test('Premium Plus keeps the activity library after a trial ends',
+        () async {
+      SharedPreferences.setMockInitialValues({'is_premium_plus': true});
+      final prefs = await SharedPreferences.getInstance();
+      final provider = ActivityProvider(prefs);
+
+      expect(provider.isPremium, isTrue);
+      expect(provider.hasPurchasedPremiumAccess, isTrue);
     });
 
     test('granting premium does not imply premiumPlus', () async {

@@ -55,7 +55,7 @@ void main() {
       await unlockSettings(tester);
 
       expect(find.text('PlaySteps Premium'), findsOneWidget);
-      expect(find.text('Premium Plus — Active'), findsOneWidget);
+      expect(find.text('Premium Plus active'), findsOneWidget);
     });
 
     testWidgets('restore reports that the store is unavailable',

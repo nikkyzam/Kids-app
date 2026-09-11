@@ -425,11 +425,19 @@ class _ActivityTab extends StatelessWidget {
 
   String _motivationText(int achieved, int total) {
     final pct = (achieved / total * 100).round();
-    if (pct < 10) return 'Great start! Keep tracking each milestone.';
-    if (pct < 30) return 'Building momentum — $pct% complete!';
-    if (pct < 60) return 'Halfway there — you\'re doing amazing!';
-    if (pct < 85) return '$pct% tracked — incredible progress!';
-    return 'Almost done — nearly all milestones logged!';
+    if (pct < 10) {
+      return 'A good start. Keep tracking milestones as they happen.';
+    }
+    if (pct < 30) {
+      return '$pct% of milestones tracked.';
+    }
+    if (pct < 60) {
+      return '$pct% of milestones tracked so far.';
+    }
+    if (pct < 85) {
+      return '$pct% of milestones tracked.';
+    }
+    return 'Nearly all milestones are tracked.';
   }
 }
 
@@ -442,7 +450,8 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
       children: [
         Row(
           children: [
-            const Text('⭐', style: TextStyle(fontSize: 14)),
+            const Icon(Icons.workspace_premium_rounded,
+                size: 16, color: Color(0xFFF5A623)),
             const SizedBox(width: 6),
             // Expanded rather than a bare Text plus Spacer: at a larger text
             // scale the heading and the "See all" tap target together ran off
@@ -465,13 +474,21 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PremiumPlusScreen()),
                 ),
-                child: const Text(
-                  'Upgrade →',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFF5A623),
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Upgrade',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFFF5A623),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 2),
+                    Icon(Icons.chevron_right_rounded,
+                        size: 16, color: Color(0xFFF5A623)),
+                  ],
                 ),
               ),
             ],
@@ -487,7 +504,7 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
           childAspectRatio: 2.2,
           children: [
             _PremiumPlusTile(
-              emoji: '📈',
+              icon: Icons.show_chart_rounded,
               label: 'Growth Tracker',
               isLocked: !isPremiumPlus,
               onTap: isPremiumPlus
@@ -498,7 +515,7 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
                       builder: (_) => const PremiumPlusScreen())),
             ),
             _PremiumPlusTile(
-              emoji: '🧠',
+              icon: Icons.psychology_rounded,
               label: 'Leap Calendar',
               isLocked: !isPremiumPlus,
               onTap: isPremiumPlus
@@ -508,7 +525,7 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
                       builder: (_) => const PremiumPlusScreen())),
             ),
             _PremiumPlusTile(
-              emoji: '📅',
+              icon: Icons.calendar_month_rounded,
               label: '4-Week Plan',
               isLocked: !isPremiumPlus,
               onTap: isPremiumPlus
@@ -518,7 +535,7 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
                       builder: (_) => const PremiumPlusScreen())),
             ),
             _PremiumPlusTile(
-              emoji: '📋',
+              icon: Icons.summarize_rounded,
               label: 'Weekly Report',
               isLocked: !isPremiumPlus,
               onTap: isPremiumPlus
@@ -535,13 +552,13 @@ Widget _buildPremiumPlusRow(BuildContext context, int profileId) {
 }
 
 class _PremiumPlusTile extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String label;
   final bool isLocked;
   final VoidCallback onTap;
 
   const _PremiumPlusTile({
-    required this.emoji,
+    required this.icon,
     required this.label,
     required this.isLocked,
     required this.onTap,
@@ -566,7 +583,10 @@ class _PremiumPlusTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon,
+                  size: 20,
+                  color:
+                      isLocked ? AppTheme.textMuted : const Color(0xFF8B6914)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

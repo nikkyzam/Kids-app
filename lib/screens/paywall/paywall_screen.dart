@@ -21,14 +21,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
     // everything is unlocked, and dismissing on that would make the paywall
     // impossible to open for the fortnight a parent is deciding.
     final ap = context.watch<ActivityProvider>();
-    if (ap.hasPurchasedPremium) {
+    if (ap.hasPurchasedPremiumAccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final navigator = Navigator.of(context);
         if (navigator.canPop()) navigator.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Welcome to Premium! All features unlocked.'),
+            content: Text('Premium access is active!'),
             backgroundColor: AppTheme.success,
           ),
         );
@@ -122,7 +122,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Everything you need to support your child\'s first three years.',
+          'Find the right next activity today, and bring a clear record to '
+          'your next pediatrician visit.',
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -204,7 +205,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     // Show the store's own localised price so the button never contradicts
     // what the purchase sheet charges.
     final price = store.priceFor(Entitlement.premium);
-    final label = price == null ? 'Unlock Premium' : 'Unlock Premium — $price';
+    final label = price == null ? 'Unlock Premium' : 'Unlock Premium ($price)';
 
     return Column(
       children: [
@@ -220,7 +221,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'One-time purchase. No subscription.',
+          'One-time purchase. No subscription required.',
           style: Theme.of(context)
               .textTheme
               .bodyMedium

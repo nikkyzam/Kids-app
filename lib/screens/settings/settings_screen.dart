@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// advertises a price that disagrees with the purchase sheet.
   String _priceLabel(String label, Entitlement entitlement) {
     final price = PurchaseService.instance.priceFor(entitlement);
-    return price == null ? label : '$label — $price';
+    return price == null ? label : '$label ($price)';
   }
 
   Future<void> _challengeGate() async {
@@ -185,13 +185,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: const Icon(Icons.lock_open_rounded,
                     color: AppTheme.success),
                 title: Text(
-                    'Free trial — ${activityProvider.trialDaysRemaining} '
+                    'Free trial: ${activityProvider.trialDaysRemaining} '
                     'day${activityProvider.trialDaysRemaining == 1 ? '' : 's'} left'),
                 subtitle: const Text(
                     'Everything is unlocked. Nothing you record is lost when '
                     'it ends.'),
               ),
-            if (activityProvider.hasPurchasedPremium)
+            if (activityProvider.hasPurchasedPremiumAccess)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: AppTheme.secondary),
                 title: Text('PlaySteps Premium'),
@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (activityProvider.hasPurchasedPremiumPlus)
               const ListTile(
                 leading: Icon(Icons.star_rounded, color: Color(0xFFF5A623)),
-                title: Text('Premium Plus — Active'),
+                title: Text('Premium Plus active'),
                 subtitle: Text(
                     'Growth tracker, leap calendar, smart plan & weekly report'),
               )

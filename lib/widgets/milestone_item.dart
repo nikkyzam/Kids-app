@@ -273,9 +273,9 @@ class _MilestoneItemState extends State<MilestoneItem> {
     final add = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Add a Photo Memory?'),
+        title: const Text('Add a photo memory'),
         content: const Text(
-            'Capture this milestone with a photo — it will be saved in your memories timeline.'),
+            'Add a photo to save this milestone in your memories timeline.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -298,7 +298,7 @@ class _MilestoneItemState extends State<MilestoneItem> {
     if (saved != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Photo memory saved!'),
+          content: Text('Photo memory saved.'),
           backgroundColor: AppTheme.success,
           duration: Duration(seconds: 2),
         ),

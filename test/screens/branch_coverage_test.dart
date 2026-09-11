@@ -30,7 +30,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'Sam');
       await tester.pump();
 
-      await tester.tap(find.text('Tap to select date of birth'));
+      await tester.tap(find.text('Select date of birth'));
       await tester.pump(const Duration(milliseconds: 600));
 
       // Accept whatever date the picker opens on.
@@ -56,7 +56,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'Sam');
       await tester.pump();
 
-      await tester.tap(find.text('Tap to select date of birth'));
+      await tester.tap(find.text('Select date of birth'));
       await tester.pump(const Duration(milliseconds: 600));
 
       final cancel = find.text('Cancel');

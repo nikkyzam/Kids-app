@@ -367,7 +367,7 @@ class _ActivityCardState extends State<ActivityCard> {
                     FilledButton.styleFrom(backgroundColor: AppTheme.secondary),
                 child: Text(price == null
                     ? 'Unlock Premium'
-                    : 'Unlock Premium — $price'),
+                    : 'Unlock Premium ($price)'),
               );
             }),
           ],
@@ -385,11 +385,12 @@ class _ActivityCardState extends State<ActivityCard> {
             const Icon(Icons.celebration_rounded,
                 color: AppTheme.secondary, size: 48),
             const SizedBox(height: 12),
-            Text('Great milestone!',
+            Text('No activity yet',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 6),
             Text(
-              'No activity found for this age range. Check back as your child grows!',
+              'There are no activities for this age range yet. Check back as '
+              'your child grows.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -411,7 +412,7 @@ class _ActivityCardState extends State<ActivityCard> {
     final add = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Capture the moment?'),
+        title: const Text('Capture the moment'),
         content: const Text(
             "Add a photo of today's activity to your memories timeline."),
         actions: [
@@ -436,7 +437,7 @@ class _ActivityCardState extends State<ActivityCard> {
     if (saved != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Photo memory saved!'),
+          content: Text('Photo memory saved.'),
           backgroundColor: AppTheme.success,
           duration: Duration(seconds: 2),
         ),
@@ -519,8 +520,7 @@ class _DismissReasonSheet extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Text(
-              "We'll find another one. Telling us why helps us pick better — "
-              'it stays on this device.',
+              "We'll find another one. Your choice stays on this device.",
               style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
             ),
           ),

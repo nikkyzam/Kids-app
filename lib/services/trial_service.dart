@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/clock.dart';
 
-/// The free trial.
+/// The free trial, which starts when onboarding creates the first profile.
 ///
 /// The age-based free tier alone gave a parent four weeks of content before a
 /// paywall — and a newborn's parent has neither the time nor the sleep to
@@ -17,7 +17,7 @@ class TrialService {
 
   static const Duration length = Duration(days: 14);
 
-  /// Stamps the first launch, once. Safe to call on every launch.
+  /// Stamps the trial start, once. Safe to call after every profile save.
   ///
   /// Stored rather than derived from the install date, which no platform
   /// exposes consistently. A parent who reinstalls does get a fresh trial;

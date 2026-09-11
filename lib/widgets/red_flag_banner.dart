@@ -59,7 +59,7 @@ class RedFlagBanner extends StatelessWidget {
               ),
               if (flags.length > 1)
                 Text(
-                  '+ ${flags.length - 1} more — tap to see all',
+                  '${flags.length - 1} more. Tap to see all.',
                   style:
                       const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                 ),

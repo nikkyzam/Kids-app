@@ -50,31 +50,31 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
   }
 
   String get _headline {
-    if (widget.streak >= 100) return 'Legendary! 100 Days!';
-    if (widget.streak >= 60) return 'Two Months Strong!';
-    if (widget.streak >= 30) return 'One Month Streak!';
-    if (widget.streak >= 21) return '3-Week Champion!';
-    if (widget.streak >= 14) return 'Two Weeks!';
-    return 'One Week Streak!';
+    if (widget.streak >= 100) return '100-day streak';
+    if (widget.streak >= 60) return '60-day streak';
+    if (widget.streak >= 30) return '30-day streak';
+    if (widget.streak >= 21) return '21-day streak';
+    if (widget.streak >= 14) return '14-day streak';
+    return '7-day streak';
   }
 
   String get _subtext {
     if (widget.streak >= 100) {
-      return 'You\'ve played with your baby every day for 100 days. That\'s extraordinary.';
+      return 'You have completed an activity every day for 100 days.';
     }
     if (widget.streak >= 60) {
-      return 'Two months of daily play. Your dedication is building your baby\'s brain.';
+      return 'Two months of daily activities recorded.';
     }
     if (widget.streak >= 30) {
-      return 'A full month! Science shows consistent play at this age has lasting effects.';
+      return 'A full month of daily activities.';
     }
     if (widget.streak >= 21) {
-      return 'Three weeks builds a habit. Play is now part of your daily rhythm.';
+      return 'Three weeks of daily activities.';
     }
     if (widget.streak >= 14) {
-      return 'Two weeks of daily challenges. Your baby is noticing the difference.';
+      return 'Two weeks of daily activities.';
     }
-    return 'Seven days straight! You\'ve built the habit. Keep it going.';
+    return 'A full week of daily activities.';
   }
 
   String get _emoji {
@@ -165,7 +165,7 @@ class _StreakMilestoneDialogState extends State<StreakMilestoneDialog>
                         backgroundColor: AppTheme.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text('Keep It Going!',
+                      child: const Text('Continue',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700)),
                     ),

@@ -100,7 +100,7 @@ class _CompletedTab extends StatelessWidget {
                   Text('No activities completed yet',
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 6),
-                  Text('Complete today\'s challenge to start your history!',
+                  Text('Complete today\'s activity to begin your history.',
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center),
                 ],

@@ -124,7 +124,7 @@ class WeeklyRecapCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
-                        '🏆 Perfect week! Every day completed.',
+                        'Every day completed this week.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 12,

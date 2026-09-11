@@ -170,7 +170,7 @@ class _HeroStatusCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Stormy Period — Leap ${leap.number} in progress!',
+                        'Leap ${leap.number} is in progress',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -202,7 +202,7 @@ class _HeroStatusCard extends StatelessWidget {
               ),
               child: Text(
                 daysUntilPeak == 0
-                    ? 'Leap peak is this week!'
+                    ? 'Leap peak is this week'
                     : 'Leap peak in ~$daysUntilPeak day${daysUntilPeak == 1 ? '' : 's'}',
                 style: const TextStyle(
                   fontSize: 13,
@@ -253,7 +253,7 @@ class _HeroStatusCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Leap ${leap.number} Happening Now!',
+                        'Leap ${leap.number} is happening now',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -297,7 +297,7 @@ class _HeroStatusCard extends StatelessWidget {
     final weeksUntil = leap.stormyStartWeek - ageInWeeks;
     final daysUntil = weeksUntil * 7;
     final countdownText = weeksUntil == 0
-        ? 'Starting this week!'
+        ? 'Starting this week'
         : weeksUntil == 1
             ? 'In ~1 week ($daysUntil days)'
             : 'In ~$weeksUntil weeks ($daysUntil days)';
@@ -325,7 +325,7 @@ class _HeroStatusCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Next: Leap ${leap.number} — ${leap.name}',
+                        'Next: Leap ${leap.number}, ${leap.name}',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -392,7 +392,7 @@ class _HeroStatusCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'All 10 developmental leaps complete!',
+                    'All 10 developmental leaps are complete',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -402,7 +402,7 @@ class _HeroStatusCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$childName has made it through every leap. What a journey!',
+                    '$childName has reached every leap in this guide.',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
