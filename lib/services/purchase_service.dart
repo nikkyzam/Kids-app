@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'entitlement_ledger.dart';
 import 'receipt_verifier.dart';
-import 'store_platform_io.dart' if (dart.library.html) 'store_platform_web.dart';
+import 'store_platform_io.dart'
+    if (dart.library.html) 'store_platform_web.dart';
 
 /// Thrown when a store operation cannot be completed.
 class PurchaseUnavailableException implements Exception {
