@@ -161,13 +161,11 @@ class _ActivityTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().activeProfile!;
-    final ap = context.watch<ActivityProvider>();
 
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: _buildGreeting(
-              context, profile.name, profile.ageSummary, ap.currentStreak),
+          child: _buildGreeting(context, profile.name, profile.ageSummary),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         const SliverToBoxAdapter(child: TrialBanner()),
@@ -246,7 +244,7 @@ class _ActivityTab extends StatelessWidget {
 
   Widget _buildLibraryButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: Align(
         alignment: Alignment.centerRight,
         child: TextButton.icon(
@@ -265,8 +263,7 @@ class _ActivityTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting(
-      BuildContext context, String name, String age, int streak) {
+  Widget _buildGreeting(BuildContext context, String name, String age) {
     final hour = Clock.now().hour;
     final greeting = hour < 12
         ? 'Good morning'
@@ -274,35 +271,57 @@ class _ActivityTab extends StatelessWidget {
             ? 'Good afternoon'
             : 'Good evening';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    // Full-bleed hero: a soft brand wash with decorative bubbles, so the top
+    // of the day feels like a place rather than a label.
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFE3EBFD), AppTheme.surface],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      ),
+      child: Stack(
         children: [
-          Expanded(
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(28)),
+              child: AppTheme.heroBubbles(color: AppTheme.primary),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(greeting, style: Theme.of(context).textTheme.bodyMedium),
+                Text(greeting,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
                 Text(name, style: Theme.of(context).textTheme.displayLarge),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryLight,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: AppTheme.primary.withValues(alpha: 0.25)),
+                    boxShadow: AppTheme.cardShadow,
                   ),
                   child: Text(age,
                       style: const TextStyle(
                           fontSize: 12,
                           color: AppTheme.primary,
-                          fontWeight: FontWeight.w600)),
+                          fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
           ),
-          if (streak >= 3) _StreakBadge(streak: streak),
         ],
       ),
     );
@@ -598,10 +617,17 @@ class _InsightButton extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
+                  gradient: AppTheme.shadeGradient(color),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: color, size: 20),
+                child: Icon(icon, color: Colors.white, size: 20),
               ),
               const SizedBox(height: 8),
               Text(
@@ -613,45 +639,6 @@ class _InsightButton extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _StreakBadge extends StatelessWidget {
-  final int streak;
-  const _StreakBadge({required this.streak});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFF7043), Color(0xFFFF5722)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: const Color(0xFFFF7043).withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 3))
-        ],
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.local_fire_department_rounded,
-              color: Colors.white, size: 20),
-          Text(
-            '$streak',
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
-          ),
-          const Text('days',
-              style: TextStyle(fontSize: 8, color: Colors.white70)),
-        ],
       ),
     );
   }

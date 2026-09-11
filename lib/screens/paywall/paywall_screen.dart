@@ -86,23 +86,40 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 88,
+          height: 88,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.primary, Color(0xFF7B6FEF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
+            gradient: AppTheme.brandGradient,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: AppTheme.glow(AppTheme.primary),
           ),
-          child: const Icon(Icons.auto_awesome_rounded,
-              color: Colors.white, size: 40),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: AppTheme.heroBubbles(),
+                ),
+              ),
+              const Center(
+                child: Icon(Icons.auto_awesome_rounded,
+                    color: Colors.white, size: 44),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
-        Text('Unlock PlaySteps Premium',
-            style: Theme.of(context).textTheme.displayMedium,
-            textAlign: TextAlign.center),
+        ShaderMask(
+          shaderCallback: (bounds) =>
+              AppTheme.brandGradient.createShader(Offset.zero & bounds.size),
+          blendMode: BlendMode.srcIn,
+          child: Text('Unlock PlaySteps Premium',
+              style: Theme.of(context)
+                  .textTheme
+                  .displayMedium
+                  ?.copyWith(color: Colors.white),
+              textAlign: TextAlign.center),
+        ),
         const SizedBox(height: 8),
         Text(
           'Everything you need to support your child\'s first three years.',

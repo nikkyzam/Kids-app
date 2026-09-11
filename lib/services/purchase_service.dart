@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -7,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'entitlement_ledger.dart';
 import 'receipt_verifier.dart';
+import 'store_platform_io.dart' if (dart.library.html) 'store_platform_web.dart';
 
 /// Thrown when a store operation cannot be completed.
 class PurchaseUnavailableException implements Exception {
@@ -283,10 +283,7 @@ class PurchaseService {
 
   /// The platform name the verifier expects. Web never reaches this — [init]
   /// returns early there — but a default keeps the call total.
-  static String get _platformName {
-    if (kIsWeb) return 'web';
-    return Platform.isIOS || Platform.isMacOS ? 'ios' : 'android';
-  }
+  static String get _platformName => storePlatformName();
 
   @visibleForTesting
   static PurchaseReceipt receiptFrom(PurchaseDetails purchase,

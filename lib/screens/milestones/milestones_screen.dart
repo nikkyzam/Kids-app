@@ -37,30 +37,112 @@ class MilestonesScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, MilestoneProvider mp) {
+    final total = mp.totalCount;
+    final achieved = mp.achievedCount;
+    final progress = total == 0 ? 0.0 : achieved / total;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Milestone Ledger',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 2),
-                Text(
-                  '${mp.achievedCount} of ${mp.totalCount} achieved',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: AppTheme.shadeGradient(AppTheme.primary),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          boxShadow: AppTheme.glow(AppTheme.primary),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                child: AppTheme.heroBubbles(),
+              ),
             ),
-          ),
-          TextButton.icon(
-            icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-            label: const Text('Export'),
-            onPressed: () => _exportPdf(context),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Milestone Ledger',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: Colors.white)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$achieved of $total achieved',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(height: 10),
+                        // White-on-gradient so the action stays visible
+                        // against the hero fill.
+                        TextButton.icon(
+                          onPressed: () => _exportPdf(context),
+                          icon: const Icon(Icons.picture_as_pdf_outlined,
+                              size: 15),
+                          label: const Text('Export'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.18),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 7),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.35)),
+                            ),
+                            textStyle: const TextStyle(
+                                fontSize: 12.5, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: progress),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOut,
+                    builder: (_, value, __) => SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: value,
+                            strokeWidth: 6,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.25),
+                            valueColor:
+                                const AlwaysStoppedAnimation(Colors.white),
+                          ),
+                          Text(
+                            '${(value * 100).round()}%',
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

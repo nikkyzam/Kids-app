@@ -64,20 +64,28 @@ class _StatPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: highlight
-            ? iconColor.withValues(alpha: 0.08)
-            : const Color(0xFFF4F6FB),
-        borderRadius: BorderRadius.circular(12),
-        border: highlight
-            ? Border.all(color: iconColor.withValues(alpha: 0.3))
-            : null,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: highlight
+                ? iconColor.withValues(alpha: 0.35)
+                : AppTheme.border),
+        boxShadow: AppTheme.cardShadow,
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: iconColor),
-          const SizedBox(width: 6),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: highlight ? 0.16 : 0.10),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: iconColor),
+          ),
+          const SizedBox(width: 7),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,6 +94,7 @@ class _StatPill extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
+                        height: 1.1,
                         color: highlight ? iconColor : AppTheme.textDark)),
                 Text(label,
                     style: const TextStyle(
@@ -106,12 +115,14 @@ class _WeekDots extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ActivityProvider>(
       builder: (context, ap, _) {
-        final today = Clock.now();
+        final today = Clock.today();
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF4F6FB),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.border),
+            boxShadow: AppTheme.cardShadow,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +136,11 @@ class _WeekDots extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(7, (i) {
-                  final day = today.subtract(Duration(days: 6 - i));
+                  // Calendar components, not `subtract(Duration(days: n))`: a
+                  // Duration is exactly 24 hours, so across a daylight-saving
+                  // transition a dot lands on the wrong date.
+                  final day =
+                      DateTime(today.year, today.month, today.day - (6 - i));
                   final isToday = i == 6;
                   final done = ap.completedOnDay(day);
                   return Container(

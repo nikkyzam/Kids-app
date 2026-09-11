@@ -20,71 +20,94 @@ class _DailyTipCardState extends State<DailyTipCard> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
-        color: const Color(0xFF1A1D2E),
+        // A deep navy gradient with drifting amber glints — the one dark
+        // surface on the home tab, so it reads as a spotlight.
+        color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           onTap: () => setState(() => _expanded = !_expanded),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF252B47), Color(0xFF1A1D2E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+            ),
+            child: Stack(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppTheme.secondary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                    child: AppTheme.heroBubbles(color: AppTheme.secondary),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Icon(Icons.lightbulb_rounded,
-                              size: 12, color: AppTheme.secondary),
-                          SizedBox(width: 4),
-                          Text('Daily Insight',
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  color: AppTheme.secondary,
-                                  fontWeight: FontWeight.w700)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppTheme.secondary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.lightbulb_rounded,
+                                    size: 12, color: AppTheme.secondary),
+                                SizedBox(width: 4),
+                                Text('Daily Insight',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        color: AppTheme.secondary,
+                                        fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            _expanded
+                                ? Icons.keyboard_arrow_up_rounded
+                                : Icons.keyboard_arrow_down_rounded,
+                            size: 18,
+                            color: Colors.white54,
+                          ),
                         ],
                       ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      _expanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                      color: Colors.white54,
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      AnimatedCrossFade(
+                        firstChild: Text(
+                          tip.length > 90 ? '${tip.substring(0, 90)}…' : tip,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.white, height: 1.5),
+                        ),
+                        secondChild: Text(
+                          tip,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.white, height: 1.5),
+                        ),
+                        crossFadeState: _expanded
+                            ? CrossFadeState.showSecond
+                            : CrossFadeState.showFirst,
+                        duration: const Duration(milliseconds: 200),
+                      ),
+                      if (!_expanded)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 6),
+                          child: Text('Tap to read more',
+                              style: TextStyle(
+                                  fontSize: 11, color: Colors.white38)),
+                        ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 10),
-                AnimatedCrossFade(
-                  firstChild: Text(
-                    tip.length > 90 ? '${tip.substring(0, 90)}…' : tip,
-                    style: const TextStyle(
-                        fontSize: 13, color: Colors.white, height: 1.5),
-                  ),
-                  secondChild: Text(
-                    tip,
-                    style: const TextStyle(
-                        fontSize: 13, color: Colors.white, height: 1.5),
-                  ),
-                  crossFadeState: _expanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 200),
-                ),
-                if (!_expanded)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 6),
-                    child: Text('Tap to read more',
-                        style: TextStyle(fontSize: 11, color: Colors.white38)),
-                  ),
               ],
             ),
           ),
