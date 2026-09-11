@@ -15,9 +15,13 @@ class WeeklyRecapCard extends StatelessWidget {
     return Consumer<ActivityProvider>(
       builder: (context, ap, _) {
         final today = Clock.now();
-        // Build Mon–Sun of current week
-        final weekStart = today.subtract(Duration(days: today.weekday - 1));
-        final days = List.generate(7, (i) => weekStart.add(Duration(days: i)));
+        // Mon–Sun of the current week, from calendar components: a Duration
+        // is exactly 24 hours, so across a daylight-saving transition the
+        // arithmetic form lands a dot on the wrong date.
+        final monday =
+            DateTime(today.year, today.month, today.day - (today.weekday - 1));
+        final days = List.generate(
+            7, (i) => DateTime(monday.year, monday.month, monday.day + i));
 
         final completedThisWeek =
             days.where((d) => ap.completedOnDay(d)).length;
@@ -195,11 +199,21 @@ class _DayDot extends StatelessWidget {
           height: 34,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            gradient: done ? AppTheme.shadeGradient(AppTheme.success) : null,
             color: done
-                ? AppTheme.success
+                ? null
                 : isToday
                     ? AppTheme.primaryLight
                     : Colors.transparent,
+            boxShadow: done
+                ? [
+                    BoxShadow(
+                      color: AppTheme.success.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
             border: Border.all(
               color: done
                   ? AppTheme.success

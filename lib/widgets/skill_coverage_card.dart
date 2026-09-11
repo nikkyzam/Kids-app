@@ -98,15 +98,25 @@ class _SkillBar extends StatelessWidget {
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: ratio),
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOut,
-                builder: (_, value, __) => LinearProgressIndicator(
-                  value: value,
-                  minHeight: 8,
-                  backgroundColor: color.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation(color),
+              child: Container(
+                height: 8,
+                color: color.withValues(alpha: 0.1),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: ratio),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOut,
+                  builder: (_, value, __) => FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: value,
+                    // A gradient fill rather than a flat colour: the bars are
+                    // the card's centrepiece, and the shade shift gives them
+                    // the same depth the headers have.
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.shadeGradient(color),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
