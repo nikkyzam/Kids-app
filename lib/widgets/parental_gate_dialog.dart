@@ -147,7 +147,7 @@ class _ParentalGateDialogState extends State<ParentalGateDialog> {
                   color: AppTheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('That is not quite right. Try again.',
+                child: const Text('Incorrect. Try again.',
                     style: TextStyle(
                         color: AppTheme.error,
                         fontSize: 13,
