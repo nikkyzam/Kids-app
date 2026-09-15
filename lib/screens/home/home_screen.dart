@@ -171,7 +171,8 @@ class _ActivityTab extends StatelessWidget {
         const SliverToBoxAdapter(child: TrialBanner()),
         const SliverToBoxAdapter(child: StreakBanner()),
         SliverToBoxAdapter(child: _buildLibraryButton(context)),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        // Tight against the heading above it, which now labels this card.
+        const SliverToBoxAdapter(child: SizedBox(height: 10)),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver:
@@ -242,23 +243,41 @@ class _ActivityTab extends StatelessWidget {
     );
   }
 
+  /// A section heading for the activity card, with the library as its trailing
+  /// action.
+  ///
+  /// The link used to float alone against the background, right-aligned with
+  /// empty space above and below it, so it read as something left behind
+  /// rather than the heading of what follows. Pairing it with a title gives
+  /// the card underneath a label and the link somewhere to belong.
   Widget _buildLibraryButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: TextButton.icon(
-          icon: const Icon(Icons.grid_view_rounded, size: 14),
-          label: const Text('Browse All Activities',
-              style: TextStyle(fontSize: 12)),
-          style: TextButton.styleFrom(
-            foregroundColor: AppTheme.primary,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(16, 20, 8, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              "Today's play",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ActivityLibraryScreen()),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              textStyle: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700),
+            ),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ActivityLibraryScreen()),
+            ),
+            child: const Text('Browse all'),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -292,32 +311,53 @@ class _ActivityTab extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // The age chip sits on the name's baseline rather than under it:
+            // stacked, the three lines pushed the first real content a third
+            // of the way down the screen while the right half of the hero
+            // stayed empty.
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(greeting,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)),
-                Text(name, style: Theme.of(context).textTheme.displayLarge),
-                const SizedBox(height: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: AppTheme.primary.withValues(alpha: 0.25)),
-                    boxShadow: AppTheme.cardShadow,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(greeting,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600)),
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.displayLarge,
+                      ),
+                    ],
                   ),
-                  child: Text(age,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.w700)),
+                ),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: AppTheme.primary.withValues(alpha: 0.25)),
+                      boxShadow: AppTheme.cardShadow,
+                    ),
+                    child: Text(age,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w700)),
+                  ),
                 ),
               ],
             ),

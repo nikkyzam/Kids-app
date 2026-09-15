@@ -25,7 +25,14 @@ class AppTheme {
   /// Hairline used where a surface needs definition without a shadow.
   static const Color border = Color(0xFFEBEEF6);
 
-  static const String _font = 'Nunito';
+  /// The app's typeface.
+  ///
+  /// Public because a button that overrides `textStyle` through `styleFrom`
+  /// *replaces* the theme's style rather than merging into it — so an override
+  /// that omits the family silently drops Nunito and renders that one label in
+  /// the platform font. Every override needs to name it.
+  static const String fontFamily = 'Nunito';
+  static const String _font = fontFamily;
 
   /// Corner radius for cards. Shared so that anything drawing its own surface
   /// inside a Card (e.g. a tinted header) can match the clip exactly.

@@ -178,7 +178,7 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
                 borderRadius: BorderRadius.circular(14),
               ),
               textStyle: const TextStyle(
-                fontFamily: 'Nunito',
+                fontFamily: AppTheme.fontFamily,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -227,7 +227,7 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
                       _myCode!,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontFamily: 'Nunito',
+                        fontFamily: AppTheme.fontFamily,
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppTheme.primary,
@@ -302,7 +302,7 @@ class _FamilySharingScreenState extends State<FamilySharingScreen> {
               counterText: '',
             ),
             style: const TextStyle(
-              fontFamily: 'Nunito',
+              fontFamily: AppTheme.fontFamily,
               fontSize: 18,
               fontWeight: FontWeight.w700,
               letterSpacing: 4,
@@ -552,7 +552,7 @@ class _SyncStatusChip extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontFamily: 'Nunito',
+              fontFamily: AppTheme.fontFamily,
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: color,

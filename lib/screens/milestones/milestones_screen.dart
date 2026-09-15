@@ -101,7 +101,9 @@ class MilestonesScreen extends StatelessWidget {
                                   color: Colors.white.withValues(alpha: 0.35)),
                             ),
                             textStyle: const TextStyle(
-                                fontSize: 12.5, fontWeight: FontWeight.w700),
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],

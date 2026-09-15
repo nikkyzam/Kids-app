@@ -635,7 +635,7 @@ class _MemoryDetailSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                         textStyle: const TextStyle(
-                          fontFamily: 'Nunito',
+                          fontFamily: AppTheme.fontFamily,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
