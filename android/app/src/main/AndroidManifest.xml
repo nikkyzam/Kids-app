@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Flutter only puts INTERNET in the debug and profile manifests, which
+         are not merged into a release build. Without it here, a signed release
+         has no network at all: Supabase sync fails, every receipt check reads
+         as "server unreachable" — which the verifier treats as an outage and
+         so never revokes a refund — and the song player cannot load YouTube.
+         All of that fails silently, because the app is built to degrade
+         quietly when the network is absent. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Daily play reminders (flutter_local_notifications). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />

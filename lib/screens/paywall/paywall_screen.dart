@@ -190,8 +190,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
           Icons.lock_outline_rounded,
           AppTheme.grossMotorColor,
           'Private by Default',
-          'No ads, no tracking. Accounts and cloud sync only if you turn on '
-              'family sharing.'),
+          'No ads and no tracking in the app itself. Accounts and cloud sync '
+              'only if you turn on family sharing; playing a song opens '
+              "YouTube's own player, which has both."),
     ];
 
     return Column(

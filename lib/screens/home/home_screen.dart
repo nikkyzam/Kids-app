@@ -23,6 +23,7 @@ import '../insights/pediatrician_prep_screen.dart';
 import '../growth/growth_tracker_screen.dart';
 import '../leaps/developmental_leaps_screen.dart';
 import '../plan/activity_plan_screen.dart';
+import '../songs/songs_screen.dart';
 import '../digest/weekly_digest_screen.dart';
 import '../paywall/premium_plus_screen.dart';
 import '../../widgets/weekly_recap_card.dart';
@@ -235,6 +236,17 @@ class _ActivityTab extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (_) => const PediatricianPrepScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _InsightButton(
+              icon: Icons.music_note_rounded,
+              label: 'Songs',
+              color: AppTheme.socialEmotionalColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SongsScreen()),
               ),
             ),
           ),
