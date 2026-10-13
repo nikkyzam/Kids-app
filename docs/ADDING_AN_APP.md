@@ -56,3 +56,17 @@ because there is no default flavor.
 iOS is not flavored yet: it still builds a single `Runner` target with the
 PlaySteps bundle ID. Per-app iOS needs xcconfig/schemes created in Xcode on a
 Mac; do that before shipping a second app on iOS.
+
+## Apps with a different product (e.g. SoundSteps)
+
+Flavors share build and release plumbing, not necessarily the engine.
+SoundSteps (ages 2-4 letters and sounds) is a separate product: `main()`
+checks `AppFlavor.current` and boots `lib/soundsteps/` directly, skipping the
+PlaySteps database, sync and notifications. Its speech comes from device
+text-to-speech via `lib/soundsteps/services/speaker.dart`; the Android
+`soundsteps` source set declares the TTS `<queries>` entry Android 11+ needs.
+
+Before publishing a children's app on Google Play, review the Families Policy
+(no behavioral ads, a parental gate in front of purchases and external links).
+SoundSteps has no purchases wired yet; add them behind the existing parental
+gate pattern.

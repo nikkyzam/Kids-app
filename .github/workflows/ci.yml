@@ -95,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         # Add each new app's id here so every flavor is built on every push.
-        app: [playsteps]
+        app: [playsteps, soundsteps]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

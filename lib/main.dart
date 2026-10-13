@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'config/app_flavor.dart';
+import 'soundsteps/soundsteps_app.dart';
 import 'config/supabase_config.dart';
 import 'providers/profile_provider.dart';
 import 'providers/activity_provider.dart';
@@ -21,6 +23,15 @@ import 'services/receipt_verifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // SoundSteps is a different product from the PlaySteps tracker: no child
+  // profiles, database, sync or notifications. It shares the build and
+  // release plumbing, not the engine, so it boots on its own path.
+  if (AppFlavor.current.id == AppFlavor.soundsteps.id) {
+    runApp(const SoundStepsApp());
+    return;
+  }
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Cloud sync is optional. Only spin up Supabase when real credentials have

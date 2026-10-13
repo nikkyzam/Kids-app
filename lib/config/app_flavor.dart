@@ -37,7 +37,14 @@ class AppFlavor {
     premiumPlusProductId: 'playsteps_premium_plus_yearly',
   );
 
-  static const List<AppFlavor> all = [playsteps];
+  static const soundsteps = AppFlavor(
+    id: 'soundsteps',
+    displayName: 'SoundSteps',
+    premiumProductId: 'soundsteps_premium_lifetime',
+    premiumPlusProductId: 'soundsteps_premium_plus_yearly',
+  );
+
+  static const List<AppFlavor> all = [playsteps, soundsteps];
 
   static const String _selected = String.fromEnvironment(
     'APP_FLAVOR',
