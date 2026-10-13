@@ -41,11 +41,7 @@ class _SoundMatchScreenState extends State<SoundMatchScreen> {
 
   void _newRound() {
     _target = letters[_random.nextInt(letters.length)];
-    // Distractors must make a different sound: C and K both say "kuh", so
-    // offering both would make the right answer ambiguous.
-    final others = letters.where((l) => l.sound != _target.sound).toList()
-      ..shuffle(_random);
-    _choices = [_target, ...others.take(2)]..shuffle(_random);
+    _choices = choicesFor(_target, _random);
     _message = '';
   }
 

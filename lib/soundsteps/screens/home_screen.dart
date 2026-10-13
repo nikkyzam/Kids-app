@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/speaker.dart';
 import 'letters_screen.dart';
+import 'picture_word_screen.dart';
 import 'sound_match_screen.dart';
 
 /// Two big buttons and nothing else: a 2-year-old navigates by picture.
@@ -48,6 +49,18 @@ class SoundStepsHome extends StatelessWidget {
                   )),
                 ),
               ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: _BigButton(
+                  key: const Key('open-picture-word'),
+                  color: const Color(0xFF64B5F6),
+                  emoji: '🖼️',
+                  label: 'Picture words',
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PictureWordScreen(speaker: speaker),
+                  )),
+                ),
+              ),
             ],
           ),
         ),
@@ -81,20 +94,28 @@ class _BigButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(32),
           onTap: onTap,
+          // scaleDown: on a short phone the three stacked buttons get little
+          // height; shrink the content to fit rather than overflow.
           child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(emoji, style: const TextStyle(fontSize: 72)),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(emoji, style: const TextStyle(fontSize: 56)),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

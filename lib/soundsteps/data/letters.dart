@@ -1,3 +1,5 @@
+import 'dart:math';
+
 /// One letter of the alphabet as a toddler meets it: the letter, the sound it
 /// makes, and a picture word that starts with that sound.
 class LetterEntry {
@@ -50,3 +52,23 @@ const List<LetterEntry> letters = [
   LetterEntry(letter: 'Y', sound: 'yuh', word: 'yo-yo', emoji: '🪀'),
   LetterEntry(letter: 'Z', sound: 'zzz', word: 'zebra', emoji: '🦓'),
 ];
+
+/// Letters usable in the picture-to-word game: those whose picture word
+/// *starts* with the letter's sound. X is out: "box" ends with it.
+final List<LetterEntry> pictureLetters =
+    letters.where((l) => l.letter != 'X').toList(growable: false);
+
+/// The target plus two distractors, shuffled.
+///
+/// All three choices make different sounds. A distractor sharing the target's
+/// sound would make the right answer ambiguous (C and K both say "kuh"), and
+/// two distractors sharing a sound with each other would just be noise.
+List<LetterEntry> choicesFor(LetterEntry target, Random random) {
+  final seen = {target.sound};
+  final distractors = <LetterEntry>[];
+  for (final l in [...letters]..shuffle(random)) {
+    if (seen.add(l.sound)) distractors.add(l);
+    if (distractors.length == 2) break;
+  }
+  return [target, ...distractors]..shuffle(random);
+}
