@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/app_flavor.dart';
 import 'entitlement_ledger.dart';
 import 'receipt_verifier.dart';
 import 'store_platform_io.dart'
@@ -39,10 +40,12 @@ class PurchaseService {
   /// Store product identifiers. These must match the products configured in
   /// App Store Connect and the Google Play Console exactly, or the store
   /// returns them as "not found" and purchasing is disabled.
-  static const String premiumProductId = 'playsteps_premium_lifetime';
-  static const String premiumPlusProductId = 'playsteps_premium_plus_yearly';
+  /// Resolved from the active [AppFlavor] so each app sells its own products.
+  static final String premiumProductId = AppFlavor.current.premiumProductId;
+  static final String premiumPlusProductId =
+      AppFlavor.current.premiumPlusProductId;
 
-  static const Set<String> _productIds = {
+  static final Set<String> _productIds = {
     premiumProductId,
     premiumPlusProductId,
   };

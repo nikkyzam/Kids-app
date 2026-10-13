@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'config/app_flavor.dart';
 import 'theme/app_theme.dart';
 import 'providers/profile_provider.dart';
 import 'providers/auth_provider.dart';
@@ -14,7 +15,7 @@ class PlayStepsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PlaySteps',
+      title: AppFlavor.current.displayName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: const _RootRouter(),

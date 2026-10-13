@@ -52,7 +52,6 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.nikkyzam.playsteps.app"
         minSdkVersion flutter.minSdkVersion
         // Play requires new apps and updates to target an API level within a
         // year of the latest Android release; API 36 is the current floor.
@@ -61,6 +60,20 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+    }
+
+    // One flavor per app. Each gets its own applicationId (its own Play
+    // listing) and launcher label; everything else is shared. Build with
+    // `--flavor <id>` plus `--dart-define=APP_FLAVOR=<id>` (tool/build_app.sh
+    // does both). Add a new app by adding a block here and an entry to
+    // lib/config/app_flavor.dart.
+    flavorDimensions "app"
+    productFlavors {
+        playsteps {
+            dimension "app"
+            applicationId "com.nikkyzam.playsteps.app"
+            resValue "string", "app_name", "PlaySteps"
+        }
     }
 
     signingConfigs {

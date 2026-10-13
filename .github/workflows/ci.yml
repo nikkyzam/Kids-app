@@ -89,8 +89,13 @@ jobs:
         run: deno fmt --check supabase/functions/verify-purchase/
 
   build-android:
-    name: Build Android APK
+    name: Build Android APK (${{ matrix.app }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Add each new app's id here so every flavor is built on every push.
+        app: [playsteps]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -131,7 +136,7 @@ jobs:
       # Unsigned in the sense that matters: no key.properties exists here, so
       # build.gradle falls back to debug signing. Google Play rejects that.
       - name: Build release APK
-        run: flutter build apk --release
+        run: tool/build_app.sh ${{ matrix.app }} apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -140,8 +145,8 @@ jobs:
           # artifact, and it was uploaded to Play, which rejected it for being
           # signed in debug mode. A Play-ready bundle comes from release.yml,
           # which has the keystore.
-          name: android-smoke-test-apk-not-for-play
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android-smoke-test-apk-not-for-play-${{ matrix.app }}
+          path: build/app/outputs/flutter-apk/app-${{ matrix.app }}-release.apk
           if-no-files-found: error
 
   build-ios:

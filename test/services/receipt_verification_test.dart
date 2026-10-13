@@ -33,7 +33,7 @@ class FakeVerifier implements ReceiptVerifier {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const receipt = PurchaseReceipt(
+  final receipt = PurchaseReceipt(
     platform: 'android',
     productId: PurchaseService.premiumProductId,
     token: 'token-123',
@@ -209,7 +209,7 @@ void main() {
 
       // A different token — a resubscribe, say — has never been confirmed,
       // whatever we knew about the one before it.
-      const replacement = PurchaseReceipt(
+      final replacement = PurchaseReceipt(
         platform: 'android',
         productId: PurchaseService.premiumProductId,
         token: 'token-456',
