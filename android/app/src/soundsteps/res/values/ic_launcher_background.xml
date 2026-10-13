@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SoundSteps brand orange; same as the in-app colour seed. -->
+    <color name="ic_launcher_background">#FF8A5B</color>
+</resources>
