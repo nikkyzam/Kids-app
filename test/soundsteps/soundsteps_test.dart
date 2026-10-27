@@ -59,7 +59,7 @@ void main() {
     await tester.tap(find.byKey(const Key('letter-B')));
     await tester.pump();
 
-    expect(speaker.said.single, 'buh. B is for ball');
+    expect(speaker.said.last, 'buh. B is for ball');
     expect(find.byKey(const Key('selected-letter')), findsOneWidget);
   });
 

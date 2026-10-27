@@ -31,7 +31,7 @@ class SoundMatchScreen extends StatelessWidget {
       random: random,
       pool: letters,
       prompt: (t) => '${t.sound}. Which letter?',
-      success: (t) => 'Great job! ${t.letter} says ${t.sound}',
+      success: (t) => '${t.letter} says ${t.sound}',
       hero: (context, round) => IconButton(
         key: const Key('replay'),
         iconSize: 96,

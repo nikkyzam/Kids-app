@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/stickers.dart';
+
 /// How a child is doing on one letter.
 @immutable
 class LetterStats {
@@ -74,6 +76,9 @@ class ProgressStore extends ChangeNotifier {
 
   LetterStats statsFor(String letter) =>
       _letters[letter] ?? const LetterStats();
+
+  /// Stickers earned so far; derived from stars, so nothing extra is stored.
+  int get stickersUnlocked => stickersFor(_stars);
 
   int get masteredCount => _letters.values.where((s) => s.mastered).length;
 

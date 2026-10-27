@@ -119,6 +119,15 @@ class _LettersScreenState extends State<LettersScreen> {
   }
 }
 
+const _pastels = [
+  Color(0xFFFFE0B2),
+  Color(0xFFC8E6C9),
+  Color(0xFFBBDEFB),
+  Color(0xFFE1BEE7),
+  Color(0xFFFFF9C4),
+  Color(0xFFFFCDD2),
+];
+
 class _LetterTile extends StatelessWidget {
   const _LetterTile({
     required this.entry,
@@ -140,7 +149,11 @@ class _LetterTile extends StatelessWidget {
           ? 'Letter ${entry.letter}, learned'
           : 'Letter ${entry.letter}',
       child: Material(
-        color: selected ? const Color(0xFFFF8A5B) : Colors.white,
+        // Each letter its own soft colour, so the grid reads as a rainbow
+        // rather than a wall of white.
+        color: selected
+            ? const Color(0xFFFF8A5B)
+            : _pastels[entry.letter.codeUnitAt(0) % _pastels.length],
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           key: Key('letter-${entry.letter}'),

@@ -35,7 +35,7 @@ class PictureWordScreen extends StatelessWidget {
       pool: pictureLetters,
       choiceFontSize: 64,
       prompt: (t) => '${t.word}. What does ${t.word} start with?',
-      success: (t) => 'Yes! ${t.word} starts with ${t.sound}',
+      success: (t) => '${t.word} starts with ${t.sound}',
       hero: (context, round) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -97,8 +97,9 @@ void main() {
 
       expect(find.text('⭐ 1'), findsOneWidget);
       expect(find.byKey(const Key('word-revealed')), findsOneWidget);
-      expect(speaker.said,
-          contains('Yes! ${target.word} starts with ${target.sound}'));
+      // Praise varies; the teaching part is always there.
+      expect(speaker.said.last,
+          endsWith('${target.word} starts with ${target.sound}'));
 
       // A second tap on the answer while the next round loads must not score.
       await tester.tap(find.byKey(Key('choice-${target.letter}')));

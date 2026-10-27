@@ -4,9 +4,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../data/letters.dart';
+import '../data/stickers.dart';
 import '../data/practice.dart';
 import '../services/progress_store.dart';
 import '../services/speaker.dart';
+import '../widgets/mascot.dart';
 import '../widgets/motion.dart';
 
 /// What the hero area is told about the current round.
@@ -54,6 +56,7 @@ class ChoiceGame extends StatefulWidget {
     this.random,
     this.choiceFontSize = 64,
     this.celebrationDelay = const Duration(milliseconds: 2200),
+    this.idleNudgeAfter = const Duration(seconds: 8),
   });
 
   final String title;
@@ -65,6 +68,9 @@ class ChoiceGame extends StatefulWidget {
   final List<LetterEntry> pool;
 
   final String Function(LetterEntry target) prompt;
+
+  /// The teaching half of the reply to a right answer ("B says buh"); a
+  /// varied word of praise is put in front of it.
   final String Function(LetterEntry target) success;
   final Widget Function(BuildContext context, GameRound round) hero;
 
@@ -74,6 +80,32 @@ class ChoiceGame extends StatefulWidget {
 
   /// How long the win is shown before the next round.
   final Duration celebrationDelay;
+
+  /// Quiet time before the game nudges a child who has drifted off: the
+  /// answer wiggles and the prompt is repeated. At most twice per round, so
+  /// it invites rather than nags.
+  final Duration idleNudgeAfter;
+
+  /// Rotated so the same sentence isn't heard every time; variety holds a
+  /// toddler's attention longer than repetition.
+  static const praise = [
+    'Yes!',
+    'Great job!',
+    'Wow!',
+    'You did it!',
+    'Super!',
+    'Yay!',
+    'Well done!',
+  ];
+
+  /// Bright, distinct, and dark enough for white letters to stay legible.
+  static const choiceColors = [
+    Color(0xFFFF7043),
+    Color(0xFF1E88E5),
+    Color(0xFF43A047),
+    Color(0xFF8E24AA),
+    Color(0xFFD81B60),
+  ];
 
   @override
   State<ChoiceGame> createState() => _ChoiceGameState();
@@ -92,6 +124,10 @@ class _ChoiceGameState extends State<ChoiceGame> {
   final Map<String, int> _shakes = {};
   final Map<String, int> _bounces = {};
   Timer? _next;
+  Timer? _idle;
+  int _nudges = 0;
+  Sticker? _newSticker;
+  int _colorOffset = 0;
 
   @override
   void initState() {
@@ -103,6 +139,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
   @override
   void dispose() {
     _next?.cancel();
+    _idle?.cancel();
     widget.speaker.stop();
     super.dispose();
   }
@@ -121,27 +158,55 @@ class _ChoiceGameState extends State<ChoiceGame> {
     _message = '';
     _shakes.clear();
     _bounces.clear();
+    _nudges = 0;
+    _newSticker = null;
+    _colorOffset = _random.nextInt(ChoiceGame.choiceColors.length);
+  }
+
+  void _armIdleNudge() {
+    _idle?.cancel();
+    _idle = Timer(widget.idleNudgeAfter, () {
+      if (!mounted || _solved || _nudges >= 2) return;
+      _nudges++;
+      setState(
+          () => _bounces[_target.letter] = (_bounces[_target.letter] ?? 0) + 1);
+      _prompt('Listen! ');
+    });
   }
 
   void _prompt([String prefix = '']) {
     setState(() => _pulse++);
     widget.speaker.speak('$prefix${widget.prompt(_target)}');
+    _armIdleNudge();
   }
 
   void _pick(LetterEntry choice) {
     if (_solved) return; // ignore taps while the next round is loading
     // Judged by sound, not identity: C and K both say "kuh" and are both right.
     if (choice.sound == _target.sound) {
+      _idle?.cancel();
+      final stickersBefore = widget.progress.stickersUnlocked;
       widget.progress.recordSuccess(_target.letter, firstTry: !_missed);
-      widget.speaker.speak(widget.success(_target));
+      final earned = widget.progress.stickersUnlocked > stickersBefore
+          ? stickers[widget.progress.stickersUnlocked - 1]
+          : null;
+      final cheer =
+          ChoiceGame.praise[_random.nextInt(ChoiceGame.praise.length)];
+      // One utterance, for the same reason as "Try again" below.
+      widget.speaker.speak('$cheer ${widget.success(_target)}'
+          '${earned == null ? '' : ' You won a sticker! The ${earned.name}!'}');
       setState(() {
+        _newSticker = earned;
         _solved = true;
         _message = '🎉 Yes!';
         _pulse++;
         _bursts++;
         _bounces[choice.letter] = (_bounces[choice.letter] ?? 0) + 1;
       });
-      _next = Timer(widget.celebrationDelay, () {
+      _next = Timer(
+          widget.celebrationDelay +
+              (earned == null ? Duration.zero : const Duration(seconds: 2)),
+          () {
         if (!mounted) return;
         setState(_newRound);
         _prompt();
@@ -205,7 +270,22 @@ class _ChoiceGameState extends State<ChoiceGame> {
                       ),
                     ),
                   ),
+                  Positioned(
+                    left: 4,
+                    bottom: 0,
+                    child: Mascot(
+                      size: 76,
+                      cheer: _bursts,
+                      mood: _solved
+                          ? MascotMood.happy
+                          : _missed
+                              ? MascotMood.encourage
+                              : MascotMood.idle,
+                    ),
+                  ),
                   Positioned.fill(child: StarBurst(trigger: _bursts)),
+                  if (_newSticker != null)
+                    Positioned.fill(child: _NewStickerBanner(_newSticker!)),
                 ],
               ),
             ),
@@ -222,7 +302,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
               flex: 3,
               child: Row(
                 children: [
-                  for (final choice in _choices)
+                  for (final (i, choice) in _choices.indexed)
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8),
@@ -234,7 +314,10 @@ class _ChoiceGameState extends State<ChoiceGame> {
                               button: true,
                               label: 'Letter ${choice.letter}',
                               child: Material(
-                                color: Colors.white,
+                                color: ChoiceGame.choiceColors[
+                                    (i + _colorOffset) %
+                                        ChoiceGame.choiceColors.length],
+                                elevation: 3,
                                 borderRadius: BorderRadius.circular(24),
                                 child: InkWell(
                                   key: Key('choice-${choice.letter}'),
@@ -246,6 +329,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
                                       style: TextStyle(
                                         fontSize: widget.choiceFontSize,
                                         fontWeight: FontWeight.w800,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),
@@ -260,6 +344,45 @@ class _ChoiceGameState extends State<ChoiceGame> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "New sticker!" — the sticker zooms in over the picture for the rest of the
+/// celebration. Taps go through to nothing; the next round clears it.
+class _NewStickerBanner extends StatelessWidget {
+  const _NewStickerBanner(this.sticker);
+
+  final Sticker sticker;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        key: const Key('new-sticker'),
+        color: const Color(0xCCFFFFFF),
+        alignment: Alignment.center,
+        child: FittedBox(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'New sticker!',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
+              ),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: motionEnabled(context) ? 0.2 : 1, end: 1),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child:
+                    Text(sticker.emoji, style: const TextStyle(fontSize: 120)),
+              ),
+            ],
+          ),
         ),
       ),
     );

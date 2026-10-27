@@ -73,6 +73,43 @@ Android build or device (this environment has Flutter 3.24 and no Android SDK).
 19. **Timer for the next round is cancelled on dispose** (was a bare delayed
     future guarded by `mounted`).
 
+## Engagement ("captivating, keeps their attention")
+
+20. **Pip, a mascot chick, drawn in code** (`widgets/mascot.dart`): blinks and
+    bobs every few seconds, jumps and grins on a right answer, tilts its head
+    encouragingly after a miss, says hello when the app opens and when tapped.
+    *Why:* a character to bond with is the single strongest attention hook in
+    toddler apps. Drawn with a `CustomPainter` so there is no art to license;
+    every motion is one-shot (no endless loop) and off under reduce-motion.
+21. **Sticker book: one animal per 5 stars, 30 in all** (`data/stickers.dart`,
+    `screens/sticker_book_screen.dart`). Earning one interrupts the game with a
+    "New sticker!" moment and Pip names the animal. *Ethics:* fixed unlock
+    order (no randomised rewards / loot-box mechanics), finite set (no endless
+    treadmill), no streaks, no timers, no "come back tomorrow" pressure.
+    Derived from the star count, so nothing new is stored.
+22. **Varied praise** ("Wow!", "You did it!", ...) before the teaching sentence,
+    which never changes ("pig starts with puh"). Variety holds attention; the
+    lesson stays consistent. Wrong-answer feedback stays one calm, fixed
+    phrase.
+23. **Idle nudge:** after 8 quiet seconds the right answer wiggles and the
+    prompt repeats ("Listen! ..."), at most twice per round, so it invites
+    rather than nags.
+24. **Colour:** the three answer buttons are three different bright colours
+    with white letters; the alphabet grid is a soft rainbow.
+25. **Not done on purpose:** no session-length nudges *toward* more play, no
+    push notifications, no daily rewards. A break reminder for long sessions
+    would be a reasonable later addition for parents.
+
+## Build
+
+26. **Kotlin Gradle plugin 1.9.24 → 2.2.20.** `flutter_tts` 4.2.5 is built
+    against kotlin-stdlib 2.2, which the old compiler could not read; the
+    Android release build failed for *both* flavors from the commit that added
+    `flutter_tts` until this fix. I had not checked CI after those pushes.
+27. **This environment cannot build Android or iOS locally:** `dl.google.com`
+    (Android SDK) is blocked by the network policy, and iOS needs macOS. CI's
+    Android and iOS jobs are the build check.
+
 ## Deliberately not done
 
 - **Recorded audio / illustrations.** Need assets you must create or license;
