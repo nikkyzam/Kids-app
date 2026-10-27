@@ -61,6 +61,10 @@ class _LettersScreenState extends State<LettersScreen> {
                   duration: motionEnabled(context)
                       ? const Duration(milliseconds: 300)
                       : Duration.zero,
+                  // Only the new picture: the default layout stacks the old
+                  // one on top while it shrinks, and the two texts overlap.
+                  layoutBuilder: (current, previous) =>
+                      current ?? const SizedBox.shrink(),
                   transitionBuilder: (child, animation) => ScaleTransition(
                     scale: CurvedAnimation(
                         parent: animation, curve: Curves.elasticOut),

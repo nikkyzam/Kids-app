@@ -21,6 +21,9 @@ class LetterEntry {
   /// A familiar word starting with the sound.
   final String word;
 
+  /// Must be an emoji that is colourful by default. Text-default symbols
+  /// (☀ ☂ 🖼, written with an invisible U+FE0F to request colour) render as
+  /// black glyphs on some renderers; a test enforces this.
   final String emoji;
 }
 
@@ -43,9 +46,9 @@ const List<LetterEntry> letters = [
   LetterEntry(letter: 'P', sound: 'puh', word: 'pig', emoji: '🐷'),
   LetterEntry(letter: 'Q', sound: 'kwuh', word: 'queen', emoji: '👑'),
   LetterEntry(letter: 'R', sound: 'rrr', word: 'rabbit', emoji: '🐰'),
-  LetterEntry(letter: 'S', sound: 'sss', word: 'sun', emoji: '☀️'),
+  LetterEntry(letter: 'S', sound: 'sss', word: 'sun', emoji: '🌞'),
   LetterEntry(letter: 'T', sound: 'tuh', word: 'tiger', emoji: '🐯'),
-  LetterEntry(letter: 'U', sound: 'uh', word: 'umbrella', emoji: '☂️'),
+  LetterEntry(letter: 'U', sound: 'uh', word: 'umbrella', emoji: '☔'),
   LetterEntry(letter: 'V', sound: 'vvv', word: 'van', emoji: '🚐'),
   LetterEntry(letter: 'W', sound: 'wuh', word: 'whale', emoji: '🐳'),
   LetterEntry(letter: 'X', sound: 'ks', word: 'box', emoji: '📦'),

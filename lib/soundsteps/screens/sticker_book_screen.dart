@@ -86,7 +86,7 @@ class _StickerBookScreenState extends State<StickerBookScreen> {
                                     style: const TextStyle(fontSize: 44))
                                 : const Text('❔',
                                     style: TextStyle(
-                                        fontSize: 32, color: Colors.black26)),
+                                        fontSize: 32, color: Colors.black45)),
                           ),
                         ),
                       ),

@@ -110,6 +110,20 @@ Android build or device (this environment has Flutter 3.24 and no Android SDK).
     (Android SDK) is blocked by the network policy, and iOS needs macOS. CI's
     Android and iOS jobs are the build check.
 
+## Found by running it in a browser
+
+28. **`lib/soundsteps/main.dart`: a SoundSteps-only entry point** that imports
+    no PlaySteps code. Lets SoundSteps run as a web preview in this
+    environment (`flutter build web -t lib/soundsteps/main.dart --web-renderer
+    html`) and in Chrome on a dev machine. Store builds still use
+    `lib/main.dart` + the flavor.
+29. **No text-default emoji.** ☀️ (sun), ☂️ (umbrella) and 🖼️ (home button)
+    rendered as black glyphs; swapped for 🌞, ☔ and 🐱, and a test now rejects
+    any letter or sticker emoji that needs the U+FE0F colour selector.
+30. **Letters header shows only the new picture during its pop-in;** the
+    default AnimatedSwitcher stacked the old text over the new one.
+31. **Locked stickers' "?" made more visible** (it was barely readable).
+
 ## Deliberately not done
 
 - **Recorded audio / illustrations.** Need assets you must create or license;

@@ -162,7 +162,7 @@ class _SoundStepsHomeState extends State<SoundStepsHome> {
                 child: _BigButton(
                   key: const Key('open-picture-word'),
                   color: const Color(0xFF64B5F6),
-                  emoji: '🖼️',
+                  emoji: '🐱',
                   label: 'Picture words',
                   onTap: () => _open(
                       PictureWordScreen(speaker: speaker, progress: progress)),
