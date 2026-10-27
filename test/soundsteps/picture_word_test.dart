@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playsteps/soundsteps/data/letters.dart';
 import 'package:playsteps/soundsteps/screens/home_screen.dart';
 import 'package:playsteps/soundsteps/screens/picture_word_screen.dart';
+import 'package:playsteps/soundsteps/services/progress_store.dart';
 import 'package:playsteps/soundsteps/services/speaker.dart';
 
 class FakeSpeaker implements Speaker {
@@ -45,7 +46,11 @@ void main() {
     Future<(FakeSpeaker, LetterEntry)> pump(WidgetTester tester) async {
       final speaker = FakeSpeaker();
       await tester.pumpWidget(MaterialApp(
-        home: PictureWordScreen(speaker: speaker, random: Random(3)),
+        home: PictureWordScreen(
+          speaker: speaker,
+          progress: ProgressStore.memory(),
+          random: Random(3),
+        ),
       ));
       await tester.pump();
       // First prompt: "<word>. What does <word> start with?"
@@ -79,7 +84,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('⭐ 0'), findsOneWidget);
-      expect(speaker.said, contains('Try again'));
+      expect(speaker.said.any((t) => t.startsWith('Try again.')), isTrue);
       expect(find.byKey(const Key('word-revealed')), findsNothing);
     });
 
@@ -117,7 +122,10 @@ void main() {
   group('navigation and small screens', () {
     testWidgets('home opens picture words', (tester) async {
       await tester.pumpWidget(MaterialApp(
-        home: SoundStepsHome(speaker: FakeSpeaker()),
+        home: SoundStepsHome(
+          speaker: FakeSpeaker(),
+          progress: ProgressStore.memory(),
+        ),
       ));
       await tester.tap(find.byKey(const Key('open-picture-word')));
       await tester.pumpAndSettle();
@@ -132,7 +140,10 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(MaterialApp(
-        home: SoundStepsHome(speaker: FakeSpeaker()),
+        home: SoundStepsHome(
+          speaker: FakeSpeaker(),
+          progress: ProgressStore.memory(),
+        ),
       ));
       expect(tester.takeException(), isNull);
 

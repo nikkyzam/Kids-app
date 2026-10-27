@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../data/letters.dart';
+import '../services/progress_store.dart';
 import '../services/speaker.dart';
+import '../widgets/motion.dart';
 
 /// Alphabet grid. Tap a letter to hear its sound and a picture word, and see
-/// the picture. Exploration only: nothing to get wrong.
+/// the picture. Exploration only: nothing to get wrong. Letters the child has
+/// mastered in the games carry a small star, so progress is visible here too.
 class LettersScreen extends StatefulWidget {
-  const LettersScreen({super.key, required this.speaker});
+  const LettersScreen({
+    super.key,
+    required this.speaker,
+    required this.progress,
+  });
 
   final Speaker speaker;
+  final ProgressStore progress;
 
   @override
   State<LettersScreen> createState() => _LettersScreenState();
@@ -16,9 +24,13 @@ class LettersScreen extends StatefulWidget {
 
 class _LettersScreenState extends State<LettersScreen> {
   LetterEntry? _selected;
+  final Map<String, int> _bounces = {};
 
   void _select(LetterEntry entry) {
-    setState(() => _selected = entry);
+    setState(() {
+      _selected = entry;
+      _bounces[entry.letter] = (_bounces[entry.letter] ?? 0) + 1;
+    });
     widget.speaker
         .speak('${entry.sound}. ${entry.letter} is for ${entry.word}');
   }
@@ -44,59 +56,114 @@ class _LettersScreenState extends State<LettersScreen> {
             SizedBox(
               height: 120,
               child: Center(
-                child: selected == null
-                    ? const Text('Tap a letter!',
-                        style: TextStyle(fontSize: 24))
-                    : Row(
-                        key: const Key('selected-letter'),
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(selected.emoji,
-                              style: const TextStyle(fontSize: 64)),
-                          const SizedBox(width: 12),
-                          Text(
-                            '${selected.letter} ${selected.word}',
-                            style: const TextStyle(
-                                fontSize: 32, fontWeight: FontWeight.w800),
-                          ),
-                        ],
-                      ),
+                // The picture pops in; with reduced motion it just swaps.
+                child: AnimatedSwitcher(
+                  duration: motionEnabled(context)
+                      ? const Duration(milliseconds: 300)
+                      : Duration.zero,
+                  transitionBuilder: (child, animation) => ScaleTransition(
+                    scale: CurvedAnimation(
+                        parent: animation, curve: Curves.elasticOut),
+                    child: child,
+                  ),
+                  child: selected == null
+                      ? const Text('Tap a letter!',
+                          key: Key('letters-hint'),
+                          style: TextStyle(fontSize: 24))
+                      : Row(
+                          key: ValueKey(selected.letter),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(selected.emoji,
+                                style: const TextStyle(fontSize: 64)),
+                            const SizedBox(width: 12),
+                            Text(
+                              '${selected.letter} ${selected.word}',
+                              key: const Key('selected-letter'),
+                              style: const TextStyle(
+                                  fontSize: 32, fontWeight: FontWeight.w800),
+                            ),
+                          ],
+                        ),
+                ),
               ),
             ),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 4,
-                padding: const EdgeInsets.all(12),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: [
-                  for (final entry in letters)
-                    Semantics(
-                      button: true,
-                      label: 'Letter ${entry.letter}',
-                      child: Material(
-                        color: entry == selected
-                            ? const Color(0xFFFF8A5B)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          key: Key('letter-${entry.letter}'),
-                          borderRadius: BorderRadius.circular(20),
+              child: ListenableBuilder(
+                listenable: widget.progress,
+                builder: (context, _) => GridView.count(
+                  crossAxisCount: 4,
+                  padding: const EdgeInsets.all(12),
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  children: [
+                    for (final entry in letters)
+                      Bounce(
+                        trigger: _bounces[entry.letter] ?? 0,
+                        child: _LetterTile(
+                          entry: entry,
+                          selected: entry == selected,
+                          mastered:
+                              widget.progress.statsFor(entry.letter).mastered,
                           onTap: () => _select(entry),
-                          child: Center(
-                            child: Text(
-                              entry.letter,
-                              style: const TextStyle(
-                                  fontSize: 40, fontWeight: FontWeight.w800),
-                            ),
-                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LetterTile extends StatelessWidget {
+  const _LetterTile({
+    required this.entry,
+    required this.selected,
+    required this.mastered,
+    required this.onTap,
+  });
+
+  final LetterEntry entry;
+  final bool selected;
+  final bool mastered;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: mastered
+          ? 'Letter ${entry.letter}, learned'
+          : 'Letter ${entry.letter}',
+      child: Material(
+        color: selected ? const Color(0xFFFF8A5B) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          key: Key('letter-${entry.letter}'),
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Text(
+                entry.letter,
+                style:
+                    const TextStyle(fontSize: 40, fontWeight: FontWeight.w800),
+              ),
+              if (mastered)
+                Positioned(
+                  top: 4,
+                  right: 6,
+                  child: Text('⭐',
+                      key: Key('mastered-${entry.letter}'),
+                      style: const TextStyle(fontSize: 16)),
+                ),
+            ],
+          ),
         ),
       ),
     );

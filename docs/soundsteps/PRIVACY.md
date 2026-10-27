@@ -16,16 +16,29 @@ Code (EU/UK) and Google Play's Families Policy for the markets you ship in.
 
 SoundSteps is a letters-and-sounds app for toddlers (ages 2–4). It collects no
 personal information, has no accounts, shows no ads, contains no analytics or
-third-party tracking, and does not need an internet connection.
+third-party tracking, and does not need an internet connection. It remembers
+the child's star count and which letters they find easy or tricky, on the
+device only.
 
 ## What we collect
 
-**Nothing.** The app does not ask for, store or transmit your name, your
-child's name, age, photos, voice, location, contacts, device identifiers or
-advertising IDs.
+**Nothing leaves the device.** The app does not ask for, store or transmit your
+name, your child's name, age, photos, voice, location, contacts, device
+identifiers or advertising IDs, and we receive nothing at all.
 
-The star count shown during games is held in memory while a game is open and is
-discarded when it closes. It is not saved or sent anywhere.
+## What is saved on the device
+
+So the games can pick up where your child left off and practise the letters
+they find tricky, the app saves, in the app's private storage on the device:
+
+- a total star count, and
+- for each letter, how many times it was answered right first time and how
+  many times a wrong letter was tapped first.
+
+Nothing in this is personal, and it is never sent anywhere. It is deleted when
+the app is uninstalled. A parent can also clear it at any time: on the home
+screen, press and hold the star count, answer the grown-ups-only question, and
+confirm.
 
 ## Permissions
 
@@ -58,13 +71,15 @@ advertising, analytics or social-media components that run in SoundSteps.
 
 ## Children's privacy
 
-SoundSteps is designed for use by young children with a parent nearby. Because
-it collects no personal information, there is nothing to consent to, access,
-correct or delete. We do not knowingly collect information from children.
+SoundSteps is designed for use by young children with a parent nearby. It
+collects no personal information and nothing leaves the device, so there is
+nothing on our side to consent to, access, correct or delete; the on-device
+progress can be cleared by a parent as described above. We do not knowingly
+collect information from children.
 
 ## Changes and contact
 
-If we ever add features that collect data (for example saved progress synced to
-an account), we will update this policy and the app's Play Store data-safety
+If we ever add features that collect data (for example progress synced to an
+account), we will update this policy and the app's Play Store data-safety
 information first, and ask for verifiable parental consent where the law
 requires it. Questions: _[privacy@yourdomain.example]_.

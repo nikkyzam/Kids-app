@@ -6,6 +6,7 @@ import 'package:playsteps/config/app_flavor.dart';
 import 'package:playsteps/soundsteps/data/letters.dart';
 import 'package:playsteps/soundsteps/screens/letters_screen.dart';
 import 'package:playsteps/soundsteps/screens/sound_match_screen.dart';
+import 'package:playsteps/soundsteps/services/progress_store.dart';
 import 'package:playsteps/soundsteps/services/speaker.dart';
 import 'package:playsteps/soundsteps/soundsteps_app.dart';
 
@@ -50,7 +51,8 @@ void main() {
   testWidgets('home opens letters and speaks the tapped letter',
       (tester) async {
     final speaker = FakeSpeaker();
-    await tester.pumpWidget(SoundStepsApp(speaker: speaker));
+    await tester.pumpWidget(
+        SoundStepsApp(speaker: speaker, progress: ProgressStore.memory()));
     await tester.tap(find.byKey(const Key('open-letters')));
     await tester.pumpAndSettle();
 
@@ -63,7 +65,8 @@ void main() {
 
   testWidgets('letters screen shows every letter', (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: LettersScreen(speaker: FakeSpeaker()),
+      home: LettersScreen(
+          speaker: FakeSpeaker(), progress: ProgressStore.memory()),
     ));
     // The grid is lazy; scroll to the last letter to prove it is reachable.
     await tester.scrollUntilVisible(find.byKey(const Key('letter-Z')), 200);
@@ -74,7 +77,11 @@ void main() {
     Future<(FakeSpeaker, LetterEntry)> pump(WidgetTester tester) async {
       final speaker = FakeSpeaker();
       await tester.pumpWidget(MaterialApp(
-        home: SoundMatchScreen(speaker: speaker, random: Random(7)),
+        home: SoundMatchScreen(
+          speaker: speaker,
+          progress: ProgressStore.memory(),
+          random: Random(7),
+        ),
       ));
       await tester.pump();
       // First prompt is "<sound>. Which letter?"; recover the target from it.
@@ -105,7 +112,7 @@ void main() {
       await tester.tap(find.byKey(Key('choice-${wrong.letter}')));
       await tester.pump();
       expect(find.text('⭐ 0'), findsOneWidget);
-      expect(speaker.said, contains('Try again'));
+      expect(speaker.said.any((t) => t.startsWith('Try again.')), isTrue);
 
       await tester.tap(find.byKey(Key('choice-${target.letter}')));
       await tester.pump();

@@ -45,6 +45,9 @@ it, the word appears with its first letter highlighted.
 MADE FOR LITTLE HANDS
 • Big buttons, no reading needed to get around
 • Spoken instructions for every activity
+• Cheerful animations, with a respect for your device's reduce-motion setting
+• Remembers progress on your device and brings back the letters your child
+  finds tricky
 • No ads, no purchases, no tracking
 • No accounts, and no internet connection needed
 • Collects no personal information
@@ -79,7 +82,10 @@ outcome claim you cannot back up.
 - Ads: none.
 
 **Data safety** (matches the code today)
-- Does the app collect or share any user data? **No.**
+- Does the app collect or share any user data? **No.** Star counts and
+  per-letter results are saved only on the device and never transmitted.
+  **[verify]** Google's form treats data that never leaves the device as not
+  collected; confirm against the current wording of the question.
 - Is all data encrypted in transit / can users request deletion? Not
   applicable — no data is collected. Answer per the form's wording.
 
