@@ -16,29 +16,39 @@ Code (EU/UK) and Google Play's Families Policy for the markets you ship in.
 
 SoundSteps is a letters-and-sounds app for toddlers (ages 2–4). It collects no
 personal information, has no accounts, shows no ads, contains no analytics or
-third-party tracking, and does not need an internet connection. It remembers
-the child's star count and which letters they find easy or tricky, on the
-device only.
+third-party tracking, and does not need an internet connection. It remembers,
+on the device only, the child's progress, how long they played each day, the
+grown-up's settings, and (if the grown-up types one in) a first name or
+nickname so Pip can say hello.
 
 ## What we collect
 
-**Nothing leaves the device.** The app does not ask for, store or transmit your
-name, your child's name, age, photos, voice, location, contacts, device
-identifiers or advertising IDs, and we receive nothing at all.
+**Nothing leaves the device.** The app does not transmit anything, and we
+receive nothing at all. It never asks for or stores your name, your child's
+age, photos, voice, location, contacts, device identifiers or advertising IDs.
+The only personal detail it can hold is the optional child's first name or
+nickname described below, and that also stays on the device.
 
 ## What is saved on the device
 
 So the games can pick up where your child left off and practise the letters
 they find tricky, the app saves, in the app's private storage on the device:
 
-- a total star count, and
+- a total star count (stickers are worked out from it);
 - for each letter, how many times it was answered right first time and how
-  many times a wrong letter was tapped first.
+  many times a wrong letter was tapped first;
+- minutes played per day, for the last 14 days (shown to the grown-up in the
+  "Grown-ups' corner");
+- the grown-up's settings (speech speed, break reminder, vibration, calmer
+  screen); and
+- **optionally**, a child's first name or nickname, typed in by the grown-up
+  so Pip can greet the child. Leave it blank and the app works the same.
 
-Nothing in this is personal, and it is never sent anywhere. It is deleted when
-the app is uninstalled. A parent can also clear it at any time: on the home
-screen, press and hold the star count, answer the grown-ups-only question, and
-confirm.
+None of this is ever sent anywhere. It is deleted when
+the app is uninstalled. A parent can also clear progress and play time at any
+time in the Grown-ups' corner (home screen → Grown-ups → answer the
+grown-ups-only question → Reset progress), and can clear or change the name
+there too.
 
 ## Permissions
 

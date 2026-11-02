@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'services/progress_store.dart';
+import 'services/settings_store.dart';
 import 'soundsteps_app.dart';
 
 /// SoundSteps on its own, without importing any PlaySteps code. Used for
@@ -12,5 +13,8 @@ import 'soundsteps_app.dart';
 /// (tool/build_app.sh), which boots this same app.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(SoundStepsApp(progress: await ProgressStore.open()));
+  runApp(SoundStepsApp(
+    progress: await ProgressStore.open(),
+    settings: await SettingsStore.open(),
+  ));
 }

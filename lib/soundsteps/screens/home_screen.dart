@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../services/progress_store.dart';
+import '../services/settings_store.dart';
 import '../services/speaker.dart';
+import '../widgets/haptics.dart';
 import '../widgets/mascot.dart';
 import '../widgets/parent_gate.dart';
 import 'letters_screen.dart';
 import 'picture_word_screen.dart';
 import 'sound_match_screen.dart';
+import 'parent_corner_screen.dart';
 import 'sticker_book_screen.dart';
+import 'trace_screen.dart';
 
-/// Pip, three big picture buttons and the sticker book: a 2-year-old
-/// navigates by picture. Pip says hello when the app opens and again when
+/// Pip, four big picture buttons and the sticker book: a 2-year-old
+/// navigates by picture. A quiet "Grown-ups" link, behind the parental gate,
+/// leads to the progress report and settings. Pip says hello when the app opens and again when
 /// tapped.
 class SoundStepsHome extends StatefulWidget {
   const SoundStepsHome({
@@ -40,14 +45,30 @@ class _SoundStepsHomeState extends State<SoundStepsHome> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _hello());
   }
 
+  /// Settings from the app scope; a private in-memory one when the home
+  /// screen is pumped on its own (tests).
+  late final SettingsStore _fallbackSettings = SettingsStore.memory();
+  SettingsStore get _settings =>
+      SoundStepsScope.maybeOf(context) ?? _fallbackSettings;
+
   void _hello() {
     if (!mounted) return;
     setState(() => _cheer++);
-    speaker.speak("Hi! I'm Pip. Let's play!");
+    final name = _settings.childName;
+    speaker.speak(name.isEmpty
+        ? "Hi! I'm Pip. Let's play!"
+        : "Hi $name! I'm Pip. Let's play!");
   }
 
-  void _open(Widget screen) =>
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  void _open(Widget screen) {
+    tapHaptic(context);
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  Future<void> _openParentCorner() async {
+    if (!await showParentGate(context) || !mounted) return;
+    _open(ParentCornerScreen(progress: progress, settings: _settings));
+  }
 
   /// Parents only: a long-press on the star count, then the parental gate,
   /// then a confirmation. Toddlers can neither find nor pass it by accident.
@@ -135,37 +156,66 @@ class _SoundStepsHomeState extends State<SoundStepsHome> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Expanded(
-                child: _BigButton(
-                  key: const Key('open-letters'),
-                  color: const Color(0xFFFFB74D),
-                  emoji: '🔤',
-                  label: 'Letters',
-                  onTap: () => _open(
-                      LettersScreen(speaker: speaker, progress: progress)),
-                ),
+                child: Row(children: [
+                  Expanded(
+                    child: _BigButton(
+                      key: const Key('open-letters'),
+                      color: const Color(0xFFFFB74D),
+                      emoji: '🔤',
+                      label: 'Letters',
+                      onTap: () => _open(
+                          LettersScreen(speaker: speaker, progress: progress)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _BigButton(
+                      key: const Key('open-match'),
+                      color: const Color(0xFF81C784),
+                      emoji: '👂',
+                      label: 'Match the sound',
+                      onTap: () => _open(SoundMatchScreen(
+                          speaker: speaker, progress: progress)),
+                    ),
+                  ),
+                ]),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               Expanded(
-                child: _BigButton(
-                  key: const Key('open-match'),
-                  color: const Color(0xFF81C784),
-                  emoji: '👂',
-                  label: 'Match the sound',
-                  onTap: () => _open(
-                      SoundMatchScreen(speaker: speaker, progress: progress)),
-                ),
+                child: Row(children: [
+                  Expanded(
+                    child: _BigButton(
+                      key: const Key('open-picture-word'),
+                      color: const Color(0xFF64B5F6),
+                      emoji: '🐱',
+                      label: 'Picture words',
+                      onTap: () => _open(PictureWordScreen(
+                          speaker: speaker, progress: progress)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _BigButton(
+                      key: const Key('open-trace'),
+                      color: const Color(0xFF9575CD),
+                      emoji: '🎨',
+                      label: 'Trace',
+                      onTap: () => _open(
+                          TraceScreen(speaker: speaker, progress: progress)),
+                    ),
+                  ),
+                ]),
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: _BigButton(
-                  key: const Key('open-picture-word'),
-                  color: const Color(0xFF64B5F6),
-                  emoji: '🐱',
-                  label: 'Picture words',
-                  onTap: () => _open(
-                      PictureWordScreen(speaker: speaker, progress: progress)),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('open-parent-corner'),
+                  onPressed: _openParentCorner,
+                  icon: const Icon(Icons.lock_outline, size: 18),
+                  label: const Text('Grown-ups'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.black45),
                 ),
               ),
             ],
@@ -201,8 +251,8 @@ class _BigButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(32),
           onTap: onTap,
-          // scaleDown: on a short phone the three stacked buttons get little
-          // height; shrink the content to fit rather than overflow.
+          // scaleDown: on a short phone the grid cells get little room;
+          // shrink the content to fit rather than overflow.
           child: Center(
             child: FittedBox(
               fit: BoxFit.scaleDown,

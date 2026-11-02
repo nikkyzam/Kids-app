@@ -124,6 +124,52 @@ Android build or device (this environment has Flutter 3.24 and no Android SDK).
     default AnimatedSwitcher stacked the old text over the new one.
 31. **Locked stickers' "?" made more visible** (it was barely readable).
 
+## Premium
+
+32. **"Premium" means quality and depth, not a paywall.** The request was to
+    make the app feel premium. I built premium-grade features and kept the app
+    free: with four activities it is still too small to split into free and
+    paid tiers without making the free part feel thin, and a purchase flow in
+    a toddler app also needs the Play billing permission back, a parental
+    gate in front of it, store products and receipt checks. The product IDs
+    already exist in `AppFlavor`; a paywall is a later, separate decision.
+33. **Tracing (new 4th activity)**, `screens/trace_screen.dart`,
+    `data/strokes.dart`. All 26 capitals drawn as stroke data in the order
+    children are taught; numbered start dots; the letter fills with colour as
+    the finger passes. Done when 85% of the letter *and* 75% of every stroke
+    is covered: the first version only had the 85% rule, and running it showed
+    an A completing without its crossbar. A test now proves no multi-stroke
+    letter can be finished with any stroke left out. Tracing earns a star but
+    not mastery: it is a motor skill, and the games are the sound check.
+34. **Grown-ups' corner** behind the parental gate: stars / stickers /
+    letters learned, a 7-day play-time chart, a 26-letter map (learned /
+    practising / tricky / not tried; colour plus a ✓ or ! mark and a legend,
+    never colour alone; status colours from the dataviz reference palette),
+    the letters being practised most, and settings.
+35. **Settings**, `services/settings_store.dart`: speech speed (slow default,
+    normal), break reminder (off default; 10/15/20/30 min), vibration (on), a
+    calmer-screen switch that adds to the device's reduce-motion (never
+    overrides it off). Saved on the device.
+36. **Break reminder off by default.** Parents opt in; a default nap in the
+    middle of a first play would feel like a bug. When due, Pip falls asleep
+    over the whole app and only a grown-up (past the gate) can continue;
+    returning after 5+ minutes away starts a fresh session. Play time is only
+    counted while the app is in the foreground.
+37. **First-run welcome with an optional child's name.** Pip greets the child
+    by name. On-device only, optional, editable/clearable in the corner; the
+    privacy policy says so.
+38. **Haptics** on taps and wins (system haptics, no permission needed),
+    **"Bb" upper + lower case** in Letters and Trace, **2×2 home grid**, zoom
+    page transitions, and a **branded launch screen** for the SoundSteps build
+    (orange with the icon, including the Android 12+ splash in light and
+    dark).
+39. **Bugs found by tests / by running it, fixed before shipping:** the break
+    screen's "keep playing" could not open the parental gate (no navigator
+    above the app's navigator: it now has its own); the play chart
+    overflowed by 2px; the Trace button used a text-default emoji (✏️) that
+    renders black — the emoji test now scans every SoundSteps source file; A's
+    first start dot was hidden under the second.
+
 ## Deliberately not done
 
 - **Recorded audio / illustrations.** Need assets you must create or license;

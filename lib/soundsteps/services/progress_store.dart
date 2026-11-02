@@ -32,7 +32,9 @@ class LetterStats {
 /// best-effort: if storage fails, the session carries on from memory and the
 /// child never sees an error.
 class ProgressStore extends ChangeNotifier {
-  ProgressStore._(this._prefs, this._stars, this._letters);
+  ProgressStore._(this._prefs, this._stars, this._letters,
+      [Map<String, int>? play])
+      : _playSeconds = play ?? {};
 
   /// In-memory only; nothing is saved. For tests and as a safe fallback.
   factory ProgressStore.memory() => ProgressStore._(null, 0, {});
@@ -48,6 +50,7 @@ class ProgressStore extends ChangeNotifier {
     }
     var stars = 0;
     final letters = <String, LetterStats>{};
+    final play = <String, int>{};
     try {
       final raw = prefs.getString(storageKey);
       if (raw != null) {
@@ -60,17 +63,27 @@ class ProgressStore extends ChangeNotifier {
             misses: (m['m'] as num).toInt(),
           );
         });
+        (json['play'] as Map<String, dynamic>? ?? {}).forEach((day, secs) {
+          play[day] = (secs as num).toInt();
+        });
       }
     } catch (_) {
       stars = 0;
       letters.clear();
+      play.clear();
     }
-    return ProgressStore._(prefs, stars, letters);
+    return ProgressStore._(prefs, stars, letters, play);
   }
 
   final SharedPreferences? _prefs;
   int _stars;
   final Map<String, LetterStats> _letters;
+
+  /// Seconds played per local calendar day ("2026-11-02"), last 14 days.
+  final Map<String, int> _playSeconds;
+
+  static String dayKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   int get stars => _stars;
 
@@ -100,9 +113,30 @@ class ProgressStore extends ChangeNotifier {
     return _changed();
   }
 
+  /// A star for an activity that is not about recognising a sound (e.g.
+  /// tracing): it counts toward stickers, not toward mastering a letter.
+  Future<void> addStar() {
+    _stars++;
+    return _changed();
+  }
+
+  /// Adds play time to [now]'s day. Keeps two weeks; older days are dropped.
+  Future<void> recordPlay(Duration played, {DateTime? now}) {
+    final today = now ?? DateTime.now();
+    final key = dayKey(today);
+    _playSeconds[key] = (_playSeconds[key] ?? 0) + played.inSeconds;
+    final cutoff = dayKey(today.subtract(const Duration(days: 14)));
+    _playSeconds.removeWhere((day, _) => day.compareTo(cutoff) < 0);
+    return _changed();
+  }
+
+  /// Whole minutes played on [day].
+  int minutesOn(DateTime day) => (_playSeconds[dayKey(day)] ?? 0) ~/ 60;
+
   Future<void> reset() {
     _stars = 0;
     _letters.clear();
+    _playSeconds.clear();
     return _changed();
   }
 
@@ -117,6 +151,7 @@ class ProgressStore extends ChangeNotifier {
             for (final e in _letters.entries)
               e.key: {'c': e.value.correct, 'm': e.value.misses},
           },
+          'play': _playSeconds,
         }),
       );
     } catch (_) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playsteps/soundsteps/data/letters.dart';
 import 'package:playsteps/soundsteps/data/stickers.dart';
@@ -20,5 +22,21 @@ void main() {
       expect(s.emoji.runes, isNot(contains(variationSelector)),
           reason: '${s.name} uses a text-default emoji');
     }
+  });
+
+  test('no SoundSteps source file uses a text-default emoji anywhere', () {
+    final offenders = <String>[];
+    for (final f in Directory('lib/soundsteps')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      final lines = f.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].runes.contains(variationSelector)) {
+          offenders.add('${f.path}:${i + 1}');
+        }
+      }
+    }
+    expect(offenders, isEmpty);
   });
 }

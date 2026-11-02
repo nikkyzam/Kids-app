@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'config/app_flavor.dart';
 import 'soundsteps/services/progress_store.dart';
+import 'soundsteps/services/settings_store.dart';
 import 'soundsteps/soundsteps_app.dart';
 import 'config/supabase_config.dart';
 import 'providers/profile_provider.dart';
@@ -29,7 +30,10 @@ void main() async {
   // profiles, database, sync or notifications. It shares the build and
   // release plumbing, not the engine, so it boots on its own path.
   if (AppFlavor.current.id == AppFlavor.soundsteps.id) {
-    runApp(SoundStepsApp(progress: await ProgressStore.open()));
+    runApp(SoundStepsApp(
+      progress: await ProgressStore.open(),
+      settings: await SettingsStore.open(),
+    ));
     return;
   }
 

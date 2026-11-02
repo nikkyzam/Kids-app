@@ -1,5 +1,7 @@
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'settings_store.dart';
+
 /// Speaks text aloud. An interface so screens never touch the plugin and
 /// tests can record what would have been said.
 abstract class Speaker {
@@ -12,21 +14,32 @@ abstract class Speaker {
 /// Speech must never crash the app: if the device has no engine, a call
 /// swallows the error and the screens still work, silently.
 class TtsSpeaker implements Speaker {
-  TtsSpeaker({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
+  TtsSpeaker({FlutterTts? tts, this.settings}) : _tts = tts ?? FlutterTts();
 
   final FlutterTts _tts;
+
+  /// Where the parent's speech-speed choice comes from; slow if absent.
+  final SettingsStore? settings;
   Future<void>? _ready;
+  double? _rate;
 
   Future<void> _init() => _ready ??= () async {
         await _tts.setLanguage('en-US');
-        await _tts.setSpeechRate(0.4);
         await _tts.setPitch(1.15);
       }();
+
+  Future<void> _applyRate() async {
+    final rate = (settings?.speed ?? SpeechSpeed.slow).rate;
+    if (rate == _rate) return;
+    await _tts.setSpeechRate(rate);
+    _rate = rate;
+  }
 
   @override
   Future<void> speak(String text) async {
     try {
       await _init();
+      await _applyRate();
       await _tts.stop();
       await _tts.speak(text);
     } catch (_) {

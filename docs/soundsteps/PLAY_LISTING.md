@@ -42,6 +42,18 @@ PICTURE WORDS
 See a picture, hear its word, and tap the letter it starts with. When you find
 it, the word appears with its first letter highlighted.
 
+TRACE
+Trace every letter from A to Z with a finger. Numbered dots show where to
+start, and the letter fills with colour as you go.
+
+FOR GROWN-UPS
+• A progress report: letters learned, letters to practise, and play time for
+  the week
+• An optional break reminder: Pip takes a nap and the games pause until a
+  grown-up says to carry on
+• Slow or normal speech, gentle vibration, and a calmer, low-motion mode
+• Pip greets your child by name (optional, stays on the phone)
+
 MADE FOR LITTLE HANDS
 • Big buttons, no reading needed to get around
 • Spoken instructions for every activity
@@ -82,8 +94,9 @@ outcome claim you cannot back up.
 - Ads: none.
 
 **Data safety** (matches the code today)
-- Does the app collect or share any user data? **No.** Star counts and
-  per-letter results are saved only on the device and never transmitted.
+- Does the app collect or share any user data? **No.** Star counts,
+  per-letter results, daily play time, settings and the optional child's
+  nickname are saved only on the device and never transmitted.
   **[verify]** Google's form treats data that never leaves the device as not
   collected; confirm against the current wording of the question.
 - Is all data encrypted in transit / can users request deletion? Not

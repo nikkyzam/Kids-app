@@ -8,7 +8,9 @@ import '../data/stickers.dart';
 import '../data/practice.dart';
 import '../services/progress_store.dart';
 import '../services/speaker.dart';
+import '../widgets/haptics.dart';
 import '../widgets/mascot.dart';
+import '../widgets/new_sticker_banner.dart';
 import '../widgets/motion.dart';
 
 /// What the hero area is told about the current round.
@@ -182,6 +184,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
 
   void _pick(LetterEntry choice) {
     if (_solved) return; // ignore taps while the next round is loading
+    tapHaptic(context);
     // Judged by sound, not identity: C and K both say "kuh" and are both right.
     if (choice.sound == _target.sound) {
       _idle?.cancel();
@@ -195,6 +198,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
       // One utterance, for the same reason as "Try again" below.
       widget.speaker.speak('$cheer ${widget.success(_target)}'
           '${earned == null ? '' : ' You won a sticker! The ${earned.name}!'}');
+      successHaptic(context);
       setState(() {
         _newSticker = earned;
         _solved = true;
@@ -285,7 +289,7 @@ class _ChoiceGameState extends State<ChoiceGame> {
                   ),
                   Positioned.fill(child: StarBurst(trigger: _bursts)),
                   if (_newSticker != null)
-                    Positioned.fill(child: _NewStickerBanner(_newSticker!)),
+                    Positioned.fill(child: NewStickerBanner(_newSticker!)),
                 ],
               ),
             ),
@@ -344,45 +348,6 @@ class _ChoiceGameState extends State<ChoiceGame> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// "New sticker!" — the sticker zooms in over the picture for the rest of the
-/// celebration. Taps go through to nothing; the next round clears it.
-class _NewStickerBanner extends StatelessWidget {
-  const _NewStickerBanner(this.sticker);
-
-  final Sticker sticker;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        key: const Key('new-sticker'),
-        color: const Color(0xCCFFFFFF),
-        alignment: Alignment.center,
-        child: FittedBox(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'New sticker!',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
-              ),
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: motionEnabled(context) ? 0.2 : 1, end: 1),
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.elasticOut,
-                builder: (context, scale, child) =>
-                    Transform.scale(scale: scale, child: child),
-                child:
-                    Text(sticker.emoji, style: const TextStyle(fontSize: 120)),
-              ),
-            ],
-          ),
         ),
       ),
     );

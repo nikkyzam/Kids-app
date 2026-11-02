@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/letters.dart';
 import '../services/progress_store.dart';
 import '../services/speaker.dart';
+import '../widgets/haptics.dart';
 import '../widgets/motion.dart';
 
 /// Alphabet grid. Tap a letter to hear its sound and a picture word, and see
@@ -27,6 +28,7 @@ class _LettersScreenState extends State<LettersScreen> {
   final Map<String, int> _bounces = {};
 
   void _select(LetterEntry entry) {
+    tapHaptic(context);
     setState(() {
       _selected = entry;
       _bounces[entry.letter] = (_bounces[entry.letter] ?? 0) + 1;
@@ -82,7 +84,8 @@ class _LettersScreenState extends State<LettersScreen> {
                                 style: const TextStyle(fontSize: 64)),
                             const SizedBox(width: 12),
                             Text(
-                              '${selected.letter} ${selected.word}',
+                              // Big and small together: children meet both.
+                              '${selected.letter}${selected.letter.toLowerCase()}  ${selected.word}',
                               key: const Key('selected-letter'),
                               style: const TextStyle(
                                   fontSize: 32, fontWeight: FontWeight.w800),

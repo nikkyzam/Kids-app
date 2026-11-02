@@ -15,6 +15,9 @@ enum MascotMood {
 
   /// Looks up, head tilted: "hmm, have another go".
   encourage,
+
+  /// Eyes closed, a "z" floating up: time for a break.
+  sleepy,
 }
 
 /// Pip, the SoundSteps chick. Drawn in code, so there is no art asset to
@@ -59,7 +62,10 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _idle = Timer.periodic(const Duration(milliseconds: 3500), (_) {
-      if (mounted && motionEnabled(context) && !_jump.isAnimating) {
+      if (mounted &&
+          motionEnabled(context) &&
+          !_jump.isAnimating &&
+          widget.mood != MascotMood.sleepy) {
         _bob.forward(from: 0);
       }
     });
@@ -199,12 +205,14 @@ class _PipPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     for (final dx in [-0.33, 0.33]) {
       final e = Offset(c.dx + dx * r, eyeY + look);
-      if (happy || blinking) {
-        // ^ ^ when happy, a flat line when blinking.
+      final sleepy = mood == MascotMood.sleepy;
+      if (happy || blinking || sleepy) {
+        // ^ ^ when happy, u u when sleepy, a flat line when blinking.
+        final bend = happy ? -r * 0.12 : (sleepy ? r * 0.1 : 0.0);
+        final lift = happy ? r * 0.04 : 0.0;
         final path = Path()
-          ..moveTo(e.dx - r * 0.12, e.dy + (happy ? r * 0.04 : 0))
-          ..quadraticBezierTo(e.dx, e.dy - (happy ? r * 0.12 : 0),
-              e.dx + r * 0.12, e.dy + (happy ? r * 0.04 : 0));
+          ..moveTo(e.dx - r * 0.12, e.dy + lift)
+          ..quadraticBezierTo(e.dx, e.dy + bend, e.dx + r * 0.12, e.dy + lift);
         canvas.drawPath(path, ink);
       } else {
         fill.color = _ink;
@@ -218,6 +226,20 @@ class _PipPainter extends CustomPainter {
     fill.color = _cheek;
     for (final dx in [-0.55, 0.55]) {
       canvas.drawCircle(Offset(c.dx + dx * r, c.dy + r * 0.02), r * 0.11, fill);
+    }
+
+    if (mood == MascotMood.sleepy) {
+      final z = TextPainter(
+        text: TextSpan(
+          text: 'z',
+          style: TextStyle(
+              color: const Color(0xFF7E57C2),
+              fontSize: w * 0.22,
+              fontWeight: FontWeight.w800),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      z.paint(canvas, Offset(c.dx + r * 0.75, c.dy - r * 1.35));
     }
 
     // Beak: open when happy.
