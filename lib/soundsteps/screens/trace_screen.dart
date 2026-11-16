@@ -148,7 +148,11 @@ class _TraceScreenState extends State<TraceScreen> {
                       final size = box.biggest;
                       return Stack(
                         children: [
+                          // container: its own node, so screen readers (and
+                          // the web build) expose the pad's label rather than
+                          // dropping or merging it.
                           Semantics(
+                            container: true,
                             label: 'Trace the letter ${_letter.letter}',
                             child: GestureDetector(
                               key: const Key('trace-pad'),

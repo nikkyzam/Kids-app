@@ -1,7 +1,8 @@
 // Renders the SoundSteps Play Store feature graphic (1024x500) with the real
 // Pip widget, so the store art always matches the app. Not part of the app.
 //
-//   flutter build web -t tool/soundsteps_store_art.dart --web-renderer html
+//   flutter build web -t tool/soundsteps_store_art.dart --release \
+//       --no-web-resources-cdn -o build/store_art
 //   node tool/soundsteps_store_shots.js   (see docs/soundsteps/STORE_ASSETS.md)
 import 'package:flutter/material.dart';
 import 'package:playsteps/soundsteps/widgets/mascot.dart';

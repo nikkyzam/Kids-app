@@ -1,6 +1,7 @@
 // Captures SoundSteps Play Store images from the real app (web build):
 // six 1080x1920 phone screenshots and the 1024x500 feature graphic.
-// Usage (from the repo root, after the two web builds in STORE_ASSETS.md):
+// Usage (from the repo root, after the two web builds in STORE_ASSETS.md,
+// which write build/soundsteps_web and build/store_art):
 //   NODE_PATH=$(npm root -g) node tool/soundsteps_store_shots.js
 // Needs Node with the `playwright` package and a Chromium it can launch.
 const http = require('http');
@@ -51,7 +52,7 @@ function seed() {
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const app = await serve(path.resolve('build/web'));
+  const app = await serve(path.resolve('build/soundsteps_web'));
   const art = await serve(path.resolve('build/store_art'));
   const browser = await chromium.launch().catch(() =>
     chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }));
@@ -96,7 +97,10 @@ function seed() {
   await tap('Back'); await page.waitForTimeout(1000);
 
   await tap('Trace'); await page.waitForTimeout(1500);
-  const pad = await page.locator('[aria-label^="Trace the letter"]').first().boundingBox();
+  // Newer Flutter web exposes semantics labels as text, older as aria-label.
+  const pad = await page.locator('flt-semantics')
+    .filter({ hasText: /^Trace the letter/ })
+    .or(page.locator('[aria-label^="Trace the letter"]')).last().boundingBox(); // last = deepest
   const at = ([x, y]) => [pad.x + x * pad.width, pad.y + y * pad.height];
   await page.mouse.move(...at([.5, .1])); await page.mouse.down();
   await page.mouse.move(...at([.2, .9]), { steps: 12 }); await page.mouse.up();

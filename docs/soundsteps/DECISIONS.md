@@ -208,6 +208,26 @@ Android build or device (this environment has Flutter 3.24 and no Android SDK).
     Developer setup) and an iOS launch screen per app (both apps share the
     plain white LaunchScreen.storyboard).
 
+## Tooling
+
+47. **The cloud session now runs the same Flutter as CI (3.44.7).** The
+    repo's session-start hook pinned 3.24 (stale; its own comment said it
+    matched CI) and, worse, never installed anything because the cloud
+    environment's setup script had already put 3.24 in `~/flutter`. Result:
+    18 test files failed to compile in-session, the analyzer reported 116
+    issues, and `pubspec.lock` was rewritten every session. The hook now
+    reads the version from `ci.yml`, installs it (checksum-verified) into
+    `~/flutter-<version>` and puts it first on PATH. In-session: 732/732
+    tests pass, analyzer clean. A re-run takes ~2 s.
+48. **`pubspec.lock` now includes `flutter_tts`.** It was missing since
+    SoundSteps added the dependency: the lock kept being reverted to undo the
+    old Flutter's rewrites, which also threw away the one real change. CI
+    resolved it on the fly; the lock is now complete and reproducible.
+49. **Store images re-rendered on Flutter 3.44** (CanvasKit): icons and
+    Nunito's weights now render as in the app. Each web build gets its own
+    output dir, and the trace pad is now its own semantics node so screen
+    readers (and the capture script) can find it.
+
 ## Deliberately not done
 
 - **Recorded audio / illustrations.** Need assets you must create or license;
