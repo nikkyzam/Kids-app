@@ -11,7 +11,7 @@ repeat for every release after that.
 |---|---|
 | Android application ID | `com.nikkyzam.playsteps.app` |
 | iOS bundle ID | `com.nikkyzam.playsteps.app` |
-| Version | `pubspec.yaml` → `version: 1.0.0+1` |
+| Version | From the release tag (`playsteps-v1.2.0` → 1.2.0); build number = 100 + release run number |
 | Premium product ID | `playsteps_premium_lifetime` (non-consumable) |
 | Premium Plus product ID | `playsteps_premium_plus_yearly` (yearly subscription) |
 
@@ -161,9 +161,11 @@ git push origin v1.0.0
    `PLAY_STORE_SERVICE_ACCOUNT_JSON` is set; otherwise it skips silently and
    you upload the artifact by hand.
 
-Bump `version:` in `pubspec.yaml` before each tag. The build number (the part
-after `+`) must increase for every upload Play or Apple accepts, even a
-re-upload of the same version name.
+The tag sets the version: `git tag playsteps-v1.2.0` ships PlaySteps 1.2.0.
+`pubspec.yaml`'s version is only the fallback for local builds, because every
+app in the repo shares that file. The build number is 100 + the release
+workflow's run number, so it rises with every release of any app (gaps are
+fine; Play and Apple only need it to increase).
 
 ## 6. Smoke-test the internal build
 

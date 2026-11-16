@@ -44,7 +44,7 @@ RLS policies and purchase receipts would mix.
 ```bash
 tool/build_app.sh toddlersteps run              # local run
 tool/build_app.sh toddlersteps appbundle        # local release bundle
-git tag toddlersteps-v1.0.0 && git push --tags  # CI release for that app only
+git tag toddlersteps-v1.0.0 && git push --tags  # CI release for that app only, version 1.0.0
 ```
 
 Always build through `tool/build_app.sh` (or pass both `--flavor <id>` and

@@ -79,8 +79,8 @@ outcome claim you cannot back up.
 | Asset | Requirement | Status |
 |---|---|---|
 | App icon | 512×512 PNG | Done — `docs/soundsteps/icon_512.png` |
-| Feature graphic | 1024×500 PNG/JPG | **Missing** |
-| Phone screenshots | 2–8, 16:9 or 9:16 | **Missing** — capture Home, Letters, Match, Picture words from a real device |
+| Feature graphic | 1024×500 PNG/JPG | Done — `docs/soundsteps/store/feature_graphic_1024x500.png` |
+| Phone screenshots | 2–8, 16:9 or 9:16 | Done — six at 1080×1920 in `docs/soundsteps/store/` (see `STORE_ASSETS.md`) |
 
 ---
 
