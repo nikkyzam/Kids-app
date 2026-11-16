@@ -167,6 +167,7 @@ jobs:
 
   ios:
     name: iOS (build validation)
+    needs: resolve
     # Not a pinned macos-14: its Xcode predates the StoreKit 2 APIs
     # in_app_purchase_storekit compiles against (winBackOffers,
     # eligibleWinBackOfferIDs), so the job failed on the plugin's own source
@@ -187,11 +188,15 @@ jobs:
         run: flutter pub get
 
       # A full App Store upload requires signing certificates and a provisioning
-      # profile (e.g. via Fastlane Match). This job compiles the iOS app without
-      # code signing to catch build breakage on every release tag. Wire up
-      # signing + `xcrun altool`/Fastlane deliver here when secrets are available.
+      # profile (e.g. via Fastlane Match). This job compiles the tagged app's
+      # iOS flavor without code signing to catch build breakage on every
+      # release tag. Wire up signing + `xcrun altool`/Fastlane deliver here
+      # when secrets are available.
       - name: Build iOS (no code signing)
-        run: flutter build ios --release --no-codesign
+        env:
+          BUILD_NAME: ${{ needs.resolve.outputs.version }}
+          BUILD_NUMBER: ${{ needs.resolve.outputs.build_number }}
+        run: tool/build_app.sh ${{ needs.resolve.outputs.app }} ios --release --no-codesign
 
   github-release:
     name: GitHub Release
